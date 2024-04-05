@@ -119,28 +119,18 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+[Java Development Kit **JDK**](https://www.oracle.com/java/technologies/downloads/)
 
 ### Installation
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
-
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Clone the repo
    ```sh
-   git clone https://github.com/your_username_/Project-Name.git
+   https://github.com/TC3005B-562-2024/Spring-Boot-Backend.git
    ```
-3. Install NPM packages
+2. Building Maven project
    ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
+   mvn clean install # Linux or MacOS
+   mvnw.cmd clean install # Windows
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
