@@ -1,5 +1,7 @@
 package tc3005b224.amazonconnectinsights.dto.agent;
 
+import java.util.Date;
+
 public class AgentDTO {
     // -- ATTRIBUTES
     private String arn;
@@ -9,11 +11,11 @@ public class AgentDTO {
     private String username;
     private String agentContactState;
     private String agentPauseDurationInSeconds;
-    private String connectedToAgentTimestamp;
+    private Date connectedToAgentTimestamp;
 
     // -- METHODS
     // Constructor Method
-    public AgentDTO(String arn, String id, IdentityInfoDTO identityInfo, String routingProfileId, String username, String agentContactState, String agentPauseDurationInSeconds, String connectedToAgentTimestamp) {
+    public AgentDTO(String arn, String id, IdentityInfoDTO identityInfo, String routingProfileId, String username, String agentContactState, String agentPauseDurationInSeconds, Date connectedToAgentTimestamp) {
         this.arn = arn;
         this.id = id;
         this.identityInfo = identityInfo;
@@ -81,11 +83,11 @@ public class AgentDTO {
         this.agentPauseDurationInSeconds = agentPauseDurationInSeconds;
     }
 
-    public String getConnectedToAgentTimestamp() {
+    public Date getConnectedToAgentTimestamp() {
         return connectedToAgentTimestamp;
     }
 
-    public void setConnectedToAgentTimestamp(String connectedToAgentTimestamp) {
+    public void setConnectedToAgentTimestamp(Date connectedToAgentTimestamp) {
         this.connectedToAgentTimestamp = connectedToAgentTimestamp;
     }
 }
