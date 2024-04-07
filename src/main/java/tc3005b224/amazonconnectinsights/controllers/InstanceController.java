@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import tc3005b224.amazonconnectinsights.dto.InstanceDTO;
+import tc3005b224.amazonconnectinsights.dto.instance.InstanceDTO;
 
 @RestController
 @RequestMapping("/instance")
@@ -18,6 +18,8 @@ public class InstanceController {
 
     /**
      * Get the Amazon Connect instance data
+     * 
+     * TODO: Implement the method that retrieves the Amazon Connect instance data from the Amazon Connect API.
      * 
      * @return InstanceDTO
      * @author Diego Jacobo Djmr5

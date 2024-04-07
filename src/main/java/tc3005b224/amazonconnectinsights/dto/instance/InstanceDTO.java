@@ -1,4 +1,4 @@
-package tc3005b224.amazonconnectinsights.dto;
+package tc3005b224.amazonconnectinsights.dto.instance;
 
 /**
  * Data Transfer Object for Amazon Connect Instance entity information
@@ -21,11 +21,27 @@ public class InstanceDTO {
     private String instanceStatus;
     private String serviceRole;
     /**
-     * 
+     * Indicates if Contact Lens is enabled in the instance (Sentiment analysis)
      */
     private boolean contactLensEnabled;
     private boolean inboundCallsEnable;
     private boolean outboundCallsEnable;
+
+    public InstanceDTO() {
+    }
+
+    public InstanceDTO(String arn, String id, String instanceAlias, String instanceAccessUrl, String instanceStatus,
+            String serviceRole, boolean contactLensEnabled, boolean inboundCallsEnable, boolean outboundCallsEnable) {
+        this.arn = arn;
+        this.id = id;
+        this.instanceAlias = instanceAlias;
+        this.instanceAccessUrl = instanceAccessUrl;
+        this.instanceStatus = instanceStatus;
+        this.serviceRole = serviceRole;
+        this.contactLensEnabled = contactLensEnabled;
+        this.inboundCallsEnable = inboundCallsEnable;
+        this.outboundCallsEnable = outboundCallsEnable;
+    }
 
     public String getArn() {
         return arn;
@@ -96,19 +112,6 @@ public class InstanceDTO {
     }
 
     public void setOutboundCallsEnable(boolean outboundCallsEnable) {
-        this.outboundCallsEnable = outboundCallsEnable;
-    }
-
-    public InstanceDTO(String arn, String id, String instanceAlias, String instanceAccessUrl, String instanceStatus,
-            String serviceRole, boolean contactLensEnabled, boolean inboundCallsEnable, boolean outboundCallsEnable) {
-        this.arn = arn;
-        this.id = id;
-        this.instanceAlias = instanceAlias;
-        this.instanceAccessUrl = instanceAccessUrl;
-        this.instanceStatus = instanceStatus;
-        this.serviceRole = serviceRole;
-        this.contactLensEnabled = contactLensEnabled;
-        this.inboundCallsEnable = inboundCallsEnable;
         this.outboundCallsEnable = outboundCallsEnable;
     }
 
