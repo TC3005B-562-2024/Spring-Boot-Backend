@@ -24,6 +24,7 @@ public class AgentDTO {
         this.agentContactState = agentContactState;
         this.agentPauseDurationInSeconds = agentPauseDurationInSeconds;
         this.connectedToAgentTimestamp = connectedToAgentTimestamp;
+
     }
 
     // Getters and Setters
@@ -90,4 +91,5 @@ public class AgentDTO {
     public void setConnectedToAgentTimestamp(Date connectedToAgentTimestamp) {
         this.connectedToAgentTimestamp = connectedToAgentTimestamp;
     }
+
 }

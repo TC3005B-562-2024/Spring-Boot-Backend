@@ -1,5 +1,8 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,10 +20,8 @@ import tc3005b224.amazonconnectinsights.dto.AgentAdherenceDTO;
 import tc3005b224.amazonconnectinsights.dto.AgentAttendanceCallsDTO;
 import tc3005b224.amazonconnectinsights.dto.EmotionDTO;
 import tc3005b224.amazonconnectinsights.dto.InfoCallsDTO;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentStateDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDataDTO;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/agents")
@@ -42,6 +43,21 @@ public class AgentController {
                 73.4);
         return ResponseEntity.ok(data);
 
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agent Status found", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = AgentStateDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Agent Status not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect API", content = @Content),
+    })
+    @Operation(summary = "Obtain status of an agent")
+    @GetMapping("/status")
+    public ResponseEntity<AgentStateDTO> getAgentStatus() {
+        AgentStateDTO data = new AgentStateDTO("Available");
+        return ResponseEntity.ok(data);
     }
 
     @ApiResponses(value = {
@@ -75,6 +91,7 @@ public class AgentController {
         return ResponseEntity.ok(data);
 
     }
+
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found call information", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = InfoCallsDTO.class))
@@ -85,7 +102,8 @@ public class AgentController {
     })
     @Operation(summary = "Get the individual information of a call attended by an specific agent during the day")
     @GetMapping("/{agentId}/calls/{callId}")
-    public ResponseEntity<List<InfoCallsDTO>> getCallInfo(@PathVariable("agentId") int agentId, @PathVariable("callId") int callId) {
+    public ResponseEntity<List<InfoCallsDTO>> getCallInfo(@PathVariable("agentId") int agentId,
+            @PathVariable("callId") int callId) {
         List<InfoCallsDTO> result = new ArrayList<>();
         InfoCallsDTO call1 = new InfoCallsDTO();
         call1.setAgent_id(agentId);
@@ -101,6 +119,5 @@ public class AgentController {
         result.add(call1);
         return ResponseEntity.ok(result);
     }
-
 
 }
