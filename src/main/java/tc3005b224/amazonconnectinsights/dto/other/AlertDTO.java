@@ -1,4 +1,4 @@
-package tc3005b224.amazonconnectinsights.dto.Alerts;
+package tc3005b224.amazonconnectinsights.dto.other;
 
 public class AlertDTO {
     private String id;

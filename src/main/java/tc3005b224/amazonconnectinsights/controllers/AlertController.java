@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
+import tc3005b224.amazonconnectinsights.dto.other.AlertDTO;
 
 import java.util.Arrays;
 import java.util.List;
@@ -94,6 +94,7 @@ public class AlertController {
                 .findFirst();
 
         return ResponseEntity.ok(criticalAlerts);
+    }
 
     @PutMapping("/{alert_id}")
     public ResponseEntity<String> putAlert(@PathVariable("alert_id") String alertId) {
