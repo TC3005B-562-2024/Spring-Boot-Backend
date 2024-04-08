@@ -1,0 +1,9 @@
+addReviewers: true
+
+reviewers:
+  - Djmr5
+  - MoisesAdame
+  - emvivas
+
+numberOfReviewers: 0
+addAssignees: author
