@@ -5,10 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/alerts")
@@ -27,5 +24,9 @@ public class AlertController {
 
         String result = String.format("Alert %d ignored.", id);
         return ResponseEntity.ok(result);
+    }
+    @PutMapping("/{alert_id}")
+    public ResponseEntity<String> putAlert(@PathVariable("alert_id") String alertId) {
+        return ResponseEntity.ok("Alert " + alertId + " was updated");
     }
 }
