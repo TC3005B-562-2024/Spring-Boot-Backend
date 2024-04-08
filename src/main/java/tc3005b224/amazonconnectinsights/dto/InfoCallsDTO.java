@@ -6,13 +6,18 @@ import java.util.Date;
 import java.util.List;
 
 public class InfoCallsDTO {
-
+    private Integer agent_id;
     private Integer client_id;
     private String date;
     private String call_duration;
     private List<EmotionDTO> emotions_detected;
 
-
+    public Integer getAgent_id() {
+        return agent_id;
+    }
+    public void setAgent_id(Integer agent_id) {
+        this.agent_id = agent_id;
+    }
     public Integer getClient_id() {
         return client_id;
     }
