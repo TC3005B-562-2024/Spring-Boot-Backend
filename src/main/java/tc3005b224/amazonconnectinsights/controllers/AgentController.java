@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.*;
 
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDataDTO;
 import tc3005b224.amazonconnectinsights.dto.AgentAdherenceDTO;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentStateDTO;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/agents")
@@ -52,4 +55,21 @@ public class AgentController {
                 73.4);
         return ResponseEntity.ok(data);
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agent Status found", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = AgentStateDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Agent Status not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect API", content = @Content),
+    })
+    @Operation(summary = "Obtain status of an agent")
+    @GetMapping("/status")
+    public ResponseEntity<AgentStateDTO> getAgentStatus() {
+        AgentStateDTO data = new AgentStateDTO("Available");
+        return ResponseEntity.ok(data);
+    }
+
+
 }
