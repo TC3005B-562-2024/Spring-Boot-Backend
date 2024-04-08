@@ -115,7 +115,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 ## Contributing
 
 1. Clone the project
-2. Create your Branch (`git swtich -b A01656583/login-endpoint`)
+2. Create your Branch (`git switch -b A01656583/login-endpoint`) or get your remote branch (`git checkout -b A01656583/login-endpoint origin/A01656583/login-endpoint`)
 3. Commit your Changes (`git commit -m 'Add login endpoint'`)
 4. Push to the Branch (`git push origin A01656583/login-endpoint`)
 5. Open a Pull Request

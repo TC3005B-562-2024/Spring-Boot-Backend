@@ -1,5 +1,8 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +18,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import tc3005b224.amazonconnectinsights.dto.AgentAdherenceDTO;
 import tc3005b224.amazonconnectinsights.dto.AgentAttendanceCallsDTO;
+import tc3005b224.amazonconnectinsights.dto.EmotionDTO;
+import tc3005b224.amazonconnectinsights.dto.InfoCallsDTO;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentStateDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDataDTO;
 
 @RestController
@@ -37,6 +43,21 @@ public class AgentController {
                 73.4);
         return ResponseEntity.ok(data);
 
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agent Status found", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = AgentStateDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Agent Status not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect API", content = @Content),
+    })
+    @Operation(summary = "Obtain status of an agent")
+    @GetMapping("/status")
+    public ResponseEntity<AgentStateDTO> getAgentStatus() {
+        AgentStateDTO data = new AgentStateDTO("Available");
+        return ResponseEntity.ok(data);
     }
 
     @ApiResponses(value = {
@@ -69,6 +90,34 @@ public class AgentController {
         AgentAttendanceCallsDTO data = new AgentAttendanceCallsDTO(id, 1);
         return ResponseEntity.ok(data);
 
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found call information", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = InfoCallsDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Agent or Call ID not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Server couldn't process the application", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Server couldn't connect to Amazon Connect API", content = @Content),
+    })
+    @Operation(summary = "Get the individual information of a call attended by an specific agent during the day")
+    @GetMapping("/{agentId}/calls/{callId}")
+    public ResponseEntity<List<InfoCallsDTO>> getCallInfo(@PathVariable("agentId") int agentId,
+            @PathVariable("callId") int callId) {
+        List<InfoCallsDTO> result = new ArrayList<>();
+        InfoCallsDTO call1 = new InfoCallsDTO();
+        call1.setAgent_id(agentId);
+        call1.setClient_id(callId);
+        call1.setDate("2024-04-07 15:30:00");
+        call1.setCall_duration("01:30:15");
+        List<EmotionDTO> emotionsdetected = new ArrayList<>();
+        EmotionDTO e1 = new EmotionDTO();
+        e1.setEmotion("angry");
+        e1.setTime("00:50:00");
+        emotionsdetected.add(e1);
+        call1.setEmotions_detected(emotionsdetected);
+        result.add(call1);
+        return ResponseEntity.ok(result);
     }
 
 }
