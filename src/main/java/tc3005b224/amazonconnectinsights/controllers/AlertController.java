@@ -6,10 +6,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tc3005b224.amazonconnectinsights.dto.Alerts.AlertAllDTO;
+import tc3005b224.amazonconnectinsights.dto.Alerts.AlertDTO;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/alerts")
@@ -20,8 +22,8 @@ public class AlertController {
     })
 
     @GetMapping("/all")
-    public List<AlertAllDTO> getAllAlerts() {
-        AlertAllDTO Alert = new AlertAllDTO();
+    public ResponseEntity<List<AlertDTO>> getAllAlerts() {
+        AlertDTO Alert = new AlertDTO();
         Alert.setId("1");
         Alert.setDescription("El cliente se enfurecio");
         Alert.setPriority("Critica");
@@ -30,7 +32,7 @@ public class AlertController {
         Alert.setQueueId("queue1");
         Alert.setContactId("contact1");
 
-        AlertAllDTO Alert2 = new AlertAllDTO();
+        AlertDTO Alert2 = new AlertDTO();
         Alert2.setId("2");
         Alert2.setDescription("El cliente se enfurecio mucho");
         Alert2.setPriority("Critica");
@@ -39,7 +41,9 @@ public class AlertController {
         Alert2.setQueueId("queue1");
         Alert2.setContactId("contact1");
 
-        return Arrays.asList(Alert, Alert2);
+        List<AlertDTO> alerts = Arrays.asList(Alert, Alert2);
+
+        return ResponseEntity.ok(alerts);
     }
 
     @DeleteMapping("/{alert_id}")
@@ -47,6 +51,20 @@ public class AlertController {
         return ResponseEntity.ok("Alert " + alertId + " was deleted");
     }
 
+    @GetMapping("/critics")
+    public ResponseEntity<List<AlertDTO>> getCriticalAlerts() {
+        List<AlertDTO> alerts = Arrays.asList(
+                new AlertDTO("1", "El cliente se suicidó", "critica", "agent1", "skill1", "queue1", "contact1"),
+                new AlertDTO("2", "Sistema en riesgo de sobrecarga", "alta", "agent2", "skill2", "queue2", "contact2"),
+                new AlertDTO("3", "Error de conexión", "critica", "agent3", "skill3", "queue3", "contact3")
+        );
+
+        List<AlertDTO> criticalAlerts = alerts.stream()
+                .filter(alert -> "critica".equals(alert.getPriority()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(criticalAlerts);
+    }
     @Operation(summary = "Ignore a desired alert.")
     @PostMapping("/{id}/ignore")
     public ResponseEntity<String> ignore(@PathVariable("id") int id){
