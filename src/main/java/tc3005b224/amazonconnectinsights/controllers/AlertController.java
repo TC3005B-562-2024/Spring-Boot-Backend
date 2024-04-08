@@ -6,12 +6,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import tc3005b224.amazonconnectinsights.dto.Alerts.AlertDTO;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/alerts")
@@ -75,5 +77,9 @@ public class AlertController {
 
         String result = String.format("Alert %d ignored.", id);
         return ResponseEntity.ok(result);
+    }
+    @PutMapping("/{alert_id}")
+    public ResponseEntity<String> putAlert(@PathVariable("alert_id") String alertId) {
+        return ResponseEntity.ok("Alert " + alertId + " was updated");
     }
 }
