@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -94,16 +96,44 @@ public class AlertController {
                 new AlertDTO("3", "Error de conexión", "critica", "agent3", "skill3", "queue3", "contact3")
         );
 
-        Optional<AlertDTO> criticalAlerts = alerts.stream()
+        Optional<AlertDTO> Alert = alerts.stream()
                 .filter(alert -> alert.getId().equals(alert_id))
                 .findFirst();
 
-        return ResponseEntity.ok(criticalAlerts);
+        return ResponseEntity.ok(Alert);
     }
 
     @PutMapping("/{alert_id}")
     public ResponseEntity<String> putAlert(@PathVariable("alert_id") String alertId) {
         return ResponseEntity.ok("Alert " + alertId + " was updated");
 
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<Map<String, Integer>> getAlertsInfo() {
+        List<AlertDTO> alerts = Arrays.asList(
+                new AlertDTO("1", "descripcion1", "critica", "agent1", "skill1", "queue1", "contact1"),
+                new AlertDTO("2", "descripcion2", "critica", "agent2", "skill2", "queue2", "contact2"),
+                new AlertDTO("3", "descripcion3", "media", "agent3", "skill3", "queue3", "contact3"),
+                new AlertDTO("4", "descripcion4", "media", "agent3", "skill3", "queue3", "contact3"),
+                new AlertDTO("5", "descripcion5", "baja", "agent3", "skill3", "queue3", "contact3"),
+                new AlertDTO("6", "descripcion6", "critica", "agent3", "skill3", "queue3", "contact3"),
+                new AlertDTO("7", "descripcion7", "media", "agent3", "skill3", "queue3", "contact3"),
+                new AlertDTO("8", "descripcion8", "baja", "agent3", "skill3", "queue3", "contact3")
+        );
+
+        Map<String, Integer> alertCount = new HashMap<>();
+        alertCount.put("total", 0);
+        alertCount.put("critica", 0);
+        alertCount.put("media", 0);
+        alertCount.put("baja", 0);
+
+        for (AlertDTO alert : alerts) {
+            String priority = alert.getPriority();
+            alertCount.put(priority, alertCount.get(priority) + 1);
+            alertCount.put("total", alertCount.get("total") + 1);
+        }
+
+        return ResponseEntity.ok(alertCount);
     }
 }
