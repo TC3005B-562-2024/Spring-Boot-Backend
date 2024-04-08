@@ -22,6 +22,7 @@ import tc3005b224.amazonconnectinsights.dto.EmotionDTO;
 import tc3005b224.amazonconnectinsights.dto.InfoCallsDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentStateDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDataDTO;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentAcrDTO;
 
 @RestController
 @RequestMapping("/agents")
@@ -118,6 +119,22 @@ public class AgentController {
         call1.setEmotions_detected(emotionsdetected);
         result.add(call1);
         return ResponseEntity.ok(result);
+    }
+
+    //ACR per agent
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agent ACR found", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = AgentAcrDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Agent ACR not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect API", content = @Content),
+    })
+    @Operation(summary = "Obtain ACR of an agent")
+    @GetMapping("{agentId}/acr")
+    public ResponseEntity<AgentAcrDTO> getAcrData(@PathVariable("agentId") int id) {
+        AgentAcrDTO data = new AgentAcrDTO(id, 10, 2);
+        return ResponseEntity.ok(data);
     }
 
 }
