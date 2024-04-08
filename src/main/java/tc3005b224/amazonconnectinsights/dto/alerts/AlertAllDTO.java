@@ -1,6 +1,6 @@
-package tc3005b224.amazonconnectinsights.dto.other;
+package tc3005b224.amazonconnectinsights.dto.alerts;
 
-public class AlertDTO {
+public class AlertAllDTO {
     private String id;
     private  String description;
     private String priority;
@@ -9,17 +9,7 @@ public class AlertDTO {
     private String queueId;
     private String contactId;
 
-    public AlertDTO() {}
-
-    public AlertDTO(String id, String description, String priority, String agentId, String skillId, String queueId, String contactId) {
-        this.id = id;
-        this.description = description;
-        this.priority = priority;
-        this.agentId = agentId;
-        this.skillId = skillId;
-        this.queueId = queueId;
-        this.contactId = contactId;
-    }
+    public AlertAllDTO() {}
 
     public String getId() {
         return id;
