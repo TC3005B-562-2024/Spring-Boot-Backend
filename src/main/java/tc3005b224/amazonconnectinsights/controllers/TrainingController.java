@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,6 +50,28 @@ public class TrainingController {
         trainings.add(new TrainingDTO("3", "This is a sample description", "3", creationDate, completionDate, false));
 
         return ResponseEntity.ok(trainings);
+    }
+
+    /**
+     * Get the training data by its id
+     * 
+     * @param trainingId
+     * @return TrainingDTO
+     * @author Diego Jacobo Djmr5
+     * @see TrainingDTO
+     */
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found training data", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingDTO.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to Database", content = @Content),
+    })
+    @Operation(summary = "Get the training data by its id")
+    @GetMapping("{trainingId}")
+    public ResponseEntity<TrainingDTO> getTrainingData(@PathVariable("trainingId") String trainingId) {
+        return ResponseEntity
+                .ok(new TrainingDTO(trainingId, "This is a sample description", "1", new Date(), new Date(), false));
     }
 
 }
