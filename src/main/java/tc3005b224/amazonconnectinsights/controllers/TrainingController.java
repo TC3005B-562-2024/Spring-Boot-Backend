@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import tc3005b224.amazonconnectinsights.dto.training.ListTrainingDTO;
 import tc3005b224.amazonconnectinsights.dto.training.TrainingDTO;
 
 @RestController
@@ -27,20 +28,20 @@ public class TrainingController {
      * TODO: Create training model in db.
      * 
      * @param agentId
-     * @return List<TrainingDTO>
+     * @return ListTrainingDTO
      * @author Diego Jacobo Djmr5
      * @see TrainingDTO
      */
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found trainings data", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingDTO.class))
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ListTrainingDTO.class))
             }),
             @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Database", content = @Content),
     })
     @Operation(summary = "Get the list of all trainings data")
     @GetMapping("")
-    public ResponseEntity<List<TrainingDTO>> getTrainingsData(
+    public ResponseEntity<ListTrainingDTO> getTrainingsData(
             @RequestParam(required = false, name = "agentId") String agentId) {
 
         List<TrainingDTO> trainings = new ArrayList<TrainingDTO>();
@@ -59,10 +60,10 @@ public class TrainingController {
                     filteredTrainings.add(training);
                 }
             }
-            return ResponseEntity.ok(filteredTrainings);
+            return ResponseEntity.ok(new ListTrainingDTO(filteredTrainings));
         }
 
-        return ResponseEntity.ok(trainings);
+        return ResponseEntity.ok(new ListTrainingDTO(trainings));
     }
 
 }
