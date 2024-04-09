@@ -76,7 +76,7 @@ public class StatsController {
         int totalAgents = agentActivityTimes.size();
         double occupancyPercentage = (double) activeAgentsCount / totalAgents * 100;
 
-        return 100;
+        return occupancyPercentage;
     }
 
     // Método para obtener la velocidad media de respuesta en un intervalo de tiempo
