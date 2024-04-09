@@ -2,6 +2,7 @@ package tc3005b224.amazonconnectinsights.controllers;
 
 import tc3005b224.amazonconnectinsights.dto.stats.OccupancyDTO;
 import tc3005b224.amazonconnectinsights.dto.stats.TimeWindowDTO;
+import tc3005b224.amazonconnectinsights.dto.stats.SpeedOfAnswerDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -77,5 +78,52 @@ public class StatsController {
 
         return occupancyPercentage;
     }
+
+    // Método para obtener la velocidad media de respuesta en un intervalo de tiempo
+
+    //Codigos de error
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Average speed of answer retrieved", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = SpeedOfAnswerDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Speed of answer data not found", content = @Content),
+
+            @ApiResponse(responseCode = "400", description = "Date format invalid", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = SpeedOfAnswerDTO.class))
+            }),
+    })
+    @Operation(summary = "Get average speed of answer within a time window")
+    @GetMapping("/asa")
+    public ResponseEntity<List<SpeedOfAnswerDTO>> getAverageSpeedOfAnswer(@RequestParam Date start, @RequestParam Date end) {
+        // Simular la obtención de la velocidad media de respuesta en el intervalo de tiempo
+        List<SpeedOfAnswerDTO> speedOfAnswerDTOList = new ArrayList<>();
+
+        // Simular múltiples velocidades medias de respuesta
+        for (int i = 0; i < 1; i++) {
+            double calculatedSpeedOfAnswer = calculateSpeedOfAnswer(start, end);
+
+            SpeedOfAnswerDTO speedOfAnswerDTO = new SpeedOfAnswerDTO();
+            speedOfAnswerDTO.setSpeedOfAnswerValue(calculatedSpeedOfAnswer);
+
+            TimeWindowDTO timeWindowDTO = new TimeWindowDTO();
+            timeWindowDTO.setStart(start);
+            timeWindowDTO.setEnd(end);
+
+            speedOfAnswerDTO.setTimeWindow(timeWindowDTO);
+
+            speedOfAnswerDTOList.add(speedOfAnswerDTO);
+        }
+
+        return ResponseEntity.ok(speedOfAnswerDTOList);     //Retornar la lista de velocidades medias de respuesta
+    }
+
+
+    // Método de utilidad para calcular la velocidad media de respuesta
+    private double calculateSpeedOfAnswer(Date start, Date end) {
+        // Simulación de datos de velocidad media de respuesta para un intervalo de tiempo dado (start, end)
+        // Aquí se cambiara deacuerdo a como se tenga en la base de datos la lógica para calcular la velocidad media de respuesta
+        return Math.random() * 100; // Valor aleatorio entre 0 y 100
+    }
+
 
 }
