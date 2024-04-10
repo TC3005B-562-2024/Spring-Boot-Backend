@@ -4,6 +4,7 @@ import tc3005b224.amazonconnectinsights.dto.stats.OccupancyDTO;
 import tc3005b224.amazonconnectinsights.dto.stats.TimeWindowDTO;
 import tc3005b224.amazonconnectinsights.dto.stats.SpeedOfAnswerDTO;
 import tc3005b224.amazonconnectinsights.dto.stats.NumberOfContactsDTO;
+import tc3005b224.amazonconnectinsights.dto.stats.ServiceLevelDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -111,12 +112,49 @@ public class StatsController {
         return ResponseEntity.ok(numberOfContactsDTO);
     }
 
+    // Método para obtener el valor del nivel de servicio en un intervalo de tiempo
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Service level value retrieved", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ServiceLevelDTO.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Date format invalid", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ServiceLevelDTO.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Service unavailable", content = @Content),
+    })
+    @Operation(summary = "Get service level value within a time window")
+    @GetMapping("/service-level")
+    public ResponseEntity<ServiceLevelDTO> getServiceLevel(@RequestParam Date start, @RequestParam Date end) {
+        // Simulación de la obtención del valor del nivel de servicio en el intervalo de tiempo
+        double serviceLevelValue = calculateServiceLevel(start, end);
+
+        ServiceLevelDTO serviceLevelDTO = new ServiceLevelDTO();
+        serviceLevelDTO.setServiceLevelValue(serviceLevelValue);
+
+        TimeWindowDTO timeWindowDTO = new TimeWindowDTO();
+        timeWindowDTO.setStart(start);
+        timeWindowDTO.setEnd(end);
+
+        serviceLevelDTO.setTimeWindow(timeWindowDTO);
+
+        return ResponseEntity.ok(serviceLevelDTO);
+    }
+
     // Método de utilidad para calcular el número de contactos perdidos
     private int calculateLostContacts(Date start, Date end) {
         // Simulación de datos de contactos perdidos para un intervalo de tiempo dado (start, end)
         // Aquí se puede implementar la lógica para obtener el número de contactos perdidos desde la base de datos u otro origen de datos.
         // Por ahora, se generará un valor aleatorio para la demostración.
         return (int) (Math.random() * 100); // Generar un valor aleatorio entre 0 y 100 para representar el número de contactos perdidos.
+    }
+
+    // Método de utilidad para calcular el valor del nivel de servicio
+    private double calculateServiceLevel(Date start, Date end) {
+        // Simulación de datos del valor del nivel de servicio para un intervalo de tiempo dado (start, end)
+        // Aquí se puede implementar la lógica para calcular el nivel de servicio desde la base de datos u otro origen de datos.
+        // Por ahora, se generará un valor aleatorio para la demostración.
+        return Math.random(); // Generar un valor aleatorio entre 0 y 1 para representar el nivel de servicio.
     }
 
     // Método de utilidad para calcular la ocupación de los agentes
