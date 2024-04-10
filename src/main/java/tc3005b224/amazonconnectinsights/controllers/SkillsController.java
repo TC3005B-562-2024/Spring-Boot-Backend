@@ -1,5 +1,5 @@
 package tc3005b224.amazonconnectinsights.controllers;
-
+import org.springframework.web.bind.annotation.PathVariable;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,7 +23,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/instance")
 public class SkillsController {
-
+    /**
+     * This method is mapped to the "/skills" URL path and responds to HTTP GET requests.
+     * It returns a list of SkillDTO objects.
+     * Each SkillDTO object represents a skill with its details like skill id, title, description, critical alerts, and agents.
+     * The skills are sorted in descending order based on the number of critical alerts.
+     *
+     * @return ResponseEntity containing the list of SkillDTO objects and HTTP status code.
+     */
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found instance data", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = InstanceDTO.class))
@@ -65,5 +72,11 @@ public class SkillsController {
         });
 
         return new ResponseEntity<>(skills, HttpStatus.OK);
+    }
+
+    @GetMapping("/skills/{skill_id}")
+    public ResponseEntity<SkillDTO> getSkill(@PathVariable("skill_id") int skillId) {
+        // Method implementation goes here
+        return null;
     }
 }
