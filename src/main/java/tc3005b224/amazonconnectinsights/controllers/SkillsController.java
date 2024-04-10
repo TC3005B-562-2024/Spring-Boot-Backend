@@ -1,11 +1,16 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tc3005b224.amazonconnectinsights.dto.agent.IdentityInfoDTO;
+import tc3005b224.amazonconnectinsights.dto.instance.InstanceDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.CriticalAlertDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
@@ -19,6 +24,12 @@ import java.util.List;
 @RequestMapping("/instance")
 public class SkillsController {
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found instance data", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = InstanceDTO.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "The server couldn’t connect with the Amazon Connect API.", content = @Content),
+    })
     @GetMapping("/skills")
     public ResponseEntity<List<SkillDTO>> getSkills() {
         List<SkillDTO> skills = new ArrayList<>();
