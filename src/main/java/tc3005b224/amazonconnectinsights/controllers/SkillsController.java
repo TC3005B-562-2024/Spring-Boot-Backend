@@ -12,6 +12,7 @@ import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -37,8 +38,9 @@ public class SkillsController {
         skill1.setCritic_alerts(criticalAlerts1);
 
         IdentityInfoDTO identityInfo1 = new IdentityInfoDTO("a", "b", "c", "d", "e");
+        Date dateqq = new Date();
         List<AgentDTO> agents1 = new ArrayList<>();
-        AgentDTO agent1 = new AgentDTO("hola", "Juan Pérez", identityInfo1, "juan.perez@ejemplo.com", "Neutral", "0", "2024-04-05T16:43:00Z", "123");
+        AgentDTO agent1 = new AgentDTO("hola", "Juan Pérez", identityInfo1, "juan.perez@ejemplo.com", "Neutral", "0", "2024-04-05T16:43:00Z", dateqq);
 
         agents1.add(agent1);
         skill1.setAgents(agents1);
