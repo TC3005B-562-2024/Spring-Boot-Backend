@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tc3005b224.amazonconnectinsights.dto.agent.IdentityInfoDTO;
 import tc3005b224.amazonconnectinsights.dto.instance.InstanceDTO;
+import tc3005b224.amazonconnectinsights.dto.skill.ListSkillDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.CriticalAlertDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
@@ -33,7 +34,7 @@ public class SkillsController {
      */
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found instance data", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = InstanceDTO.class))
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ListSkillDTO.class))
             }),
             @ApiResponse(responseCode = "500", description = "The server couldn’t connect with the Amazon Connect API.", content = @Content),
     })
@@ -74,6 +75,12 @@ public class SkillsController {
         return new ResponseEntity<>(skills, HttpStatus.OK);
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found instance data", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ListSkillDTO.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "The server couldn’t connect with the Amazon Connect API.", content = @Content),
+    })
     @GetMapping("/skills/{skill_id}")
     public ResponseEntity<SkillDTO> getSkill(@PathVariable("skill_id") int skillId) {
         // Method implementation goes here
