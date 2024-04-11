@@ -1,6 +1,7 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -16,11 +17,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.AgentAdherenceDTO;
 import tc3005b224.amazonconnectinsights.dto.AgentAttendanceCallsDTO;
 import tc3005b224.amazonconnectinsights.dto.EmotionDTO;
 import tc3005b224.amazonconnectinsights.dto.InfoCallsDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentStateDTO;
+import tc3005b224.amazonconnectinsights.dto.agent.IdentityInfoDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDataDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentAcrDTO;
 
@@ -137,4 +140,21 @@ public class AgentController {
         return ResponseEntity.ok(data);
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of agents displayed", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = AgentDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Agent with ID not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect API", content = @Content),
+    })
+    @Operation(summary = "Obtain the list of all the Agents")
+    @GetMapping("/")
+    public ResponseEntity<List<AgentDTO>> getAllAgents() {
+        List<AgentDTO> agents = new ArrayList<>();
+        agents.add(new AgentDTO("Available", "1", new IdentityInfoDTO("c@example.com", "Jacob","Ponce","6556","cc@example.com"), "1", "1", "1", "1", new Date()));
+        agents.add(new AgentDTO("On Call", "2", new IdentityInfoDTO("a@example.com", "Carlos","Mendoza","5555","aa@example.com"), "2", "carlos", "2", "2",  new Date()));
+        agents.add(new AgentDTO("Disconnected", "3", new IdentityInfoDTO("b@example.com", "Will","Steven","5445","bb@example.com"), "3", "will", "3", "3", new Date()));
+        return ResponseEntity.ok(agents);
+    }
 }
