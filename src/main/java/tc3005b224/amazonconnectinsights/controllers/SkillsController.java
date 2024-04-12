@@ -82,8 +82,24 @@ public class SkillsController {
             @ApiResponse(responseCode = "500", description = "The server couldn’t connect with the Amazon Connect API.", content = @Content),
     })
     @GetMapping("/skills/{skill_id}")
-    public ResponseEntity<SkillDTO> getSkill(@PathVariable("skill_id") int skillId) {
-        // Method implementation goes here
-        return null;
+        public ResponseEntity<SkillDTO> getSkill(@PathVariable("skill_id") int skillId) {
+        // Buscar la habilidad con el skill_id proporcionado en la lista de skills
+        SkillDTO foundSkill = null;
+
+        for (SkillDTO skill : getSkills().getBody()) {
+            if (skill.getSkill_id() == skillId) {
+                foundSkill = skill;
+                break;
+            }
+        }
+
+        // Verificar si se encontró la habilidad
+        if (foundSkill != null) {
+            return new ResponseEntity<>(foundSkill, HttpStatus.OK);
+        } else {
+            // Si no se encontró la habilidad, devolver un ResponseEntity con HttpStatus.NOT_FOUND
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
+
 }
