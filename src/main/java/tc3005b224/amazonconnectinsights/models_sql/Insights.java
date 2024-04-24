@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class InsightsModel {
+@Table(name = "Insights")
+public class Insights {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Short identifier;
 
     @Column(name = "Category_identifier", nullable = false)
