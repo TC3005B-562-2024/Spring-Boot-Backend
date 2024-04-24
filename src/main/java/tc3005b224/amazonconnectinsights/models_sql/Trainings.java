@@ -2,11 +2,10 @@ package tc3005b224.amazonconnectinsights.models_sql;
 
 import java.util.Date;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Trainings")
-public class TrainingsModel {
+public class Trainings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "identifier")
