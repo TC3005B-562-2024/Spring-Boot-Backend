@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tc3005b224.amazonconnectinsights.models_sql.Categories;
-import tc3005b224.amazonconnectinsights.models_sql.Insights;
 import tc3005b224.amazonconnectinsights.repository.CategoriesRepository;
 
 import java.util.Optional;
@@ -38,4 +37,3 @@ public class CategoriesService {
 }
 
 
-}
