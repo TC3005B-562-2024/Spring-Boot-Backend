@@ -4,6 +4,7 @@ on:
     types: [opened, ready_for_review]
     branches:
       - main
+      - dev
 
 jobs:
   add-reviews:
