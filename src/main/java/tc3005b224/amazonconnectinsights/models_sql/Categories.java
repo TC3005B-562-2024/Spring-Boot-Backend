@@ -23,9 +23,7 @@ public class Categories {
 
     @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean isActive = true;
-
-
-
+    
     @Column(name = "priority", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean priority = true;
 
