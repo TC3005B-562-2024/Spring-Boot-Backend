@@ -11,7 +11,7 @@ public class Insights {
     private Short identifier;
 
     @ManyToOne
-    @Column(name = "Category_identifier", nullable = false)
+    @JoinColumn(name = "categories_id")
     private Categories categories;
 
     @Column(name = "denomination", nullable = false)
