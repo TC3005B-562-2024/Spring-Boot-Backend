@@ -28,7 +28,7 @@ public class Trainings {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Alert_identifier", referencedColumnName = "identifier")
-    private Alert alert;
+    private Alerts alert;
 
     public Long getIdentifier() {
         return identifier;
@@ -78,11 +78,11 @@ public class Trainings {
         this.dateUpdated = dateUpdated;
     }
 
-    public Alert getAlert() {
+    public Alerts getAlert() {
         return alert;
     }
 
-    public void setAlert(Alert alert) {
+    public void setAlert(Alerts alert) {
         this.alert = alert;
     }
 }

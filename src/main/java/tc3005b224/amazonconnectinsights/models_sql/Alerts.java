@@ -1,21 +1,26 @@
 package tc3005b224.amazonconnectinsights.models_sql;
+
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Insights")
-public class Insights {
+@Table(name = "Alrts")
+public class Alerts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Short identifier;
 
     @ManyToOne
-    @Column(name = "Category_identifier", nullable = false)
-    private Categories categories;
+    @JoinColumn(name = "Connection_identifier", nullable = false)
+    private Connections connections;
 
-    @Column(name = "denomination", nullable = false)
-    private String denomination;
+    @ManyToOne
+    @JoinColumn(name = "Insight_identifier", nullable = false)
+    private Insights insights;
+
+    @Column(name = "is_solved", nullable = false)
+    private Boolean isSolved = false;
 
     @Column(name = "date_registered", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateRegistered = LocalDateTime.now();
@@ -23,8 +28,8 @@ public class Insights {
     @Column(name = "date_updated", nullable = false, columnDefinition = "TIMESTAMO DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateUpdated = LocalDateTime.now();
 
-    @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT(1)")
-    private Boolean isActive = true;
+    @Column(name = "resource_arn", nullable = false)
+    private String resourceArn;
 
     public Short getIdentifier() {
         return identifier;
@@ -34,20 +39,28 @@ public class Insights {
         this.identifier = identifier;
     }
 
-    public Categories getCategories() {
-        return categories;
+    public Connections getConnections() {
+        return connections;
     }
 
-    public void setCategories(Categories categories) {
-        this.categories = categories;
+    public void setConnections(Connections connections) {
+        this.connections = connections;
     }
 
-    public String getDenomination() {
-        return denomination;
+    public Insights getInsights() {
+        return insights;
     }
 
-    public void setDenomination(String denomination) {
-        this.denomination = denomination;
+    public void setInsights(Insights insights) {
+        this.insights = insights;
+    }
+
+    public Boolean getSolved() {
+        return isSolved;
+    }
+
+    public void setSolved(Boolean solved) {
+        isSolved = solved;
     }
 
     public LocalDateTime getDateRegistered() {
@@ -66,11 +79,11 @@ public class Insights {
         this.dateUpdated = dateUpdated;
     }
 
-    public Boolean getActive() {
-        return isActive;
+    public String getResourceArn() {
+        return resourceArn;
     }
 
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setResourceArn(String resourceArn) {
+        this.resourceArn = resourceArn;
     }
 }

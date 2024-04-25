@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class CategoriesModel {
+public class Categories {
 
 
     @Id
