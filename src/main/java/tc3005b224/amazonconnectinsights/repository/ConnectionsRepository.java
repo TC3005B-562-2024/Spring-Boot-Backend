@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import tc3005b224.amazonconnectinsights.models_sql.Connections;
 
 @Repository
-public interface ConnectionsRepository extends CrudRepository<Connections, Integer> {
+public interface ConnectionsRepository extends CrudRepository<Connections, Short> {
 
 }
