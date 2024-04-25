@@ -1,24 +1,23 @@
 package tc3005b224.amazonconnectinsights.models_sql;
+
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
-@Table(name = "Connections")
-public class Connections{
+@Table(name = "Connection")
+public class Connection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "identifier")
-    private Short id;
+    private int identifier;
 
-    @Column(name = "denomination", nullable = false, length = 50)
+    @Column(name = "denomination", nullable = false, length = 100)
     private String denomination;
 
-    @Column(name = "description", nullable = true, length = 100)
+    @Column(name = "description", nullable = false, length = 8)
     private String description;
-
-    @Column(name = "key", nullable = false, columnDefinition = "TINYTEXT")
-    private String key;
 
     @Column(name = "date_joined", nullable = false)
     private Date dateJoined;
@@ -29,12 +28,15 @@ public class Connections{
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    public Short getId() {
-        return id;
+    @OneToMany(mappedBy="connection")
+    private List<Alert> alerts;
+
+    public int getIdentifier() {
+        return identifier;
     }
 
-    public void setId(Short id) {
-        this.id = id;
+    public void setIdentifier(int identifier) {
+        this.identifier = identifier;
     }
 
     public String getDenomination() {
@@ -51,14 +53,6 @@ public class Connections{
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
     }
 
     public Date getDateJoined() {
@@ -83,6 +77,14 @@ public class Connections{
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public List<Alert> getAlerts() {
+        return alerts;
+    }
+
+    public void setAlerts(List<Alert> alerts) {
+        this.alerts = alerts;
     }
 }
 

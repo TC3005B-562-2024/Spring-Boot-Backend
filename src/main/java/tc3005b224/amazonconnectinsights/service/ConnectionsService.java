@@ -3,8 +3,8 @@ package tc3005b224.amazonconnectinsights.service;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tc3005b224.amazonconnectinsights.models_sql.Connections;
-import tc3005b224.amazonconnectinsights.repository.ConnectionsRepository;
+import tc3005b224.amazonconnectinsights.models_sql.Connection;
+import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 
 import java.util.Optional;
 
@@ -12,18 +12,18 @@ import java.util.Optional;
 @Transactional
 public class ConnectionsService {
     @Autowired
-    private ConnectionsRepository connectionsRepository;
+    private ConnectionRepository connectionRepository;
 
-    public Iterable<Connections> findAll() {
-        return connectionsRepository.findAll();
+    public Iterable<Connection> findAll() {
+        return connectionRepository.findAll();
     }
 
-    public Connections savaConnections(Short id, Connections newConnections) {
-        return connectionsRepository.save(newConnections);
+    public Connection savaConnections(Short id, Connection newConnection) {
+        return connectionRepository.save(newConnection);
     }
 
-    public Connections findById(Short id) {
-        Optional<Connections> connectionsOptional = connectionsRepository.findById(id);
+    public Connection findById(Short id) {
+        Optional<Connection> connectionsOptional = connectionRepository.findById(id);
 
         if(connectionsOptional.isPresent()) {
             return connectionsOptional.get();
@@ -32,6 +32,6 @@ public class ConnectionsService {
     }
 
     public void deleteConnections(Short id) {
-        connectionsRepository.deleteById(id);
+        connectionRepository.deleteById(id);
     }
 }

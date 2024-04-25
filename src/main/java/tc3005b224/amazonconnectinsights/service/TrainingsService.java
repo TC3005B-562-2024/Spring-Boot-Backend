@@ -3,8 +3,8 @@ package tc3005b224.amazonconnectinsights.service;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tc3005b224.amazonconnectinsights.models_sql.Trainings;
-import tc3005b224.amazonconnectinsights.repository.TrainingsRepository;
+import tc3005b224.amazonconnectinsights.models_sql.Training;
+import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
 
 import java.util.Optional;
 
@@ -12,18 +12,18 @@ import java.util.Optional;
 @Transactional
 public class TrainingsService {
     @Autowired
-    private TrainingsRepository trainingsRepository;
+    private TrainingRepository trainingRepository;
 
-    public Iterable<Trainings> findAll() {
-        return trainingsRepository.findAll();
+    public Iterable<Training> findAll() {
+        return trainingRepository.findAll();
     }
 
-    public Trainings saveTrainings(Long id, Trainings newTrainings) {
-        return trainingsRepository.save(newTrainings);
+    public Training saveTrainings(Long id, Training newTraining) {
+        return trainingRepository.save(newTraining);
     }
 
-    public Trainings findById(Long id) {
-        Optional<Trainings> trainingsOptional = trainingsRepository.findById(id);
+    public Training findById(Long id) {
+        Optional<Training> trainingsOptional = trainingRepository.findById(id);
 
         if(trainingsOptional.isPresent()) {
             return trainingsOptional.get();
@@ -32,6 +32,6 @@ public class TrainingsService {
     }
 
     public void deleteTrainings(Long id) {
-        trainingsRepository.deleteById(id);
+        trainingRepository.deleteById(id);
     }
 }

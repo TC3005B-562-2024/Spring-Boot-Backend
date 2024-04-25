@@ -1,12 +1,9 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.HashMap;
-import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +21,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertAllDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.ListAlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertInfoDTO;
+import tc3005b224.amazonconnectinsights.models_sql.Alert;
+import tc3005b224.amazonconnectinsights.service.AlertService;
 
 @RestController
 @RequestMapping("/alerts")
 public class AlertController {
+    @Autowired
+    private AlertService alertService;
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Alerts Found.", content = {
@@ -39,29 +41,12 @@ public class AlertController {
     })
     @Operation(summary = "Get all alerts.")
     @GetMapping("/all")
-    public ResponseEntity<AlertAllDTO> getAllAlerts() {
-        AlertDTO Alert = new AlertDTO();
-        Alert.setId("1");
-        Alert.setDescription("El cliente se enfurecio");
-        Alert.setPriority("Critica");
-        Alert.setAgentId("agent1");
-        Alert.setSkillId("skill1");
-        Alert.setQueueId("queue1");
-        Alert.setContactId("contact1");
+    public ResponseEntity<List<AlertDTO>> getAllAlerts() {
+        List<AlertDTO> response = new ArrayList<>();
+        Iterable<Alert> dbAlerts = alertService.findAll();
+        dbAlerts.forEach(alert -> response.add(new AlertDTO(alert)));
 
-        AlertDTO Alert2 = new AlertDTO();
-        Alert2.setId("2");
-        Alert2.setDescription("El cliente se enfurecio mucho");
-        Alert2.setPriority("Critica");
-        Alert2.setAgentId("agent1");
-        Alert2.setSkillId("skill1");
-        Alert2.setQueueId("queue1");
-        Alert2.setContactId("contact1");
-
-        AlertAllDTO alerts = new AlertAllDTO();
-        alerts.setAlerts(Arrays.asList(Alert, Alert2));
-
-        return ResponseEntity.ok(alerts);
+        return ResponseEntity.ok(response);
     }
 
     @ApiResponses(value = {
@@ -87,9 +72,8 @@ public class AlertController {
     @GetMapping("/critics")
     public ResponseEntity<AlertAllDTO> getCriticalAlerts() {
         List<AlertDTO> alerts = Arrays.asList(
-                new AlertDTO("1", "El cliente se suicidó", "critica", "agent1", "skill1", "queue1", "contact1"),
-                new AlertDTO("2", "Sistema en riesgo de sobrecarga", "alta", "agent2", "skill2", "queue2", "contact2"),
-                new AlertDTO("3", "Error de conexión", "critica", "agent3", "skill3", "queue3", "contact3")
+                new AlertDTO(1, "arn1", new Date(), new Date(), 3, false, new Date()),
+                new AlertDTO(1, "arn1", new Date(), new Date(), 3, false, new Date())
         );
 
         List<AlertDTO> criticalAlerts = alerts.stream()
@@ -127,18 +111,14 @@ public class AlertController {
     })
     @Operation(summary = "Get an alert by its id.")
     @GetMapping("/{alert_id}")
-    public ResponseEntity<Optional<AlertDTO>> getAlert(@PathVariable("alert_id") String alert_id){
+    public ResponseEntity<AlertDTO> getAlert(@PathVariable("alert_id") String alert_id){
         List<AlertDTO> alerts = Arrays.asList(
-                new AlertDTO("1", "El cliente se desconecto", "critica", "agent1", "skill1", "queue1", "contact1"),
-                new AlertDTO("2", "Sistema en riesgo de sobrecarga", "alta", "agent2", "skill2", "queue2", "contact2"),
-                new AlertDTO("3", "Error de conexión", "critica", "agent3", "skill3", "queue3", "contact3")
+                new AlertDTO(1, "arn1", new Date(), new Date(), 3, false, new Date()),
+                new AlertDTO(1, "arn1", new Date(), new Date(), 3, false, new Date()),
+                new AlertDTO(1, "arn1", new Date(), new Date(), 3, false, new Date())
         );
 
-        Optional<AlertDTO> Alert = alerts.stream()
-                .filter(alert -> alert.getId().equals(alert_id))
-                .findFirst();
-
-        return ResponseEntity.ok(Alert);
+        return ResponseEntity.ok(alerts.get(0));
     }
 
     @ApiResponses(value = {
@@ -166,14 +146,8 @@ public class AlertController {
     @GetMapping("/info")
     public ResponseEntity<AlertInfoDTO> getAlertsInfo() {
         List<AlertDTO> alerts = Arrays.asList(
-                new AlertDTO("1", "descripcion1", "critica", "agent1", "skill1", "queue1", "contact1"),
-                new AlertDTO("2", "descripcion2", "critica", "agent2", "skill2", "queue2", "contact2"),
-                new AlertDTO("3", "descripcion3", "media", "agent3", "skill3", "queue3", "contact3"),
-                new AlertDTO("4", "descripcion4", "media", "agent3", "skill3", "queue3", "contact3"),
-                new AlertDTO("5", "descripcion5", "baja", "agent3", "skill3", "queue3", "contact3"),
-                new AlertDTO("6", "descripcion6", "critica", "agent3", "skill3", "queue3", "contact3"),
-                new AlertDTO("7", "descripcion7", "media", "agent3", "skill3", "queue3", "contact3"),
-                new AlertDTO("8", "descripcion8", "baja", "agent3", "skill3", "queue3", "contact3"));
+                new AlertDTO(1, "arn1", new Date(), new Date(), 3, false, new Date())
+        );
 
         Map<String, Integer> alertCount = new HashMap<>();
         alertCount.put("total", 0);
@@ -182,7 +156,7 @@ public class AlertController {
         alertCount.put("baja", 0);
 
         for (AlertDTO alert : alerts) {
-            String priority = alert.getPriority();
+            String priority = alert.toString();
             alertCount.put(priority, alertCount.get(priority) + 1);
             alertCount.put("total", alertCount.get("total") + 1);
         }

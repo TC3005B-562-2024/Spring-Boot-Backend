@@ -1,79 +1,99 @@
 package tc3005b224.amazonconnectinsights.dto.alerts;
+import tc3005b224.amazonconnectinsights.models_sql.Alert;
+
+import java.util.Date;
 
 public class AlertDTO {
-    private String id;
-    private  String description;
-    private String priority;
-    private String agentId;
-    private String skillId;
-    private String queueId;
-    private String contactId;
+    private long identifier;
+    private String resource;
+    private Date dateRegistered;
+    private Date dateUpdated;
+    private int priority;
+    private boolean isSolved;
+    private Date dateTrainingCompleted;
 
-    public AlertDTO() {}
+    // Constructor
+    public AlertDTO(Alert alert) {
+        this.identifier = alert.getIdentifier();
+        this.resource = alert.getResourceArn();
+        this.dateRegistered = alert.getDateRegistered();
+        this.dateUpdated = alert.getDateUpdated();
+        this.isSolved = alert.getSolved();
+        this.dateTrainingCompleted = alert.getDateTrainingCompleted();
+    }
 
-    public AlertDTO(String id, String description, String priority, String agentId, String skillId, String queueId, String contactId) {
-        this.id = id;
-        this.description = description;
+    public AlertDTO(long identifier, String resource, Date dateRegistered, Date dateUpdated, int priority, boolean isSolved, Date dateTrainingCompleted) {
+        this.identifier = identifier;
+        this.resource = resource;
+        this.dateRegistered = dateRegistered;
+        this.dateUpdated = dateUpdated;
         this.priority = priority;
-        this.agentId = agentId;
-        this.skillId = skillId;
-        this.queueId = queueId;
-        this.contactId = contactId;
+        this.isSolved = isSolved;
+        this.dateTrainingCompleted = dateTrainingCompleted;
     }
 
-    public String getId() {
-        return id;
+    // Getters & Setters
+    public long getIdentifier() {
+        return identifier;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setIdentifier(long identifier) {
+        this.identifier = identifier;
     }
 
-    public String getDescription() {
-        return description;
+
+    public String getResource() {
+        return resource;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setResource(String resource) {
+        this.resource = resource;
     }
 
-    public String getPriority() {
+    public Date getDateRegistered() {
+        return dateRegistered;
+    }
+
+    public void setDateRegistered(Date dateRegistered) {
+        this.dateRegistered = dateRegistered;
+    }
+
+    public Date getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(Date dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    public int getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
     }
 
-    public String getAgentId() {
-        return agentId;
+    @Override
+    public String toString() {
+        return "AlertDTO{" +
+                "priority=" + priority +
+                '}';
     }
 
-    public void setAgentId(String agentId) {
-        this.agentId = agentId;
+    public boolean isSolved() {
+        return isSolved;
     }
 
-    public String getSkillId() {
-        return skillId;
+    public void setSolved(boolean solved) {
+        isSolved = solved;
     }
 
-    public void setSkillId(String skillId) {
-        this.skillId = skillId;
+    public Date getDateTrainingCompleted() {
+        return dateTrainingCompleted;
     }
 
-    public String getQueueId() {
-        return queueId;
-    }
-
-    public void setQueueId(String queueId) {
-        this.queueId = queueId;
-    }
-
-    public String getContactId() {
-        return contactId;
-    }
-
-    public void setContactId(String contactId) {
-        this.contactId = contactId;
+    public void setDateTrainingCompleted(Date dateTrainingCompleted) {
+        this.dateTrainingCompleted = dateTrainingCompleted;
     }
 }

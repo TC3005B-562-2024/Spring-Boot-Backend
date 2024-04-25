@@ -1,20 +1,22 @@
 package tc3005b224.amazonconnectinsights.models_sql;
 
 import java.util.Date;
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Trainings")
-public class Trainings {
+@Table(name = "training")
+public class Training {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "identifier")
-    private Long identifier;
+    private Short identifier;
 
-    @Column(name = "denomination", nullable = false)
+    @Column(name = "denomination", nullable = false, length = 100)
     private String denomination;
 
-    @Column(name = "description", nullable = true)
+    @Column(name = "description", nullable = true, length = 8)
     private String description;
 
     @Column(name = "date_registered", nullable = false)
@@ -26,15 +28,14 @@ public class Trainings {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Alert_identifier", referencedColumnName = "identifier")
-    private Alerts alert;
+    @OneToMany(mappedBy = "training")
+    private List<Alert> alerts;
 
-    public Long getIdentifier() {
+    public Short getIdentifier() {
         return identifier;
     }
 
-    public void setIdentifier(Long identifier) {
+    public void setIdentifier(Short identifier) {
         this.identifier = identifier;
     }
 
@@ -78,11 +79,11 @@ public class Trainings {
         this.dateUpdated = dateUpdated;
     }
 
-    public Alerts getAlert() {
-        return alert;
+    public List<Alert> getAlerts() {
+        return alerts;
     }
 
-    public void setAlert(Alerts alert) {
-        this.alert = alert;
+    public void setAlerts(List<Alert> alerts) {
+        this.alerts = alerts;
     }
 }

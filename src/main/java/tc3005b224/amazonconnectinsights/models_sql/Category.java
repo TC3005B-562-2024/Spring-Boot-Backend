@@ -2,18 +2,23 @@ package tc3005b224.amazonconnectinsights.models_sql;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-public class Categories {
-
-
+@Table(name = "category")
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Short identifier;
 
-    private byte identifier;
-
-    @Column(name = "denomination", nullable = false)
+    @Column(name = "denomination", nullable = false, length = 100)
     private String denomination;
+
+    @Column(name = "description", nullable = true, length = 8)
+    private String description;
+
+    @Column(name = "priority", nullable = false)
+    private Short priority;
 
     @Column(name = "date_registered", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateRegistered = LocalDateTime.now();
@@ -24,15 +29,11 @@ public class Categories {
     @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean isActive = true;
 
-    @Column(name = "priority", nullable = false, columnDefinition = "TINYINT(1)")
-    private Boolean priority = true;
-
-
-    public byte getIdentifier() {
+    public Short getIdentifier() {
         return identifier;
     }
 
-    public void setIdentifier(byte identifier) {
+    public void setIdentifier(Short identifier) {
         this.identifier = identifier;
     }
 
@@ -42,6 +43,22 @@ public class Categories {
 
     public void setDenomination(String denomination) {
         this.denomination = denomination;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Short getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Short priority) {
+        this.priority = priority;
     }
 
     public LocalDateTime getDateRegistered() {
@@ -67,20 +84,4 @@ public class Categories {
     public void setActive(Boolean active) {
         isActive = active;
     }
-
-    public Boolean getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Boolean priority) {
-        this.priority = priority;
-    }
 }
-
-
-
-
-
-
-
-

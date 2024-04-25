@@ -3,8 +3,8 @@ package tc3005b224.amazonconnectinsights.service;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tc3005b224.amazonconnectinsights.models_sql.Categories;
-import tc3005b224.amazonconnectinsights.repository.CategoriesRepository;
+import tc3005b224.amazonconnectinsights.models_sql.Category;
+import tc3005b224.amazonconnectinsights.repository.CategoryRepository;
 
 import java.util.Optional;
 
@@ -12,18 +12,18 @@ import java.util.Optional;
 @Transactional
 public class CategoriesService {
     @Autowired
-    private CategoriesRepository categoriesRepository;
+    private CategoryRepository categoryRepository;
 
-    public Iterable<Categories> findAll() {
-        return categoriesRepository.findAll();
+    public Iterable<Category> findAll() {
+        return categoryRepository.findAll();
     }
 
-    public Categories saveCategories(Byte id, Categories newCategories) {
-        return categoriesRepository.save(newCategories);
+    public Category saveCategories(Byte id, Category newCategory) {
+        return categoryRepository.save(newCategory);
     }
 
-    public Categories findById(Byte id) {
-        Optional<Categories> categoriesOptional = categoriesRepository.findById(id);
+    public Category findById(Byte id) {
+        Optional<Category> categoriesOptional = categoryRepository.findById(id);
 
         if(categoriesOptional.isPresent()) {
             return categoriesOptional.get();
@@ -32,7 +32,7 @@ public class CategoriesService {
     }
 
     public void deleteCategories(Byte id) {
-        categoriesRepository.deleteById(id);
+        categoryRepository.deleteById(id);
     }
 }
 
