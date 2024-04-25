@@ -7,7 +7,9 @@ import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Category;
 import tc3005b224.amazonconnectinsights.repository.CategoryRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -21,6 +23,11 @@ public class CategoriesService {
             return toCategoryDTO(categoryOptional.get());
         }
         return null;
+    }
+
+    public List<CategoryDTO> findAll() {
+        List<Category> categories = (List<Category>) categoryRepository.findAll();
+        return categories.stream().map(this::toCategoryDTO).collect(Collectors.toList());
     }
 
     private CategoryDTO toCategoryDTO(Category category) {
