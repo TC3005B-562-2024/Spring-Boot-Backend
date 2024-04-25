@@ -1,6 +1,6 @@
 ---
 name: 'Endpoint'
-description: 'A template to easy add a Spring-Boot endpoint to an issue.'
+about: 'A template to easy add a Spring-Boot endpoint to an issue.'
 title: 'E. EndpointName'
 labels: ''
 assignees: ''
