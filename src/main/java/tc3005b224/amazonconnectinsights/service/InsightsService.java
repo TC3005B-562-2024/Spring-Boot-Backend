@@ -18,7 +18,11 @@ public class InsightsService {
         return insightsRepository.findAll();
     }
 
-    public Insights findById(int id) {
+    public Insights saveInsight(Short id, Insights newInsight) {
+        return insightsRepository.save(newInsight);
+    }
+
+    public Insights findById(Short id) {
         Optional<Insights> insightsOptional = insightsRepository.findById(id);
 
         if(insightsOptional.isPresent()) {
@@ -27,10 +31,7 @@ public class InsightsService {
         return null;
     }
 
-    public  Insights updateInsight(Short id, Insights newInsight) {
-        return insightsRepository.findAllById(id)
-                .map(insight -> {
-                    insight.setCategoryIdentifier(newInsight.getCategoryIde)
-                })
+    public void deleteInsight(Short id) {
+        insightsRepository.deleteById(id);
     }
 }
