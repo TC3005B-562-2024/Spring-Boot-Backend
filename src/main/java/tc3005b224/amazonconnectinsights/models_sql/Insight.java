@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Table(name = "insight")
@@ -103,5 +104,10 @@ public class Insight {
 
     public void setAlerts(List<Alert> alerts) {
         this.alerts = alerts;
+    }
+
+    public static Optional<Insight> stream() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'stream'");
     }
 }
