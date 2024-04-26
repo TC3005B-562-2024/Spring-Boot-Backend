@@ -30,6 +30,14 @@ public class CategoriesService {
         return categories.stream().map(this::toCategoryDTO).collect(Collectors.toList());
     }
 
+    public boolean deleteCategory(Byte id) {
+        if (categoryRepository.existsById(id)) {
+            categoryRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
     private CategoryDTO toCategoryDTO(Category category) {
         CategoryDTO dto = new CategoryDTO();
         dto.setIdentifier(category.getIdentifier());
