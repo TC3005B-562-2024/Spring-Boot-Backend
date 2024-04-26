@@ -66,6 +66,22 @@ public class CategoriesService {
         dto.setIsActive(category.getActive());
         return dto;
     }
+
+    public CategoryDTO updateCategory(Byte id, CategoryDTO categoryDTO) {
+        Optional<Category> categoryOptional = categoryRepository.findById(id);
+        if (categoryOptional.isPresent()) {
+            Category category = categoryOptional.get();
+            category.setDenomination(categoryDTO.getDenomination());
+            category.setDescription(categoryDTO.getDescription());
+            category.setPriority(categoryDTO.getPriority());
+            category.setDateRegistered(categoryDTO.getDateRegistered());
+            category.setDateUpdated(categoryDTO.getDateUpdated());
+            category.setActive(categoryDTO.getIsActive());
+            category = categoryRepository.save(category);
+            return toCategoryDTO(category);
+        }
+        return null;
+    }
 }
 
 

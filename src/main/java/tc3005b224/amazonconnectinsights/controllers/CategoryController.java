@@ -45,4 +45,13 @@ public class CategoryController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @PutMapping("/{categoryId}")
+    public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Byte categoryId, @RequestBody CategoryDTO categoryDTO) {
+        CategoryDTO updatedCategoryDTO = categoriesService.updateCategory(categoryId, categoryDTO);
+        if (updatedCategoryDTO != null) {
+            return ResponseEntity.ok(updatedCategoryDTO);
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
