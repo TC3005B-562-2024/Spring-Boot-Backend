@@ -38,10 +38,28 @@ public class CategoriesService {
         return false;
     }
 
+    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
+        Category category = toCategory(categoryDTO);
+        category = categoryRepository.save(category);
+        return toCategoryDTO(category);
+    }
+
+    private Category toCategory(CategoryDTO dto) {
+        Category category = new Category();
+        category.setDenomination(dto.getDenomination());
+        category.setDescription(dto.getDescription());
+        category.setPriority(dto.getPriority());
+        category.setDateRegistered(dto.getDateRegistered());
+        category.setDateUpdated(dto.getDateUpdated());
+        category.setActive(dto.getIsActive());
+        return category;
+    }
+
     private CategoryDTO toCategoryDTO(Category category) {
         CategoryDTO dto = new CategoryDTO();
         dto.setIdentifier(category.getIdentifier());
         dto.setDenomination(category.getDenomination());
+        dto.setDescription(category.getDescription());
         dto.setPriority(category.getPriority());
         dto.setDateRegistered(category.getDateRegistered());
         dto.setDateUpdated(category.getDateUpdated());

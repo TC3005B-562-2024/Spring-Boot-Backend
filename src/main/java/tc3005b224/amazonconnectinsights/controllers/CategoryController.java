@@ -1,6 +1,8 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
@@ -18,6 +20,12 @@ public class CategoryController {
     public ResponseEntity<List<CategoryDTO>> getAllCategories() {
         List<CategoryDTO> categories = categoriesService.findAll();
         return ResponseEntity.ok(categories);
+    }
+
+    @PostMapping
+    public ResponseEntity<CategoryDTO> createCategory(@RequestBody CategoryDTO categoryDTO) {
+        categoryDTO = categoriesService.createCategory(categoryDTO);
+        return new ResponseEntity<>(categoryDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/{categoryId}")
