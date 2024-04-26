@@ -8,9 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+
 public class InsightsDTO {
-    private int identifier;
-    private int categoryIdentifier;
+    private short identifier;
+    private short categoryIdentifier;
     private String denomination;
     private String description;
     private Date dateRegistered;

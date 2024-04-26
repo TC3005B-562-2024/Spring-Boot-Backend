@@ -26,11 +26,11 @@ public class InsightsService {
         return insightRepository.save(newInsight);
     }
 
-    public Insight findById(Short id) {
+    public InsightsDTO findById(short id) {
         Optional<Insight> insightsOptional = insightRepository.findById(id);
 
         if(insightsOptional.isPresent()) {
-            return insightsOptional.get();
+            return toInsightDTO(insightsOptional.get());
         }
         return null;
     }
@@ -50,4 +50,11 @@ public class InsightsService {
         dto.setActive(insight.getActive());
         return dto;
     }
+
+    private Insight toInsight(InsightDTO dto) {
+        Insight insight = new Insight();
+
+        return insight;
+    }
+    
 }

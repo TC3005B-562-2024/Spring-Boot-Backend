@@ -22,5 +22,16 @@ public class InsightsController {
         return ResponseEntity.ok(insights);
     }
 
+    @GetMapping ("/{insightsId}")
+    public ResponseEntity<InsightsDTO> getInsightsById(@PathVariable("insightsId") short insightsId) {
+        InsightsDTO insightsDTO = insightsService.findById(insightsId);
+        if (insightsDTO != null) {
+            return ResponseEntity.ok(insightsDTO);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+
+
 
 }
