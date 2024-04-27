@@ -17,4 +17,10 @@ public class InsightsDTO {
     private Date dateRegistered;
     private Date dateUpdated;
     private boolean isActive;
+
+    public boolean getActive() {
+        return isActive;
+    }
 }
+
+

@@ -110,4 +110,9 @@ public class Insight {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'stream'");
     }
+
+    public void setCategory(short categoryIdentifier) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setCategory'");
+    }
 }
