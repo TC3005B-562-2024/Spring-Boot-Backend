@@ -50,6 +50,22 @@ public class InsightsService {
         return toInsightDTO(insight);
     }
 
+    public InsightsDTO updateInsights(Short id, InsightsDTO dto) {
+        Optional<Insight> insightsOptional = insightRepository.findById(id);
+        if (insightsOptional.isPresent()) {
+            Insight insight = insightsOptional.get();
+            insight.setIdentifier(dto.getIdentifier());
+            insight.setCategory(dto.getCategoryIdentifier());
+            insight.setDenomination(dto.getDenomination());
+            insight.setDescription(dto.getDescription());
+            insight.setDateRegistered(dto.getDateRegistered());
+            insight.setDateUpdated(dto.getDateUpdated());
+            insight.setActive(dto.getActive());
+            return toInsightDTO(insight);
+        }
+        return null;
+    }
+
 
     
     private InsightsDTO toInsightDTO(Insight insight) {

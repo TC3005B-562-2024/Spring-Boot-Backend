@@ -47,6 +47,15 @@ public class InsightsController {
         return ResponseEntity.notFound().build();
     }
 
+    @PutMapping("/{insightsId}")
+    public ResponseEntity<InsightsDTO> updateConnection(@PathVariable("insightsId") Short insightsId, @RequestBody InsightsDTO insightsDTO) {
+        InsightsDTO updatedInsightsDTO = insightsService.updateInsights(insightsId, insightsDTO);
+        if (updatedInsightsDTO != null) {
+            return ResponseEntity.ok(updatedInsightsDTO);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 
 
 
