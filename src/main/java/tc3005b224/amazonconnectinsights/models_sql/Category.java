@@ -2,7 +2,6 @@ package tc3005b224.amazonconnectinsights.models_sql;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "category")
@@ -18,7 +17,7 @@ public class Category {
     private String description;
 
     @Column(name = "priority", nullable = false)
-    private Short priority;
+    private int priority;
 
     @Column(name = "date_registered", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateRegistered = LocalDateTime.now();
@@ -53,11 +52,11 @@ public class Category {
         this.description = description;
     }
 
-    public Short getPriority() {
+    public int getPriority() {
         return priority;
     }
 
-    public void setPriority(Short priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
     }
 

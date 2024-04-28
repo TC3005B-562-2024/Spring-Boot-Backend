@@ -1,4 +1,5 @@
 package tc3005b224.amazonconnectinsights.models_sql;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -27,6 +28,7 @@ public class Insight {
     private Boolean isActive = true;
 
     @OneToMany(mappedBy = "insight")
+    @JsonIgnore
     List<Alert> alerts;
 
     @ManyToOne
