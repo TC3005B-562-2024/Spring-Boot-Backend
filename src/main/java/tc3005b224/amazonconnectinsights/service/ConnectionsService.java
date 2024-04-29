@@ -3,13 +3,13 @@ package tc3005b224.amazonconnectinsights.service;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
 import tc3005b224.amazonconnectinsights.dto.connections.ConnectionDTO;
+import tc3005b224.amazonconnectinsights.models_sql.Category;
 import tc3005b224.amazonconnectinsights.models_sql.Connection;
 import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -17,40 +17,38 @@ public class ConnectionsService {
     @Autowired
     private ConnectionRepository connectionRepository;
 
-
-    public List<ConnectionDTO> findAll() {
-        List<Connection> connections = (List<Connection>) connectionRepository.findAll();
-        return connections.stream().map(this::toConnectionDTO).collect(Collectors.toList());
+    // Service that returns an Iterable of all the connections in the database.
+    public Iterable<Connection> findAll() {
+        return connectionRepository.findAll();
     }
 
-    public ConnectionDTO findById(Short id) {
-        Optional<Connection> connectionOptional = connectionRepository.findById(id);
-        if (connectionOptional.isPresent()) {
-            return toConnectionDTO(connectionOptional.get());
+    // Service that looks for a Connection, given its id. If the Connection is not found, returns a null.
+    public Connection findById(Short id) {
+        Optional<Connection> connectionsOptional = connectionRepository.findById(id);
+
+        if(connectionsOptional.isPresent()) {
+            return connectionsOptional.get();
         }
         return null;
     }
 
-    public ConnectionDTO createConnection(ConnectionDTO connectionDTO) {
-        Connection connection = toConnection(connectionDTO);
-        connection = connectionRepository.save(connection);
-        return toConnectionDTO(connection);
+    // Service that instantiates a category, given a CategoryDTO and stores it in the DB.
+    public Connection createConnection(ConnectionDTO connectionDTO) {
+        Connection connection = new Connection(connectionDTO);
+        return connectionRepository.save(connection);
     }
 
-    public ConnectionDTO updateConnection(Short id, ConnectionDTO connectionDTO) {
+    // Service that updates a category considering all the non-null attributes of CategoryDTO.
+    public Connection updateConnection(Short id, ConnectionDTO connectionDTO) {
         Optional<Connection> connectionOptional = connectionRepository.findById(id);
         if (connectionOptional.isPresent()) {
-            Connection connection = connectionOptional.get();
-            connection.setDenomination(connectionDTO.getDenomination());
-            connection.setDescription(connectionDTO.getDescription());
-            connection.setDateJoined(connectionDTO.getDateJoined());
-            connection.setDateUpdated(connectionDTO.getDateUpdated());
-            connection.setActive(connectionDTO.getIsActive());
-            return toConnectionDTO(connection);
+            connectionOptional.get().updateFromDTO(connectionDTO);
+            return connectionRepository.save(connectionOptional.get());
         }
         return null;
     }
 
+    // Service that deletes a Category given its id. If the action is successful returns a true, else a false.
     public boolean deleteConnection(Short id) {
         if (connectionRepository.existsById(id)) {
             connectionRepository.deleteById(id);
@@ -58,30 +56,4 @@ public class ConnectionsService {
         }
         return false;
     }
-
-    private Connection toConnection(ConnectionDTO dto) {
-        Connection connection = new Connection();
-        connection.setDenomination(dto.getDenomination());
-        connection.setDescription(dto.getDescription());
-        connection.setDateJoined(dto.getDateJoined());
-        connection.setDateUpdated(dto.getDateUpdated());
-        if (dto.getIsActive() != null) {
-            connection.setActive(dto.getIsActive());
-        }
-        return connection;
-    }
-    private ConnectionDTO toConnectionDTO(Connection connection) {
-        ConnectionDTO dto = new ConnectionDTO();
-        dto.setIdentifier(connection.getIdentifier());
-        dto.setDenomination(connection.getDenomination());
-        dto.setDescription(connection.getDescription());
-        dto.setDateJoined(connection.getDateJoined());
-        dto.setDateUpdated(connection.getDateUpdated());
-        dto.setIsActive(connection.isActive());
-        return dto;
-    }
-
-
 }
-
-

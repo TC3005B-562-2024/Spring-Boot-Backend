@@ -1,10 +1,16 @@
-package tc3005b224.amazonconnectinsights.dto.connections;
+package tc3005b224.amazonconnectinsights.dto.category;
 
-import java.util.Date;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public class ConnectionDTO {
+import java.time.LocalDateTime;
+
+public class CategoryDTO {
+
     private String denomination;
     private String description;
+    private Short priority;
     private Boolean isActive;
 
     public String getDenomination() {
@@ -21,6 +27,14 @@ public class ConnectionDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Short getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Short priority) {
+        this.priority = priority;
     }
 
     public Boolean getActive() {

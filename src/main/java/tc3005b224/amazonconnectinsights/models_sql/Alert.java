@@ -1,62 +1,58 @@
 package tc3005b224.amazonconnectinsights.models_sql;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
 import java.util.Date;
 
 @Entity
 @Table(name = "alert")
 public class Alert {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "identifier")
-    private Long id;
+    private Long identifier;
 
     @ManyToOne
-    @JoinColumn(name = "connection_identifier")
+    @JoinColumn(name = "connection_identifier", nullable = false)
     private Connection connection;
 
     @ManyToOne
-    @JoinColumn(name = "insight_identifier")
+    @JoinColumn(name = "insight_identifier", nullable = false)
     private Insight insight;
 
     @ManyToOne
-    @JoinColumn(name = "training_identifier")
+    @JoinColumn(name = "training_identifier", nullable = true)
     private Training training;
 
-    @Column(name = "resource")
-    private String resource;
+    @Column(name = "is_solved", nullable = false)
+    private Boolean isSolved = false;
 
-    @Column(name = "date_registered")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "date_registered", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Date dateRegistered;
 
-    @Column(name = "date_updated")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "date_updated", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Date dateUpdated;
 
-    @Column(name = "is_solved")
-    private boolean solved;
+    @Column(name = "resource", nullable = false, length = 100)
+    private String resourceArn;
 
-    @Column(name = "date_training_completed")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "date_training_completed", nullable = true, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Date dateTrainingCompleted;
 
-    @Column(name = "has_training", insertable = false, updatable = false)
-    private boolean hasTraining;
-
-    @Column(name = "is_training_completed", insertable = false, updatable = false)
-    private boolean trainingCompleted;
-
-    // Constructors, getters, and setters
-    public Long getId() {
-        return id;
+    public Date getDateTrainingCompleted() {
+        return dateTrainingCompleted;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setDateTrainingCompleted(Date dateTrainingCompleted) {
+        this.dateTrainingCompleted = dateTrainingCompleted;
+    }
+
+    // Getters & Setters
+    public Long getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(Long identifier) {
+        this.identifier = identifier;
     }
 
     public Connection getConnection() {
@@ -83,12 +79,12 @@ public class Alert {
         this.training = training;
     }
 
-    public String getResource() {
-        return resource;
+    public Boolean getSolved() {
+        return isSolved;
     }
 
-    public void setResource(String resource) {
-        this.resource = resource;
+    public void setSolved(Boolean solved) {
+        isSolved = solved;
     }
 
     public Date getDateRegistered() {
@@ -107,36 +103,11 @@ public class Alert {
         this.dateUpdated = dateUpdated;
     }
 
-    public boolean isSolved() {
-        return solved;
+    public String getResourceArn() {
+        return resourceArn;
     }
 
-    public void setSolved(boolean solved) {
-        this.solved = solved;
-    }
-
-    public Date getDateTrainingCompleted() {
-        return dateTrainingCompleted;
-    }
-
-    public void setDateTrainingCompleted(Date dateTrainingCompleted) {
-        this.dateTrainingCompleted = dateTrainingCompleted;
-    }
-
-    public boolean isHasTraining() {
-        return hasTraining;
-    }
-
-    public void setHasTraining(boolean hasTraining) {
-        this.hasTraining = hasTraining;
-    }
-
-    public boolean isTrainingCompleted() {
-        return trainingCompleted;
-    }
-
-    public void setTrainingCompleted(boolean trainingCompleted) {
-        this.trainingCompleted = trainingCompleted;
+    public void setResourceArn(String resourceArn) {
+        this.resourceArn = resourceArn;
     }
 }
-

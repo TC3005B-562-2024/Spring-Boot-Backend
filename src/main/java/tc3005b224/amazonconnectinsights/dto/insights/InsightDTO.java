@@ -1,11 +1,23 @@
-package tc3005b224.amazonconnectinsights.dto.connections;
-
+package tc3005b224.amazonconnectinsights.dto.insights;
 import java.util.Date;
 
-public class ConnectionDTO {
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+public class InsightDTO {
+    private short categoryIdentifier;
     private String denomination;
     private String description;
     private Boolean isActive;
+
+    public short getCategoryIdentifier() {
+        return categoryIdentifier;
+    }
+
+    public void setCategoryIdentifier(short categoryIdentifier) {
+        this.categoryIdentifier = categoryIdentifier;
+    }
 
     public String getDenomination() {
         return denomination;
@@ -31,3 +43,5 @@ public class ConnectionDTO {
         isActive = active;
     }
 }
+
+

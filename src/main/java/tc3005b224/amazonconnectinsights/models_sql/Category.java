@@ -1,33 +1,84 @@
 package tc3005b224.amazonconnectinsights.models_sql;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "category")
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "identifier")
     private Short identifier;
 
-    @Column(name = "denomination", nullable = false, length = 100)
+    @Column(name = "denomination", nullable = false)
     private String denomination;
 
-    @Column(name = "description", nullable = true, length = 8)
+    @Column(name = "description", columnDefinition = "TINYTEXT")
     private String description;
 
     @Column(name = "priority", nullable = false)
-    private int priority;
+    private Short priority;
 
-    @Column(name = "date_registered", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime dateRegistered = LocalDateTime.now();
+    @Column(name = "date_registered", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    private Date dateRegistered;
 
-    @Column(name = "date_updated", nullable = false, columnDefinition = "TIMESTAMO DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime dateUpdated = LocalDateTime.now();
+    @Column(name = "date_updated", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    private Date dateUpdated;
 
-    @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT(1)")
-    private Boolean isActive = true;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive;
 
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Insight> insights;
+
+    // Constructors, getters, and setters
+    public Category(String denomination, String description, Short priority, Boolean isActive) {
+        this.denomination = denomination;
+        this.description = description;
+        this.priority = priority;
+        this.isActive = isActive;
+    }
+
+    public Category() {
+        ;
+    }
+
+    public Category(CategoryDTO categoryDTO) {
+        this.denomination = categoryDTO.getDenomination();
+        this.description = categoryDTO.getDescription();
+        this.priority = categoryDTO.getPriority();
+        this.dateRegistered = new Date();
+        this.dateUpdated = new Date();
+        this.isActive = categoryDTO.getActive();
+    }
+
+    public void updateFromDTO(CategoryDTO categoryDTO){
+        this.dateUpdated = new Date();
+
+        if(categoryDTO.getDenomination() != null){
+            this.denomination = categoryDTO.getDenomination();
+        }
+
+        if(categoryDTO.getDescription() != null){
+            this.description = categoryDTO.getDescription();
+        }
+
+        if(categoryDTO.getPriority() != null){
+            this.priority = categoryDTO.getPriority();
+        }
+
+        if(categoryDTO.getActive() != null){
+            this.isActive = categoryDTO.getActive();
+        }
+    }
+    
+    // Getters and setters
     public Short getIdentifier() {
         return identifier;
     }
@@ -52,35 +103,48 @@ public class Category {
         this.description = description;
     }
 
-    public int getPriority() {
+    public Short getPriority() {
         return priority;
     }
 
-    public void setPriority(int priority) {
+    public void setPriority(Short priority) {
         this.priority = priority;
     }
 
-    public LocalDateTime getDateRegistered() {
+    public Date getDateRegistered() {
         return dateRegistered;
     }
 
-    public void setDateRegistered(LocalDateTime dateRegistered) {
+    public void setDateRegistered(Date dateRegistered) {
         this.dateRegistered = dateRegistered;
     }
 
-    public LocalDateTime getDateUpdated() {
+    public Date getDateUpdated() {
         return dateUpdated;
     }
 
-    public void setDateUpdated(LocalDateTime dateUpdated) {
+    public void setDateUpdated(Date dateUpdated) {
         this.dateUpdated = dateUpdated;
     }
 
-    public Boolean getActive() {
+    public Boolean isActive() {
         return isActive;
     }
 
     public void setActive(Boolean active) {
         isActive = active;
     }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public List<Insight> getInsights() {
+        return insights;
+    }
+
+    public void setInsights(List<Insight> insights) {
+        this.insights = insights;
+    }
 }
+
