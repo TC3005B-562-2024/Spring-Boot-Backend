@@ -1,6 +1,8 @@
 package tc3005b224.amazonconnectinsights.models_sql;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
+import tc3005b224.amazonconnectinsights.dto.insights.InsightDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -14,8 +16,8 @@ public class Insight {
     @Column(name = "identifier")
     private int identifier;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_identifier", referencedColumnName = "identifier", updatable = false, nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "category_identifier", referencedColumnName = "identifier")
     private Category category;
 
     @Column(name = "denomination", nullable = false)
@@ -31,11 +33,11 @@ public class Insight {
     private Date dateUpdated;
 
     @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    private Boolean isActive;
 
-    @OneToMany(mappedBy = "insight")
+    @OneToMany(mappedBy = "insight", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    List<Alert> alerts;
+    private List<Alert> alert;
 
     // Constructors, getters, and setters
     public Insight() {
@@ -48,8 +50,32 @@ public class Insight {
         this.isActive = isActive;
     }
 
-    // Getters and setters
+    public Insight(InsightDTO insightDTO, Category category) {
+        this.category = category;
+        this.denomination = insightDTO.getDenomination();
+        this.description = insightDTO.getDescription();
+        this.dateRegistered = new Date();
+        this.dateUpdated = new Date();
+        this.isActive = insightDTO.getActive();
+    }
 
+    public void updateFromDTO(InsightDTO insightDTO){
+        this.dateUpdated = new Date();
+
+        if(insightDTO.getDenomination() != null){
+            this.denomination = insightDTO.getDenomination();
+        }
+
+        if(insightDTO.getDescription() != null){
+            this.description = insightDTO.getDescription();
+        }
+
+        if(insightDTO.getActive() != null){
+            this.isActive = insightDTO.getActive();
+        }
+    }
+
+    // Getters and setters
     public int getIdentifier() {
         return identifier;
     }
@@ -98,11 +124,19 @@ public class Insight {
         this.dateUpdated = dateUpdated;
     }
 
-    public boolean isActive() {
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+    public Boolean getActive() {
         return isActive;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public List<Alert> getAlert() {
+        return alert;
+    }
+
+    public void setAlert(List<Alert> alert) {
+        this.alert = alert;
     }
 }
