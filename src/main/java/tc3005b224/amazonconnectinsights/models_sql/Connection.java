@@ -1,6 +1,9 @@
 package tc3005b224.amazonconnectinsights.models_sql;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import tc3005b224.amazonconnectinsights.dto.connections.ConnectionDTO;
+import tc3005b224.amazonconnectinsights.dto.insights.InsightDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -28,8 +31,37 @@ public class Connection {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    @OneToMany(mappedBy="connection")
+    @OneToMany(mappedBy="connection", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Alert> alerts;
+
+    // Constructors, getters and setters
+    public Connection(){
+        ;
+    }
+    public Connection(ConnectionDTO connectionDTO) {
+        this.denomination = connectionDTO.getDenomination();
+        this.description = connectionDTO.getDescription();
+        this.dateJoined = new Date();
+        this.dateUpdated = new Date();
+        this.isActive = connectionDTO.getActive();
+    }
+
+    public void updateFromDTO(ConnectionDTO connectionDTO){
+        this.dateUpdated = new Date();
+
+        if(connectionDTO.getDenomination() != null){
+            this.denomination = connectionDTO.getDenomination();
+        }
+
+        if(connectionDTO.getDescription() != null){
+            this.description = connectionDTO.getDescription();
+        }
+
+        if(connectionDTO.getActive() != null){
+            this.isActive = connectionDTO.getActive();
+        }
+    }
 
     public int getIdentifier() {
         return identifier;

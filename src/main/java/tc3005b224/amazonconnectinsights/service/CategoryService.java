@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Category;
+import tc3005b224.amazonconnectinsights.models_sql.Connection;
 import tc3005b224.amazonconnectinsights.repository.CategoryRepository;
 
 import java.util.Date;
@@ -16,7 +17,7 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    // Service that looks for a Category, given its id. If the Categoryis not found, returns a null.
+    // Service that looks for a Category, given its id. If the Category is not found, returns a null.
     public Category findById(Short id) {
         Optional<Category> categoryOptional = categoryRepository.findById(id);
 
