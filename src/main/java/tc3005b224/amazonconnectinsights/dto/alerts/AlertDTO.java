@@ -11,16 +11,11 @@ public class AlertDTO {
 
     private String resource;
 
-    private Date dateRegistered;
-
-    private Date dateUpdated;
-
     private Boolean solved;
 
-    private Date dateTrainingCompleted;
+    private Boolean trainingCompleted;
 
     // Constructors, getters, and setters
-
     public Short getConnectionId() {
         return connectionId;
     }
@@ -53,22 +48,6 @@ public class AlertDTO {
         this.resource = resource;
     }
 
-    public Date getDateRegistered() {
-        return dateRegistered;
-    }
-
-    public void setDateRegistered(Date dateRegistered) {
-        this.dateRegistered = dateRegistered;
-    }
-
-    public Date getDateUpdated() {
-        return dateUpdated;
-    }
-
-    public void setDateUpdated(Date dateUpdated) {
-        this.dateUpdated = dateUpdated;
-    }
-
     public Boolean isSolved() {
         return solved;
     }
@@ -77,12 +56,16 @@ public class AlertDTO {
         this.solved = solved;
     }
 
-    public Date getDateTrainingCompleted() {
-        return dateTrainingCompleted;
+    public Boolean getSolved() {
+        return solved;
     }
 
-    public void setDateTrainingCompleted(Date dateTrainingCompleted) {
-        this.dateTrainingCompleted = dateTrainingCompleted;
+    public Boolean getTrainingCompleted() {
+        return trainingCompleted;
+    }
+
+    public void setTrainingCompleted(Boolean trainingCompleted) {
+        this.trainingCompleted = trainingCompleted;
     }
 }
 

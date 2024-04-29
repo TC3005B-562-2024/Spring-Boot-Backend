@@ -2,6 +2,8 @@ package tc3005b224.amazonconnectinsights.models_sql;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
+import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
 
 import java.util.Date;
 
@@ -38,19 +40,66 @@ public class Alert {
     private Date dateUpdated;
 
     @Column(name = "is_solved")
-    private boolean solved;
+    private Boolean solved;
 
     @Column(name = "date_training_completed")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateTrainingCompleted;
 
     @Column(name = "has_training", insertable = false, updatable = false)
-    private boolean hasTraining;
+    private Boolean hasTraining;
 
     @Column(name = "is_training_completed", insertable = false, updatable = false)
-    private boolean trainingCompleted;
+    private Boolean trainingCompleted;
 
     // Constructors, getters, and setters
+    public Alert() {
+        ;
+    }
+    public Alert(AlertDTO alertDTO, Connection connection, Insight insight, Training training) {
+        this.connection = connection;
+        this.insight = insight;
+        this.training = training;
+        this.resource = alertDTO.getResource();
+        this.dateRegistered = new Date();
+        this.dateUpdated = new Date();
+        this.solved = alertDTO.isSolved();
+        this.trainingCompleted = training != null ? alertDTO.getTrainingCompleted() : null;
+    }
+
+    public void updateFromDTO(AlertDTO alertDTO, Connection connection, Insight insight, Training training){
+        this.dateUpdated = new Date();
+
+        if(connection != null){
+            this.connection = connection;
+        }
+
+        if(insight != null){
+            this.insight = insight;
+        }
+
+        if(training != null){
+            this.training = training;
+        }
+
+        if(alertDTO.getResource() != null){
+            this.resource = alertDTO.getResource();
+        }
+
+        if(alertDTO.isSolved() != null){
+            this.solved = alertDTO.isSolved();
+        }
+
+        if(alertDTO.isSolved() != null){
+            this.solved = alertDTO.isSolved();
+        }
+
+        if(alertDTO.getTrainingCompleted() != null){
+            this.trainingCompleted = alertDTO.getTrainingCompleted();
+            this.dateTrainingCompleted = new Date();
+        }
+    }
+
     public Long getId() {
         return id;
     }
@@ -107,11 +156,11 @@ public class Alert {
         this.dateUpdated = dateUpdated;
     }
 
-    public boolean isSolved() {
+    public Boolean getSolved() {
         return solved;
     }
 
-    public void setSolved(boolean solved) {
+    public void setSolved(Boolean solved) {
         this.solved = solved;
     }
 
@@ -123,19 +172,19 @@ public class Alert {
         this.dateTrainingCompleted = dateTrainingCompleted;
     }
 
-    public boolean isHasTraining() {
+    public Boolean getHasTraining() {
         return hasTraining;
     }
 
-    public void setHasTraining(boolean hasTraining) {
+    public void setHasTraining(Boolean hasTraining) {
         this.hasTraining = hasTraining;
     }
 
-    public boolean isTrainingCompleted() {
+    public Boolean getTrainingCompleted() {
         return trainingCompleted;
     }
 
-    public void setTrainingCompleted(boolean trainingCompleted) {
+    public void setTrainingCompleted(Boolean trainingCompleted) {
         this.trainingCompleted = trainingCompleted;
     }
 }

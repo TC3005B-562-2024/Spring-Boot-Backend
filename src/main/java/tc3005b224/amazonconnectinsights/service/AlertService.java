@@ -90,28 +90,16 @@ public class AlertService {
     }
 
     // Method that gets an AlertDTO as an input and returns an instance of an Alert.
-    public Alert fromDTO(AlertDTO dto) {
+    public Alert fromDTO(AlertDTO alertDTO) {
 
-        Connection connection = connectionRepository.findById(dto.getConnectionId())
-                .orElseThrow(() -> new IllegalArgumentException("Connection not found with ID: " + dto.getConnectionId()));
-        Insight insight = insightRepository.findById(dto.getInsightId())
-                .orElseThrow(() -> new IllegalArgumentException("Insight not found with ID: " + dto.getInsightId()));
-        Training training = dto.getTrainingId() != null ? trainingRepository.findById(dto.getTrainingId())
-                .orElseThrow(() -> new IllegalArgumentException("Training not found with ID: " + dto.getTrainingId())) : null;
+        Connection connection = connectionRepository.findById(alertDTO.getConnectionId())
+                .orElseThrow(() -> new IllegalArgumentException("Connection not found with ID: " + alertDTO.getConnectionId()));
+        Insight insight = insightRepository.findById(alertDTO.getInsightId())
+                .orElseThrow(() -> new IllegalArgumentException("Insight not found with ID: " + alertDTO.getInsightId()));
+        Training training = alertDTO.getTrainingId() != null ? trainingRepository.findById(alertDTO.getTrainingId())
+                .orElseThrow(() -> new IllegalArgumentException("Training not found with ID: " + alertDTO.getTrainingId())) : null;
 
-        Alert alert = new Alert();
-        alert.setConnection(connection);
-        alert.setInsight(insight);
-        alert.setTraining(training);
-        alert.setResource(dto.getResource());
-        alert.setDateRegistered(dto.getDateRegistered());
-        alert.setDateUpdated(dto.getDateUpdated());
-        alert.setSolved(dto.isSolved());
-        alert.setDateTrainingCompleted(dto.getDateTrainingCompleted());
-        alert.setHasTraining(dto.getTrainingId() != null);
-        alert.setTrainingCompleted(dto.getDateTrainingCompleted() != null);
-
-        return alert;
+        return new Alert(alertDTO, connection, insight, training);
     }
 
     // Method that stores a new alert to the database.
@@ -120,46 +108,29 @@ public class AlertService {
     }
 
     // Method that gets an AlertDTO and an Alert as an input, updating only the AlertDTO attributes that are null.
-    public Alert updateAlert(Alert oldAlert, AlertDTO dto) {
-        if(dto.getConnectionId() != null){
-            Connection connection = connectionRepository.findById(dto.getConnectionId())
-                    .orElseThrow(() -> new IllegalArgumentException("Connection not found with ID: " + dto.getConnectionId()));
-            oldAlert.setConnection(connection);
+    public Alert updateAlert(Alert alert, AlertDTO alertDTO) {
+        Connection connection = null;
+        Insight insight = null;
+        Training training = null;
+
+        if(alertDTO.getConnectionId() != null){
+            connection = connectionRepository.findById(alertDTO.getConnectionId())
+                    .orElseThrow(() -> new IllegalArgumentException("Connection not found with ID: " + alertDTO.getConnectionId()));
         }
 
-        if(dto.getInsightId() != null){
-            Insight insight = insightRepository.findById(dto.getInsightId())
-                    .orElseThrow(() -> new IllegalArgumentException("Insight not found with ID: " + dto.getInsightId()));
-            oldAlert.setInsight(insight);
+        if(alertDTO.getInsightId() != null){
+            insight = insightRepository.findById(alertDTO.getInsightId())
+                    .orElseThrow(() -> new IllegalArgumentException("Insight not found with ID: " + alertDTO.getInsightId()));
         }
 
-        if(dto.getTrainingId() != null){
-            Training training = trainingRepository.findById(dto.getTrainingId())
-                    .orElseThrow(() -> new IllegalArgumentException("Training not found with ID: " + dto.getTrainingId()));
-            oldAlert.setTraining(training);
+        if(alertDTO.getTrainingId() != null){
+            training = trainingRepository.findById(alertDTO.getTrainingId())
+                    .orElseThrow(() -> new IllegalArgumentException("Training not found with ID: " + alertDTO.getTrainingId()));
         }
 
-        if(dto.getResource() != null){
-            oldAlert.setResource(dto.getResource());
-        }
+        alert.updateFromDTO(alertDTO, connection, insight, training);
 
-        if(dto.getDateRegistered() != null){
-            oldAlert.setDateRegistered(dto.getDateRegistered());
-        }
-
-        if(dto.getDateUpdated() != null){
-            oldAlert.setDateRegistered(dto.getDateUpdated());
-        }
-
-        if(dto.isSolved() != null){
-            oldAlert.setSolved(dto.isSolved());
-        }
-
-        if(dto.getDateTrainingCompleted() != null){
-            oldAlert.setDateTrainingCompleted(dto.getDateTrainingCompleted());
-        }
-
-        return oldAlert;
+        return alert;
     }
 
     // Service that checks if the alert exists, if id does deletes it, otherwise raises an exception.
