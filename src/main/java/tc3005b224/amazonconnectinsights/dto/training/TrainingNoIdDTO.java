@@ -20,9 +20,8 @@ import tc3005b224.amazonconnectinsights.models_sql.Alert;
 @AllArgsConstructor
 @Getter
 @Setter
-public class TrainingDTO {
+public class TrainingNoIdDTO {
 
-    private Short identifier;
     private String denomination;
     private String description;
     private Date dateRegistered;
