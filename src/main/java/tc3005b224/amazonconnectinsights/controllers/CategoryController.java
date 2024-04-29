@@ -6,11 +6,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Category;
 import tc3005b224.amazonconnectinsights.service.CategoryService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
