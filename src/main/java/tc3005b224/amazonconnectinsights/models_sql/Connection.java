@@ -1,12 +1,13 @@
 package tc3005b224.amazonconnectinsights.models_sql;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "Connection")
+@Table(name = "connection")
 public class Connection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +30,7 @@ public class Connection {
     private boolean isActive;
 
     @OneToMany(mappedBy="connection")
+    @JsonIgnore
     private List<Alert> alerts;
 
     public int getIdentifier() {
