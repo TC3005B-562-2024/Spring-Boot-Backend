@@ -58,6 +58,7 @@ public class Insight {
         this.dateRegistered = new Date();
         this.dateUpdated = new Date();
         this.isActive = insightDTO.getActive();
+    }
 
     public void updateFromDTO(InsightDTO insightDTO){
         this.dateUpdated = new Date();
