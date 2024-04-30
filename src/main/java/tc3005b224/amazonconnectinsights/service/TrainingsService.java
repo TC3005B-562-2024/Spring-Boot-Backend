@@ -118,7 +118,7 @@ public class TrainingsService extends BaseService {
                     denominationsFilterValues.get()));
         // Filters: isActive, resourceArn
         } else if (activeFilterValue.isPresent() && resourceArnsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByIsActiveAndAlertsResourceArnIn(
+            return convertToListDTO(trainingRepository.findByIsActiveAndAlertsResourceIn(
                     activeFilterValue.get(),
                     resourceArnsFilterValues.get()));
         // Filters: isActive
@@ -140,7 +140,7 @@ public class TrainingsService extends BaseService {
                     denominationsFilterValues.get()));
         // Filters: resourceArn
         } else if (resourceArnsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByAlertsResourceArnIn(
+            return convertToListDTO(trainingRepository.findByAlertsResourceIn(
                     resourceArnsFilterValues.get()));
         } else {
             throw new BadRequestException("Invalid filters");

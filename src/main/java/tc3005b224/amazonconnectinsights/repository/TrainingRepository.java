@@ -8,8 +8,6 @@ import tc3005b224.amazonconnectinsights.models_sql.Training;
 
 /**
  * Repository for Training entity
- * 
- * TODO: Change Long to the actual type of the identifier
  */
 @Repository
 public interface TrainingRepository extends CrudRepository<Training, Short> {
@@ -20,7 +18,7 @@ public interface TrainingRepository extends CrudRepository<Training, Short> {
 
     Iterable<Training> findByIsActiveAndDenominationIn(boolean active, Iterable<String> denominations);
 
-    Iterable<Training> findByIsActiveAndAlertsResourceArnIn(boolean active, Iterable<String> resourceArns);
+    Iterable<Training> findByIsActiveAndAlertsResourceIn(boolean active, Iterable<String> resourceArns);
 
     Iterable<Training> findByIsActive(boolean active);
 
@@ -30,5 +28,5 @@ public interface TrainingRepository extends CrudRepository<Training, Short> {
 
     Iterable<Training> findByDenominationIn(Iterable<String> denominations);
     
-    Iterable<Training> findByAlertsResourceArnIn(Iterable<String> resourceArns);
+    Iterable<Training> findByAlertsResourceIn(Iterable<String> resourceArns);
 }

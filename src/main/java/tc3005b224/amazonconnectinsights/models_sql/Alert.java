@@ -1,58 +1,111 @@
 package tc3005b224.amazonconnectinsights.models_sql;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
+import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
+
 import java.util.Date;
 
 @Entity
 @Table(name = "alert")
 public class Alert {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "identifier")
-    private Long identifier;
+    private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "connection_identifier", nullable = false)
+    @JoinColumn(name = "connection_identifier")
     private Connection connection;
 
     @ManyToOne
-    @JoinColumn(name = "insight_identifier", nullable = false)
+    @JoinColumn(name = "insight_identifier")
     private Insight insight;
 
     @ManyToOne
-    @JoinColumn(name = "training_identifier", nullable = true)
+    @JoinColumn(name = "training_identifier")
     private Training training;
 
-    @Column(name = "is_solved", nullable = false)
-    private Boolean isSolved = false;
+    @Column(name = "resource")
+    private String resource;
 
-    @Column(name = "date_registered", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "date_registered")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date dateRegistered;
 
-    @Column(name = "date_updated", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "date_updated")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date dateUpdated;
 
-    @Column(name = "resource", nullable = false, length = 100)
-    private String resourceArn;
+    @Column(name = "is_solved")
+    private Boolean solved;
 
-    @Column(name = "date_training_completed", nullable = true, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "date_training_completed")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date dateTrainingCompleted;
 
-    public Date getDateTrainingCompleted() {
-        return dateTrainingCompleted;
+    @Column(name = "has_training", insertable = false, updatable = false)
+    private Boolean hasTraining;
+
+    @Column(name = "is_training_completed", insertable = false, updatable = false)
+    private Boolean trainingCompleted;
+
+    // Constructors, getters, and setters
+    public Alert() {
+        ;
+    }
+    public Alert(AlertDTO alertDTO, Connection connection, Insight insight, Training training) {
+        this.connection = connection;
+        this.insight = insight;
+        this.training = training;
+        this.resource = alertDTO.getResource();
+        this.dateRegistered = new Date();
+        this.dateUpdated = new Date();
+        this.solved = alertDTO.isSolved();
+        this.trainingCompleted = training != null ? alertDTO.getTrainingCompleted() : null;
     }
 
-    public void setDateTrainingCompleted(Date dateTrainingCompleted) {
-        this.dateTrainingCompleted = dateTrainingCompleted;
+    public void updateFromDTO(AlertDTO alertDTO, Connection connection, Insight insight, Training training){
+        this.dateUpdated = new Date();
+
+        if(connection != null){
+            this.connection = connection;
+        }
+
+        if(insight != null){
+            this.insight = insight;
+        }
+
+        if(training != null){
+            this.training = training;
+        }
+
+        if(alertDTO.getResource() != null){
+            this.resource = alertDTO.getResource();
+        }
+
+        if(alertDTO.isSolved() != null){
+            this.solved = alertDTO.isSolved();
+        }
+
+        if(alertDTO.isSolved() != null){
+            this.solved = alertDTO.isSolved();
+        }
+
+        if(alertDTO.getTrainingCompleted() != null){
+            this.trainingCompleted = alertDTO.getTrainingCompleted();
+            this.dateTrainingCompleted = new Date();
+        }
     }
 
-    // Getters & Setters
-    public Long getIdentifier() {
-        return identifier;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdentifier(Long identifier) {
-        this.identifier = identifier;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Connection getConnection() {
@@ -79,12 +132,12 @@ public class Alert {
         this.training = training;
     }
 
-    public Boolean getSolved() {
-        return isSolved;
+    public String getResource() {
+        return resource;
     }
 
-    public void setSolved(Boolean solved) {
-        isSolved = solved;
+    public void setResource(String resource) {
+        this.resource = resource;
     }
 
     public Date getDateRegistered() {
@@ -103,11 +156,36 @@ public class Alert {
         this.dateUpdated = dateUpdated;
     }
 
-    public String getResourceArn() {
-        return resourceArn;
+    public Boolean getSolved() {
+        return solved;
     }
 
-    public void setResourceArn(String resourceArn) {
-        this.resourceArn = resourceArn;
+    public void setSolved(Boolean solved) {
+        this.solved = solved;
+    }
+
+    public Date getDateTrainingCompleted() {
+        return dateTrainingCompleted;
+    }
+
+    public void setDateTrainingCompleted(Date dateTrainingCompleted) {
+        this.dateTrainingCompleted = dateTrainingCompleted;
+    }
+
+    public Boolean getHasTraining() {
+        return hasTraining;
+    }
+
+    public void setHasTraining(Boolean hasTraining) {
+        this.hasTraining = hasTraining;
+    }
+
+    public Boolean getTrainingCompleted() {
+        return trainingCompleted;
+    }
+
+    public void setTrainingCompleted(Boolean trainingCompleted) {
+        this.trainingCompleted = trainingCompleted;
     }
 }
+
