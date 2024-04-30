@@ -7,7 +7,7 @@ public class AlertDTO {
 
     private Short insightId;
 
-    private Long trainingId;
+    private Short trainingId;
 
     private String resource;
 
@@ -32,11 +32,11 @@ public class AlertDTO {
         this.insightId = insightId;
     }
 
-    public Long getTrainingId() {
+    public Short getTrainingId() {
         return trainingId;
     }
 
-    public void setTrainingId(Long trainingId) {
+    public void setTrainingId(Short trainingId) {
         this.trainingId = trainingId;
     }
 
