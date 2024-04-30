@@ -22,7 +22,7 @@ public class Category {
     private String description;
 
     @Column(name = "priority", nullable = false)
-    private Short priority;
+    private int priority;
 
     @Column(name = "date_registered", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private Date dateRegistered;
@@ -103,11 +103,11 @@ public class Category {
         this.description = description;
     }
 
-    public Short getPriority() {
+    public int getPriority() {
         return priority;
     }
 
-    public void setPriority(Short priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
     }
 

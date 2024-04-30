@@ -6,7 +6,6 @@ import tc3005b224.amazonconnectinsights.dto.insights.InsightDTO;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Entity
 @Table(name = "insight")

@@ -3,6 +3,7 @@ package tc3005b224.amazonconnectinsights.models_sql;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -29,6 +30,7 @@ public class Training {
     private boolean isActive;
 
     @OneToMany(mappedBy = "training")
+    @JsonIgnore
     private List<Alert> alerts;
 
     public Short getIdentifier() {
