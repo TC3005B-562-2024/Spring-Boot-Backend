@@ -53,7 +53,9 @@ public class TrainingsService extends BaseService {
 
     public Iterable<TrainingDTO> findAll(List<FilterDTO> filters) throws BadRequestException {
         // Avoid excessive stream operations
-        if (filters.isEmpty()) {
+        if (filters == null) {
+            return convertToListDTO(trainingRepository.findAll());
+        } else if (filters.isEmpty()) {
             return convertToListDTO(trainingRepository.findAll());
         }
 
@@ -93,7 +95,7 @@ public class TrainingsService extends BaseService {
                 .findFirst()
                 .orElse(null));
         Optional<Iterable<String>> resourceArnsFilterValues = Optional.ofNullable(filters.stream()
-                .filter(filter -> filter.getFilterKey().equals("resourceArn"))
+                .filter(filter -> filter.getFilterKey().equals("resource"))
                 .map(filter -> filter.getFilterValues())
                 .findFirst()
                 .orElse(null));
