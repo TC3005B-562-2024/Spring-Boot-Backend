@@ -108,39 +108,39 @@ public class TrainingsService extends BaseService {
                     activeFilterValue.get(),
                     alertsFilterValues.get(),
                     denominationsFilterValues.get()));
-        // Filters: isActive, alerts
+            // Filters: isActive, alerts
         } else if (activeFilterValue.isPresent() && alertsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByIsActiveAndAlerts(
                     activeFilterValue.get(),
                     alertsFilterValues.get()));
-        // Filters: isActive, denomination
+            // Filters: isActive, denomination
         } else if (activeFilterValue.isPresent() && denominationsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByIsActiveAndDenominationIn(
                     activeFilterValue.get(),
                     denominationsFilterValues.get()));
-        // Filters: isActive, resourceArn
+            // Filters: isActive, resourceArn
         } else if (activeFilterValue.isPresent() && resourceArnsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByIsActiveAndAlertsResourceIn(
                     activeFilterValue.get(),
                     resourceArnsFilterValues.get()));
-        // Filters: isActive
+            // Filters: isActive
         } else if (activeFilterValue.isPresent()) {
             return convertToListDTO(trainingRepository.findByIsActive(
                     activeFilterValue.get()));
-        // Filters: alerts, denomination
+            // Filters: alerts, denomination
         } else if (alertsFilterValues.isPresent() && denominationsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByAlertsAndDenominationIn(
                     alertsFilterValues.get(),
                     denominationsFilterValues.get()));
-        // Filters: alerts
+            // Filters: alerts
         } else if (alertsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByAlertsIn(
                     alertsFilterValues.get()));
-        // Filters: denomination
+            // Filters: denomination
         } else if (denominationsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByDenominationIn(
                     denominationsFilterValues.get()));
-        // Filters: resourceArn
+            // Filters: resourceArn
         } else if (resourceArnsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByAlertsResourceIn(
                     resourceArnsFilterValues.get()));
@@ -170,16 +170,13 @@ public class TrainingsService extends BaseService {
         return convertToDTO(trainingOptional);
     }
 
-    public TrainingDTO findById(Short id) {
-        Optional<Training> trainingsOptional = trainingRepository.findById(id);
-
-        if (trainingsOptional.isPresent()) {
-            return convertToDTO(trainingsOptional.get());
-        }
-        return null;
+    public TrainingDTO findById(Short id) throws NotFoundException {
+        return convertToDTO(trainingRepository.findById(id).orElseThrow(
+                () -> new NotFoundException()));
     }
 
-    public void deleteTraining(Short id) {
+    public void deleteTraining(Short id) throws NotFoundException {
+        trainingRepository.findById(id).orElseThrow(() -> new NotFoundException());
         trainingRepository.deleteById(id);
     }
 }
