@@ -1,6 +1,7 @@
 package tc3005b224.amazonconnectinsights.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -8,6 +9,7 @@ import java.util.stream.StreamSupport;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -21,7 +23,7 @@ import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
 
 @Service
 @Transactional
-public class TrainingsService {
+public class TrainingsService extends BaseService {
     @Autowired
     private TrainingRepository trainingRepository;
     @Autowired
@@ -35,10 +37,9 @@ public class TrainingsService {
             Training training = modelMapper.map(trainingDTO, Training.class);
             training.setIdentifier(id);
             return training;
-        
         }
     }
-    
+
     public TrainingDTO convertToDTO(Training training) {
         return modelMapper.map(training, TrainingDTO.class);
     }
@@ -56,10 +57,12 @@ public class TrainingsService {
             return convertToListDTO(trainingRepository.findAll());
         }
 
+        // Limit the number of filters
         if (filters.size() > 3) {
-            throw new IllegalArgumentException("Too many filters");
+            throw new BadRequestException("Too many filters");
         }
 
+        // Extract valid filter values from the list of filters
         Optional<Boolean> activeFilterValue = filters.stream()
                 .filter(filter -> filter.getFilterKey().equals("isActive"))
                 .map(filter -> filter.getFilterValues().get(0))
@@ -89,7 +92,13 @@ public class TrainingsService {
                 .map(filter -> filter.getFilterValues())
                 .findFirst()
                 .orElse(null));
+        Optional<Iterable<String>> resourceArnsFilterValues = Optional.ofNullable(filters.stream()
+                .filter(filter -> filter.getFilterKey().equals("resourceArn"))
+                .map(filter -> filter.getFilterValues())
+                .findFirst()
+                .orElse(null));
 
+        // Filters: isActive, alerts, denomination
         if (activeFilterValue.isPresent() &&
                 alertsFilterValues.isPresent() &&
                 denominationsFilterValues.isPresent()) {
@@ -97,38 +106,69 @@ public class TrainingsService {
                     activeFilterValue.get(),
                     alertsFilterValues.get(),
                     denominationsFilterValues.get()));
+        // Filters: isActive, alerts
         } else if (activeFilterValue.isPresent() && alertsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByIsActiveAndAlerts(
                     activeFilterValue.get(),
                     alertsFilterValues.get()));
+        // Filters: isActive, denomination
         } else if (activeFilterValue.isPresent() && denominationsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByIsActiveAndDenominationIn(
                     activeFilterValue.get(),
                     denominationsFilterValues.get()));
+        // Filters: isActive, resourceArn
+        } else if (activeFilterValue.isPresent() && resourceArnsFilterValues.isPresent()) {
+            return convertToListDTO(trainingRepository.findByIsActiveAndAlertsResourceArnIn(
+                    activeFilterValue.get(),
+                    resourceArnsFilterValues.get()));
+        // Filters: isActive
         } else if (activeFilterValue.isPresent()) {
             return convertToListDTO(trainingRepository.findByIsActive(
                     activeFilterValue.get()));
+        // Filters: alerts, denomination
         } else if (alertsFilterValues.isPresent() && denominationsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByAlertsAndDenominationIn(
                     alertsFilterValues.get(),
                     denominationsFilterValues.get()));
+        // Filters: alerts
         } else if (alertsFilterValues.isPresent()) {
-            System.out.println("Alerts filter values: " + alertsFilterValues.get());
             return convertToListDTO(trainingRepository.findByAlertsIn(
                     alertsFilterValues.get()));
+        // Filters: denomination
         } else if (denominationsFilterValues.isPresent()) {
             return convertToListDTO(trainingRepository.findByDenominationIn(
                     denominationsFilterValues.get()));
+        // Filters: resourceArn
+        } else if (resourceArnsFilterValues.isPresent()) {
+            return convertToListDTO(trainingRepository.findByAlertsResourceArnIn(
+                    resourceArnsFilterValues.get()));
         } else {
             throw new BadRequestException("Invalid filters");
         }
     }
 
-    public TrainingDTO saveTraining(Short id, TrainingNoIdDTO newTraining) {
-        return convertToDTO(trainingRepository.save(convertToEntity(newTraining, id)));
+    public TrainingDTO saveTraining(TrainingNoIdDTO newTraining) {
+        return convertToDTO(trainingRepository.save(convertToEntity(newTraining, null)));
     }
 
-    public TrainingDTO findById(Long id) {
+    public TrainingDTO updateTraining(Short id, Map<String, Object> fieldsToUpdate)
+            throws NotFoundException, BadRequestException {
+        // Check if the identifier field is present
+        try {
+            fieldsHasId(fieldsToUpdate);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("The identifier field cannot be modified");
+        }
+        // Look for the training entity
+        Training trainingOptional = trainingRepository.findById(id).orElseThrow(
+                () -> new NotFoundException());
+        // Update the training entity
+        mapValuesToEntity(fieldsToUpdate, trainingOptional);
+        trainingRepository.save(trainingOptional);
+        return convertToDTO(trainingOptional);
+    }
+
+    public TrainingDTO findById(Short id) {
         Optional<Training> trainingsOptional = trainingRepository.findById(id);
 
         if (trainingsOptional.isPresent()) {
@@ -137,7 +177,7 @@ public class TrainingsService {
         return null;
     }
 
-    public void deleteTraining(Long id) {
+    public void deleteTraining(Short id) {
         trainingRepository.deleteById(id);
     }
 }

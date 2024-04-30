@@ -1,16 +1,18 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,6 +59,7 @@ public class TrainingController {
                 try {
                         return ResponseEntity.ok(trainingService.findAll(filters));
                 } catch (Exception e) {
+                        e.printStackTrace();
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
                 }
         }
@@ -79,7 +82,7 @@ public class TrainingController {
         })
         @Operation(summary = "Get the training data by its id")
         @GetMapping("{trainingId}")
-        public ResponseEntity<TrainingDTO> getTrainingData(@PathVariable("trainingId") Long trainingId) {
+        public ResponseEntity<TrainingDTO> getTrainingData(@PathVariable("trainingId") Short trainingId) {
                 return ResponseEntity.ok(trainingService.findById(trainingId));
         }
 
@@ -101,7 +104,7 @@ public class TrainingController {
         })
         @PostMapping("/create")
         public ResponseEntity<TrainingDTO> saveTrainingData(@RequestBody TrainingNoIdDTO newTraining) {
-                return ResponseEntity.ok(trainingService.saveTraining(null, newTraining));
+                return ResponseEntity.ok(trainingService.saveTraining(newTraining));
         }
 
         /**
@@ -110,6 +113,8 @@ public class TrainingController {
          * @param trainingId
          * @return
          * @author Diego Jacobo Djmr5
+         * @throws NotFoundException
+         * @throws BadRequestException 
          * @see TrainingDTO
          */
         @Operation(summary = "Update a training data by its id", responses = {
@@ -120,10 +125,10 @@ public class TrainingController {
                         @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
                         @ApiResponse(responseCode = "503", description = "Couldn't connect to Database", content = @Content),
         })
-        @PutMapping("{trainingId}")
+        @PatchMapping("{trainingId}")
         public ResponseEntity<TrainingDTO> updateTrainingData(@PathVariable("trainingId") Short trainingId,
-                        @RequestBody TrainingNoIdDTO newTraining) {
-                return ResponseEntity.ok(trainingService.saveTraining(trainingId, newTraining));
+                        @RequestBody Map<String, Object> fieldsToUpdate) throws NotFoundException, BadRequestException {
+                return ResponseEntity.ok(trainingService.updateTraining(trainingId, fieldsToUpdate));
         }
 
         /**
@@ -141,7 +146,7 @@ public class TrainingController {
                         @ApiResponse(responseCode = "503", description = "Couldn't connect to Database", content = @Content),
         })
         @DeleteMapping("{trainingId}")
-        public ResponseEntity<Void> deleteTrainingData(@PathVariable("trainingId") Long trainingId) {
+        public ResponseEntity<Void> deleteTrainingData(@PathVariable("trainingId") Short trainingId) {
                 trainingService.deleteTraining(trainingId);
                 return ResponseEntity.noContent().build();
         }
