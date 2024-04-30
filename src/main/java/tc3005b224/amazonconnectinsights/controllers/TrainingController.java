@@ -70,6 +70,7 @@ public class TrainingController {
          * @param trainingId
          * @return TrainingDTO
          * @author Diego Jacobo Djmr5
+         * @throws NotFoundException 
          * @see TrainingDTO
          */
         @ApiResponses(value = {
@@ -82,8 +83,12 @@ public class TrainingController {
         })
         @Operation(summary = "Get the training data by its id")
         @GetMapping("{trainingId}")
-        public ResponseEntity<TrainingDTO> getTrainingData(@PathVariable("trainingId") Short trainingId) {
-                return ResponseEntity.ok(trainingService.findById(trainingId));
+        public ResponseEntity<TrainingDTO> getTrainingData(@PathVariable("trainingId") Short trainingId) throws NotFoundException {
+                try {
+                        return ResponseEntity.ok(trainingService.findById(trainingId));
+                } catch (NotFoundException e) {
+                        return ResponseEntity.notFound().build();
+                }
         }
 
         /**
@@ -114,7 +119,7 @@ public class TrainingController {
          * @return
          * @author Diego Jacobo Djmr5
          * @throws NotFoundException
-         * @throws BadRequestException 
+         * @throws BadRequestException
          * @see TrainingDTO
          */
         @Operation(summary = "Update a training data by its id", responses = {
@@ -126,9 +131,17 @@ public class TrainingController {
                         @ApiResponse(responseCode = "503", description = "Couldn't connect to Database", content = @Content),
         })
         @PatchMapping("{trainingId}")
-        public ResponseEntity<TrainingDTO> updateTrainingData(@PathVariable("trainingId") Short trainingId,
+        public ResponseEntity<?> updateTrainingData(@PathVariable("trainingId") Short trainingId,
                         @RequestBody Map<String, Object> fieldsToUpdate) throws NotFoundException, BadRequestException {
-                return ResponseEntity.ok(trainingService.updateTraining(trainingId, fieldsToUpdate));
+                try {
+                        return ResponseEntity.ok(trainingService.updateTraining(trainingId, fieldsToUpdate));
+                } catch (NotFoundException e) {
+                        return ResponseEntity.notFound().build();
+                } catch (BadRequestException e) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+                } catch (Exception e) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+                }
         }
 
         /**
@@ -147,7 +160,12 @@ public class TrainingController {
         })
         @DeleteMapping("{trainingId}")
         public ResponseEntity<Void> deleteTrainingData(@PathVariable("trainingId") Short trainingId) {
-                trainingService.deleteTraining(trainingId);
-                return ResponseEntity.noContent().build();
+                try {
+                        trainingService.deleteTraining(trainingId);
+                        return ResponseEntity.noContent().build();
+                } catch (NotFoundException e) {
+                        e.printStackTrace();
+                        return ResponseEntity.notFound().build();
+                }
         }
 }
