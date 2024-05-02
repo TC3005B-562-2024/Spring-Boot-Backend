@@ -2,13 +2,22 @@ name: Spring Boot Build and Test
 
 on:
   push:
-    branches: [ main ]
+    branches:
+    - main
+    - dev
   pull_request:
-    branches: [ main ]
+    branches:
+    - main
+    - dev
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    env:
+      DB_URL: ${{ secrets.DB_URL }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v3

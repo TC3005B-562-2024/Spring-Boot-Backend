@@ -1,79 +1,81 @@
 package tc3005b224.amazonconnectinsights.dto.alerts;
 
+import java.util.Date;
+
 public class AlertDTO {
-    private String id;
-    private  String description;
-    private String priority;
-    private String agentId;
-    private String skillId;
-    private String queueId;
-    private String contactId;
+    private Short connectionId;
 
-    public AlertDTO() {}
+    private Short insightId;
 
-    public AlertDTO(String id, String description, String priority, String agentId, String skillId, String queueId, String contactId) {
-        this.id = id;
-        this.description = description;
-        this.priority = priority;
-        this.agentId = agentId;
-        this.skillId = skillId;
-        this.queueId = queueId;
-        this.contactId = contactId;
+    private Short trainingId;
+
+    private String resource;
+
+    private Boolean solved;
+
+    private Boolean trainingCompleted;
+
+    // Constructors, getters, and setters
+
+    public AlertDTO(Short connectionId, Short insightId, Short trainingId, String resource, Boolean solved, Boolean trainingCompleted) {
+        this.connectionId = connectionId;
+        this.insightId = insightId;
+        this.trainingId = trainingId;
+        this.resource = resource;
+        this.solved = solved;
+        this.trainingCompleted = trainingCompleted;
     }
 
-    public String getId() {
-        return id;
+    public Short getConnectionId() {
+        return connectionId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setConnectionId(Short connectionId) {
+        this.connectionId = connectionId;
     }
 
-    public String getDescription() {
-        return description;
+    public Short getInsightId() {
+        return insightId;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setInsightId(Short insightId) {
+        this.insightId = insightId;
     }
 
-    public String getPriority() {
-        return priority;
+    public Short getTrainingId() {
+        return trainingId;
     }
 
-    public void setPriority(String priority) {
-        this.priority = priority;
+    public void setTrainingId(Short trainingId) {
+        this.trainingId = trainingId;
     }
 
-    public String getAgentId() {
-        return agentId;
+    public String getResource() {
+        return resource;
     }
 
-    public void setAgentId(String agentId) {
-        this.agentId = agentId;
+    public void setResource(String resource) {
+        this.resource = resource;
     }
 
-    public String getSkillId() {
-        return skillId;
+    public Boolean isSolved() {
+        return solved;
     }
 
-    public void setSkillId(String skillId) {
-        this.skillId = skillId;
+    public void setSolved(Boolean solved) {
+        this.solved = solved;
     }
 
-    public String getQueueId() {
-        return queueId;
+    public Boolean getSolved() {
+        return solved;
     }
 
-    public void setQueueId(String queueId) {
-        this.queueId = queueId;
+    public Boolean getTrainingCompleted() {
+        return trainingCompleted;
     }
 
-    public String getContactId() {
-        return contactId;
-    }
-
-    public void setContactId(String contactId) {
-        this.contactId = contactId;
+    public void setTrainingCompleted(Boolean trainingCompleted) {
+        this.trainingCompleted = trainingCompleted;
     }
 }
+

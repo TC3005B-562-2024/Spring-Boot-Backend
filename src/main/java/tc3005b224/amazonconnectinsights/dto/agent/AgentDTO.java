@@ -1,41 +1,34 @@
 package tc3005b224.amazonconnectinsights.dto.agent;
 
-import java.util.Date;
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
+import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
+import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
+import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
+import tc3005b224.amazonconnectinsights.dto.training.TrainingDTO;
 
 public class AgentDTO {
     // -- ATTRIBUTES
-    private String arn;
     private String id;
-    private IdentityInfoDTO identityInfo;
-    private String routingProfileId;
-    private String username;
-    private String agentContactState;
-    private String agentPauseDurationInSeconds;
-    private Date connectedToAgentTimestamp;
+    private String resource;
+    private Iterable<SkillBriefDTO> skills;
+    private AgentInformationDTO agentInformationDTO;
+    private ContactInformationDTO contactInformationDTO;
+    private AlertPriorityDTO alertPriorityDTO;
+    private Iterable<TrainingDTO> trainings;
 
-    // -- METHODS
-    // Constructor Method
-    public AgentDTO(String arn, String id, IdentityInfoDTO identityInfo, String routingProfileId, String username, String agentContactState, String agentPauseDurationInSeconds, Date connectedToAgentTimestamp) {
-        this.arn = arn;
+    // -- CONSTRUCTOR
+
+    public AgentDTO(String id, String resource, Iterable<SkillBriefDTO> skills, AgentInformationDTO agentInformationDTO, ContactInformationDTO contactInformationDTO, AlertPriorityDTO alertPriorityDTO, Iterable<TrainingDTO> trainings) {
         this.id = id;
-        this.identityInfo = identityInfo;
-        this.routingProfileId = routingProfileId;
-        this.username = username;
-        this.agentContactState = agentContactState;
-        this.agentPauseDurationInSeconds = agentPauseDurationInSeconds;
-        this.connectedToAgentTimestamp = connectedToAgentTimestamp;
-
+        this.resource = resource;
+        this.skills = skills;
+        this.agentInformationDTO = agentInformationDTO;
+        this.contactInformationDTO = contactInformationDTO;
+        this.alertPriorityDTO = alertPriorityDTO;
+        this.trainings = trainings;
     }
 
-    // Getters and Setters
-    public String getArn() {
-        return arn;
-    }
-
-    public void setArn(String arn) {
-        this.arn = arn;
-    }
-
+    // -- GETTERS & SETTERS
     public String getId() {
         return id;
     }
@@ -44,52 +37,51 @@ public class AgentDTO {
         this.id = id;
     }
 
-    public IdentityInfoDTO getIdentityInfo() {
-        return identityInfo;
+    public String getResource() {
+        return resource;
     }
 
-    public void setIdentityInfo(IdentityInfoDTO identityInfo) {
-        this.identityInfo = identityInfo;
+    public void setResource(String resource) {
+        this.resource = resource;
     }
 
-    public String getRoutingProfileId() {
-        return routingProfileId;
+    public Iterable<SkillBriefDTO> getSkills() {
+        return skills;
     }
 
-    public void setRoutingProfileId(String routingProfileId) {
-        this.routingProfileId = routingProfileId;
+    public void setSkills(Iterable<SkillBriefDTO> skills) {
+        this.skills = skills;
     }
 
-    public String getUsername() {
-        return username;
+    public AgentInformationDTO getAgentInformationDTO() {
+        return agentInformationDTO;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAgentInformationDTO(AgentInformationDTO agentInformationDTO) {
+        this.agentInformationDTO = agentInformationDTO;
     }
 
-    public String getAgentContactState() {
-        return agentContactState;
+    public ContactInformationDTO getContactInformationDTO() {
+        return contactInformationDTO;
     }
 
-    public void setAgentContactState(String agentContactState) {
-        this.agentContactState = agentContactState;
+    public void setContactInformationDTO(ContactInformationDTO contactInformationDTO) {
+        this.contactInformationDTO = contactInformationDTO;
     }
 
-    public String getAgentPauseDurationInSeconds() {
-        return agentPauseDurationInSeconds;
+    public AlertPriorityDTO getAlertPriorityDTO() {
+        return alertPriorityDTO;
     }
 
-    public void setAgentPauseDurationInSeconds(String agentPauseDurationInSeconds) {
-        this.agentPauseDurationInSeconds = agentPauseDurationInSeconds;
+    public void setAlertPriorityDTO(AlertPriorityDTO alertPriorityDTO) {
+        this.alertPriorityDTO = alertPriorityDTO;
     }
 
-    public Date getConnectedToAgentTimestamp() {
-        return connectedToAgentTimestamp;
+    public Iterable<TrainingDTO> getTrainings() {
+        return trainings;
     }
 
-    public void setConnectedToAgentTimestamp(Date connectedToAgentTimestamp) {
-        this.connectedToAgentTimestamp = connectedToAgentTimestamp;
+    public void setTrainings(Iterable<TrainingDTO> trainings) {
+        this.trainings = trainings;
     }
-
 }
