@@ -9,6 +9,11 @@ jobs:
   build-and-deploy:
       runs-on: ubuntu-latest
 
+      env:
+        DB_URL: ${{ secrets.DB_URL }}
+        DB_USERNAME: ${{ secrets.DB_USERNAME }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
       steps:
       -
         name: Login to GCR
