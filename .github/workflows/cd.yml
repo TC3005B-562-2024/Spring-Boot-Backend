@@ -9,11 +9,6 @@ jobs:
   build-and-deploy:
       runs-on: ubuntu-latest
 
-      env:
-        DB_URL: ${{ secrets.DB_URL }}
-        DB_USERNAME: ${{ secrets.DB_USERNAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-
       steps:
       -
         name: Login to GCR
@@ -59,6 +54,7 @@ jobs:
         run: |
           gcloud run deploy ${{ secrets.REP_IMG_NAME }} \
             --image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REP_IMG_NAME }}/${{ secrets.REP_IMG_NAME }} \
+            --update-env-vars DB_URL=${{ secrets.DB_URL }},DB_USERNAME=${{ secrets.DB_USERNAME }},DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
             --platform=managed \
             --port=${{ secrets.PORT }} \
             --region=${{ secrets.GCP_REGION }} \
