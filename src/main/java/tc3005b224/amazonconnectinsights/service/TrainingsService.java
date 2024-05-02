@@ -26,6 +26,7 @@ import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
 public class TrainingsService extends BaseService {
     @Autowired
     private TrainingRepository trainingRepository;
+
     @Autowired
     private AlertRepository alertRepository;
     private final ModelMapper modelMapper = new ModelMapper();

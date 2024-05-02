@@ -6,6 +6,15 @@ public class FilterDTO {
     private String filterKey;
     private List<String> filterValues;
 
+    public FilterDTO() {
+        ;
+    }
+
+    public FilterDTO(String filterKey, List<String> filterValues) {
+        this.filterKey = filterKey;
+        this.filterValues = filterValues;
+    }
+
     public String getFilterKey() {
         return filterKey;
     }

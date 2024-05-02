@@ -174,7 +174,7 @@ public class AlertController {
             }
     )
     @PutMapping("/{alertIdentifier}")
-    public ResponseEntity<?> putAlert(@PathVariable Long alertIdentifier, @RequestBody AlertDTO dto) {
+    public ResponseEntity<?> putAlert(@PathVariable Long alertIdentifier, @RequestBody AlertDTO alertDTO) {
         Alert queriedAlert = alertService.findByIdentifier(alertIdentifier);
 
         // Return error 404 if the alert is not found in the database.
@@ -182,7 +182,7 @@ public class AlertController {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }else{
             try {
-                alertService.saveAlert(alertService.updateAlert(queriedAlert, dto));
+                alertService.updateAlert(alertIdentifier, alertDTO);
                 return ResponseEntity.ok("Alert upated successfully");
             }
             catch(Exception e) {
@@ -218,6 +218,56 @@ public class AlertController {
         try {
             alertService.deleteById(alertIdentifier);
             return ResponseEntity.ok("Alert deleted successfully");
+        }
+        catch(Exception e) {
+            // Return error 404 if there is an exception.
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Ignores an alert by logically deleting it (sets isSolevd to false).",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Alert ignored successfully."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Invalid alertIdentifier."
+                    ),
+            }
+    )
+    @GetMapping("/{alertIdentifier}/ignore")
+    public ResponseEntity<?> ignoreAlert(@PathVariable Long alertIdentifier){
+        try {
+            alertService.ignoreById(alertIdentifier);
+            return ResponseEntity.ok("Alert ignored successfully.");
+        }
+        catch(Exception e) {
+            // Return error 404 if there is an exception.
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Executes the action especified by the insight and the, ignores the alert.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Alert accepted successfully."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Invalid alertIdentifier."
+                    ),
+            }
+    )
+    @GetMapping("/{alertIdentifier}/accept")
+    public ResponseEntity<?> acceptAlert(@PathVariable Long alertIdentifier){
+        try {
+            String alertInsightCategoryDenomination = alertService.acceptById(alertIdentifier);
+            return ResponseEntity.ok("Alert of type: " + alertInsightCategoryDenomination + ", accepted.");
         }
         catch(Exception e) {
             // Return error 404 if there is an exception.
