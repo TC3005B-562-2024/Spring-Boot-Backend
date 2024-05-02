@@ -238,7 +238,7 @@ public class AlertController {
                     ),
             }
     )
-    @GetMapping("/{alertIdentifier}/ignore")
+    @PostMapping("/{alertIdentifier}/ignore")
     public ResponseEntity<?> ignoreAlert(@PathVariable Long alertIdentifier){
         try {
             alertService.ignoreById(alertIdentifier);
@@ -263,7 +263,7 @@ public class AlertController {
                     ),
             }
     )
-    @GetMapping("/{alertIdentifier}/accept")
+    @PostMapping("/{alertIdentifier}/accept")
     public ResponseEntity<?> acceptAlert(@PathVariable Long alertIdentifier){
         try {
             String alertInsightCategoryDenomination = alertService.acceptById(alertIdentifier);
