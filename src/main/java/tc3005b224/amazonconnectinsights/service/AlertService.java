@@ -108,7 +108,9 @@ public class AlertService {
     }
 
     // Method that gets an AlertDTO and an Alert as an input, updating only the AlertDTO attributes that are null.
-    public Alert updateAlert(Alert alert, AlertDTO alertDTO) {
+    public void updateAlert(Long alertIdentifier, AlertDTO alertDTO) {
+        Alert queriedAlert = this.findByIdentifier(alertIdentifier);
+
         Connection connection = null;
         Insight insight = null;
         Training training = null;
@@ -128,14 +130,33 @@ public class AlertService {
                     .orElseThrow(() -> new IllegalArgumentException("Training not found with ID: " + alertDTO.getTrainingId()));
         }
 
-        alert.updateFromDTO(alertDTO, connection, insight, training);
+        queriedAlert.updateFromDTO(alertDTO, connection, insight, training);
 
-        return alert;
+        this.saveAlert(queriedAlert);
     }
 
     // Service that checks if the alert exists, if id does deletes it, otherwise raises an exception.
     public void deleteById(Long id) {
         alertRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Alert not found!"));
         alertRepository.deleteById(id);
+    }
+
+    // Service that ignores (deletes logically) an alert.
+    public void ignoreById(Long id) {
+        AlertDTO alertDTO = new AlertDTO(null, null, null, null, true, null);
+        this.updateAlert(id, alertDTO);
+    }
+
+    // Service that accepts an alert and executes a series of functions so that
+    // the insight of that alert is followed.
+    public String acceptById(Long id) {
+        // TODO: If category = Training, save training to DB.
+        // TODO: If category = Intervene, barge into call.
+        // TODO: If category = Transfer, move agent to the desired resurce.
+
+        Alert alert = alertRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Alert not found!"));
+        String alertInsightCategoryDenomination = alert.getInsight().getCategory().getDenomination();
+        this.ignoreById(id);
+        return alertInsightCategoryDenomination;
     }
 }
