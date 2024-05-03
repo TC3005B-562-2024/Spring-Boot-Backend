@@ -1,7 +1,5 @@
 package tc3005b224.amazonconnectinsights.dto.alerts;
 
-import java.util.Date;
-
 public class AlertDTO {
     private Short connectionId;
 
