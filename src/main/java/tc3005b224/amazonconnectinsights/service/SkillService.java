@@ -1,11 +1,12 @@
 package tc3005b224.amazonconnectinsights.service;
 
-import org.springframework.stereotype.Service;
-import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import org.springframework.stereotype.Service;
+
+import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
 
 @Service
 public class SkillService {
@@ -15,7 +16,7 @@ public class SkillService {
 
         // Mock Skills
         SkillBriefDTO serviceSkill = new SkillBriefDTO("1", "routing-profile:1", "Service", "phone_in_talk");
-        SkillBriefDTO salesSkill = new SkillBriefDTO("2", "routing-profile:2", "Sales", "phone_in_talk");
+        SkillBriefDTO salesSkill = new SkillBriefDTO("2", "routing-profile:2", "SalesO", "phone_in_talk");
         SkillBriefDTO supportSkill = new SkillBriefDTO("3", "routing-profile:3", "Support", "phone_in_talk");
         SkillBriefDTO qualitySkill = new SkillBriefDTO("4", "routing-profile:4", "Quality", "phone_in_talk");
 

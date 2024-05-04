@@ -1,10 +1,18 @@
 package tc3005b224.amazonconnectinsights.models_sql;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
-
 import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
 
 @Entity
 @Table(name = "category")

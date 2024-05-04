@@ -1,9 +1,4 @@
 package tc3005b224.amazonconnectinsights.dto.insights;
-import java.util.Date;
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 public class InsightDTO {
     private short categoryIdentifier;

@@ -1,6 +1,7 @@
 package tc3005b224.amazonconnectinsights.dto.skill;
-import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import java.util.List;
+
+import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 
 public class SkillDTO {
     private int skill_id;
