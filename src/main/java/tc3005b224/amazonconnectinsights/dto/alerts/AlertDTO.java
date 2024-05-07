@@ -14,7 +14,6 @@ public class AlertDTO {
     private Boolean trainingCompleted;
 
     // Constructors, getters, and setters
-
     public AlertDTO(Short connectionId, Short insightId, Short trainingId, String resource, Boolean solved, Boolean trainingCompleted) {
         this.connectionId = connectionId;
         this.insightId = insightId;
