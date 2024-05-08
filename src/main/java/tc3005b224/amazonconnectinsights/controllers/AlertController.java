@@ -28,7 +28,6 @@ public class AlertController {
     @Autowired
     private AlertService alertService;
 
-
     @Operation(
             summary = "Returns an AlertPriorityDTO, which has multiple lists of alerts ordered by priority.",
             responses = {
@@ -52,8 +51,8 @@ public class AlertController {
 
     )
     @GetMapping("/connections/{connectionIdentifier}")
-    public ResponseEntity<AlertPriorityDTO> postConnectionAlerts(@PathVariable int connectionIdentifier, @RequestParam(required = false, defaultValue = "") String denominationAlike) {
-        AlertPriorityDTO response = alertService.findAll(connectionIdentifier , denominationAlike);
+    public ResponseEntity<AlertPriorityDTO> postConnectionAlerts(@PathVariable int connectionIdentifier, @RequestParam(required = false, defaultValue = "") String category, @RequestParam(required = false, defaultValue = "") String resource) {
+        AlertPriorityDTO response = alertService.findAll(connectionIdentifier , category, resource);
         return ResponseEntity.ok(response);
     }
 
@@ -93,34 +92,6 @@ public class AlertController {
         }
 
         return ResponseEntity.ok(queriedAlert);
-    }
-
-    @Operation(
-            summary = "Returns an AlertPriorityDTO, which has multiple lists of alerts ordered by priority.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Alerts Found.",
-                            content = {@Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = AlertPriorityDTO.class)
-                            )
-                            }),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal error."
-                    ),
-                    @ApiResponse(
-                            responseCode = "503",
-                            description = "Couldn't connect to database."
-                    ),
-            }
-
-    )
-    @GetMapping("/connections/{connectionIdentifier}/resource/{resourceArn}")
-    public ResponseEntity<AlertPriorityDTO> getResourceAlerts(@PathVariable int connectionIdentifier, @PathVariable String resourceArn) {
-        AlertPriorityDTO response = alertService.findByResource(connectionIdentifier, resourceArn);
-        return ResponseEntity.ok(response);
     }
 
     @Operation(

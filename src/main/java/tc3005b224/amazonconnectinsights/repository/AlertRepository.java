@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AlertRepository extends CrudRepository<Alert, Long>, JpaSpecificationExecutor<Alert> {
-    List<Alert> findByConnectionIdentifierAndSolvedAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(int connectionIdentifier, Boolean solved, int priority, String denomination);
+    List<Alert> findByConnectionIdentifierAndResourceContainingAndSolvedAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(int connectionIdentifier, String resource, Boolean solved, int priority, String denomination);
     Optional<Alert> findById(Long id);
     List<Alert> findByConnectionIdentifierAndResourceAndSolvedAndInsight_Category_Priority(int connectionIdentifier, String resouce, boolean solved, int priority);
 }
