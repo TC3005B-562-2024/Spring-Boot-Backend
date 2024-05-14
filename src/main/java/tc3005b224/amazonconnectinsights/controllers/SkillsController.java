@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
@@ -20,9 +21,9 @@ public class SkillsController {
     private SkillService skillService;
 
     @GetMapping
-    public ResponseEntity<List<SkillBriefDTO>> getAllSkills() {
-        // TODO: Using the token, figure out the instance id of the client.
-        List<SkillBriefDTO> response = skillService.findByInstance("1", 100, "x");
+    public ResponseEntity<List<SkillBriefDTO>> getAllSkills(
+            @RequestParam(required = true) String token) {
+        List<SkillBriefDTO> response = skillService.findByInstance(token);
         return ResponseEntity.ok(response);
     }
 
