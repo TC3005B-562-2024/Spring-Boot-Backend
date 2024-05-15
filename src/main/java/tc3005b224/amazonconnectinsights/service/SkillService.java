@@ -4,15 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import software.amazon.awssdk.services.connect.model.DescribeRoutingProfileRequest;
+import software.amazon.awssdk.services.connect.model.DescribeRoutingProfileResponse;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
+import software.amazon.awssdk.services.connect.model.RoutingProfile;
 import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
+import tc3005b224.amazonconnectinsights.dto.skill.SkillDTO;
+import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
 @Service
 public class SkillService extends BaseService {
+    @Autowired
+    private AlertService alertService;
+    
     // Service that calls amazon connects ListRoutingProfiles and returns a list of SkillBriefDO
     public List<SkillBriefDTO> findByInstance(String token) {
         // Get the client info
@@ -37,6 +47,34 @@ public class SkillService extends BaseService {
         return result;
     }
 
+    // Service that retrieves the Skill (Routing Profile) information given its skillId.
+    public SkillDTO findById(String token, String skillId) {
+        // Get the client info
+        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        DescribeRoutingProfileRequest describeRoutingProfileRequest = DescribeRoutingProfileRequest.builder()
+                .instanceId(clientInfo.getInstanceId())
+                .routingProfileId(skillId)
+                .build();
+        DescribeRoutingProfileResponse describeRoutingProfileResponse = getConnectClient(clientInfo.getAccessKeyId(),
+                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .describeRoutingProfile(describeRoutingProfileRequest);
+        RoutingProfile data = describeRoutingProfileResponse.routingProfile();
+        AlertPriorityDTO alerts = alertService.findByResource(clientInfo.getConnectionIdentifier(), data.routingProfileArn());
+        return new SkillDTO(
+                skillId,
+                data.name(),
+                null,
+                data.numberOfAssociatedUsers(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                alerts,
+                null,
+                null);
+    }
+    
     // Service that retrieves the Skills (Routing Profile) of an agent given its agentId.
     public List<SkillBriefDTO> findByAgentId(String isntanceId, String agentId) throws Exception {
         // TODO: Call Amazon Connect endpoint capable of retrieveng the Skills of an agent.

@@ -8,6 +8,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ReflectionUtils;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.connect.ConnectClient;
@@ -129,6 +133,7 @@ public class BaseService {
     protected ConnectClientInfo getConnectClientInfo(String token) {
         // If token matches, returns data from the database
         return new ConnectClientInfo(
+            1,
             accessKeyId,
             secretAccessKey,
             instanceId,
@@ -136,33 +141,15 @@ public class BaseService {
             );
     }
 
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    @NoArgsConstructor
     protected class ConnectClientInfo {
+        private Integer connectionIdentifier;
         private String accessKeyId;
         private String secretAccessKey;
         private String instanceId;
         private Region region;
-
-        public ConnectClientInfo(String accessKeyId, String secretAccessKey, String instanceId, Region region) {
-            this.accessKeyId = accessKeyId;
-            this.secretAccessKey = secretAccessKey;
-            this.instanceId = instanceId;
-            this.region = region;
-        }
-
-        public String getAccessKeyId() {
-            return accessKeyId;
-        }
-
-        public String getSecretAccessKey() {
-            return secretAccessKey;
-        }
-
-        public String getInstanceId() {
-            return instanceId;
-        }
-
-        public Region getRegion() {
-            return region;
-        }
     }
 }

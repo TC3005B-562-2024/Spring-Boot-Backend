@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
+import tc3005b224.amazonconnectinsights.dto.skill.SkillDTO;
 import tc3005b224.amazonconnectinsights.service.SkillService;
 
 @RestController
@@ -24,6 +25,14 @@ public class SkillsController {
     public ResponseEntity<List<SkillBriefDTO>> getAllSkills(
             @RequestParam(required = true) String token) {
         List<SkillBriefDTO> response = skillService.findByInstance(token);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{skillId}")
+    public ResponseEntity<SkillDTO> getSkillById(
+            @PathVariable String skillId,
+            @RequestParam(required = true) String token) {
+        SkillDTO response = skillService.findById(token, skillId);
         return ResponseEntity.ok(response);
     }
 
