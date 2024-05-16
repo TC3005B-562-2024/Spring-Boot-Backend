@@ -23,15 +23,15 @@ public class InstanceDTO {
     /**
      * Indicates if Contact Lens is enabled in the instance (Sentiment analysis)
      */
-    private boolean contactLensEnabled;
-    private boolean inboundCallsEnable;
-    private boolean outboundCallsEnable;
+    private String contactLensEnabled;
+    private String inboundCallsEnable;
+    private String outboundCallsEnable;
 
     public InstanceDTO() {
     }
 
     public InstanceDTO(String arn, String id, String instanceAlias, String instanceAccessUrl, String instanceStatus,
-            String serviceRole, boolean contactLensEnabled, boolean inboundCallsEnable, boolean outboundCallsEnable) {
+            String serviceRole, String contactLensEnabled, String inboundCallsEnable, String outboundCallsEnable) {
         this.arn = arn;
         this.id = id;
         this.instanceAlias = instanceAlias;
@@ -91,28 +91,16 @@ public class InstanceDTO {
         this.serviceRole = serviceRole;
     }
 
-    public boolean isContactLensEnabled() {
+    public String isContactLensEnabled() {
         return contactLensEnabled;
     }
 
-    public void setContactLensEnabled(boolean contactLensEnabled) {
-        this.contactLensEnabled = contactLensEnabled;
-    }
-
-    public boolean isInboundCallsEnable() {
+    public String isInboundCallsEnable() {
         return inboundCallsEnable;
     }
 
-    public void setInboundCallsEnable(boolean inboundCallsEnable) {
-        this.inboundCallsEnable = inboundCallsEnable;
-    }
-
-    public boolean isOutboundCallsEnable() {
+    public String isOutboundCallsEnable() {
         return outboundCallsEnable;
-    }
-
-    public void setOutboundCallsEnable(boolean outboundCallsEnable) {
-        this.outboundCallsEnable = outboundCallsEnable;
     }
 
 }

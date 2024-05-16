@@ -51,6 +51,9 @@ public class InstanceController {
 
         return ResponseEntity.ok(instance);
     }
+
+    // CONNECTION WITH AWS API ENDPOINT TO RETURN INSTANCE DETAILS
+    @Operation(summary = "Get the Amazon Connect Instance Details")
     @GetMapping
     public ResponseEntity<InstanceDTO> getInstanceData(@RequestParam(required = true) String token) {
         InstanceDTO response = instanceService.getInstanceDetails(token);
