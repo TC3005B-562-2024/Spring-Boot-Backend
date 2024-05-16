@@ -5,7 +5,16 @@ import java.lang.reflect.Field;
 import java.net.URLDecoder;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ReflectionUtils;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.connect.ConnectClient;
 
 /**
  * Base service class with common functionalities that might be used in most
@@ -15,6 +24,19 @@ import org.springframework.util.ReflectionUtils;
  * @author Diego Jacobo Djmr5
  */
 public class BaseService {
+
+    @Value("${aws_accessKeyId}")
+    private String accessKeyId;
+
+    @Value("${aws_secretAccessKey}")
+    private String secretAccessKey;
+
+    @Value("${aws_region}")
+    private String region;
+
+    @Value("${aws_connect_instanceId}")
+    private String instanceId;
+    
     /**
      * Decodes a URL encoded string.
      * 
@@ -74,9 +96,10 @@ public class BaseService {
             throw new IllegalArgumentException("The identifier field cannot be modified");
         }
     }
-    
+
     /**
-     * A function that maps the valid values from the inputted fields parameter to a given Class
+     * A function that maps the valid values from the inputted fields parameter to a
+     * given Class
      * 
      * @param <T>
      * @param fields
@@ -97,5 +120,36 @@ public class BaseService {
             ReflectionUtils.setField(field, entityInstance, convertedValue);
         });
         return entityInstance;
+    }
+
+    protected ConnectClient getConnectClient(String accessKeyId, String secretAccessKey, Region region) {
+        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+        return ConnectClient.builder()
+                .credentialsProvider(() -> awsCreds)
+                .region(region)
+                .build();
+    }
+
+    protected ConnectClientInfo getConnectClientInfo(String token) {
+        // If token matches, returns data from the database
+        return new ConnectClientInfo(
+            1,
+            accessKeyId,
+            secretAccessKey,
+            instanceId,
+            Region.of(region)
+            );
+    }
+
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    protected class ConnectClientInfo {
+        private Integer connectionIdentifier;
+        private String accessKeyId;
+        private String secretAccessKey;
+        private String instanceId;
+        private Region region;
     }
 }

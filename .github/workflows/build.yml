@@ -18,6 +18,10 @@ jobs:
       DB_URL: ${{ secrets.DB_URL }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      aws_accessKeyId: ${{ secrets.AWS_ACCESSKEYID }}
+      aws_secretAccessKey: ${{ secrets.AWS_SECRETACCESSKEY }}
+      aws_region: ${{ secrets.AWS_REGION }}
+      aws_connect_instanceId: ${{ secrets.AWS_CONNECT_INSTANCEID }}
 
     steps:
       - uses: actions/checkout@v3
