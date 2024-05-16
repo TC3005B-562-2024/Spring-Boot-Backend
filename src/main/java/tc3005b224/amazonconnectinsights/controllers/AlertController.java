@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,6 +26,7 @@ import tc3005b224.amazonconnectinsights.service.AlertService;
 
 @RestController
 @RequestMapping("/alerts")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AlertController {
     @Autowired
     private AlertService alertService;

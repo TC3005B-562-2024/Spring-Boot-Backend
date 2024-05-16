@@ -1,9 +1,8 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,10 +10,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import tc3005b224.amazonconnectinsights.dto.instance.InstanceDTO;
+import tc3005b224.amazonconnectinsights.service.InstanceService;
 
 @RestController
 @RequestMapping("/instance")
 public class InstanceController {
+    @Autowired
+    private InstanceService instanceService;
 
     /**
      * Get the Amazon Connect instance data
@@ -48,6 +50,11 @@ public class InstanceController {
                 false);
 
         return ResponseEntity.ok(instance);
+    }
+    @GetMapping
+    public ResponseEntity<InstanceDTO> getInstanceData(@RequestParam(required = true) String token) {
+        InstanceDTO response = instanceService.getInstanceDetails(token);
+        return ResponseEntity.ok(response);
     }
 
 }
