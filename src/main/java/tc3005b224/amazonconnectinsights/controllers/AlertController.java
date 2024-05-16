@@ -3,7 +3,15 @@ package tc3005b224.amazonconnectinsights.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
-import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 import tc3005b224.amazonconnectinsights.service.AlertService;
 
 @RestController
@@ -20,9 +27,6 @@ import tc3005b224.amazonconnectinsights.service.AlertService;
 public class AlertController {
     @Autowired
     private AlertService alertService;
-
-    @Autowired
-    private ConnectionRepository connectionRepository;
 
     @Operation(
             summary = "Returns an AlertPriorityDTO, which has multiple lists of alerts ordered by priority.",
@@ -46,10 +50,16 @@ public class AlertController {
             }
 
     )
-    @GetMapping("/connections/{connectionIdentifier}")
-    public ResponseEntity<AlertPriorityDTO> postConnectionAlerts(@PathVariable int connectionIdentifier, @RequestParam(required = false, defaultValue = "") String denominationAlike) {
-        AlertPriorityDTO response = alertService.findAll(connectionIdentifier , denominationAlike);
-        return ResponseEntity.ok(response);
+    @GetMapping
+    public ResponseEntity<AlertPriorityDTO> postConnectionAlerts(@RequestParam(required = false, defaultValue = "") String category, @RequestParam(required = false, defaultValue = "") String resource, @RequestParam(required = false, defaultValue = "false") String logs) {
+        try {
+            AlertPriorityDTO response = alertService.findAll(1 , category, resource, logs);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e) {
+            // Return error 404 if there is an exception.
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
     }
 
     @Operation(
@@ -88,34 +98,6 @@ public class AlertController {
         }
 
         return ResponseEntity.ok(queriedAlert);
-    }
-
-    @Operation(
-            summary = "Returns an AlertPriorityDTO, which has multiple lists of alerts ordered by priority.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Alerts Found.",
-                            content = {@Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = AlertPriorityDTO.class)
-                            )
-                            }),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal error."
-                    ),
-                    @ApiResponse(
-                            responseCode = "503",
-                            description = "Couldn't connect to database."
-                    ),
-            }
-
-    )
-    @GetMapping("/connections/{connectionIdentifier}/resource/{resourceArn}")
-    public ResponseEntity<AlertPriorityDTO> getResourceAlerts(@PathVariable int connectionIdentifier, @PathVariable String resourceArn) {
-        AlertPriorityDTO response = alertService.findByResource(connectionIdentifier, resourceArn);
-        return ResponseEntity.ok(response);
     }
 
     @Operation(

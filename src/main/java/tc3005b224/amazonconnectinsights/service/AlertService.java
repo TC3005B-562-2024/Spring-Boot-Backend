@@ -1,8 +1,13 @@
 package tc3005b224.amazonconnectinsights.service;
 
-import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
@@ -13,11 +18,6 @@ import tc3005b224.amazonconnectinsights.repository.AlertRepository;
 import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 import tc3005b224.amazonconnectinsights.repository.InsightRepository;
 import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
-
-import javax.swing.text.html.Option;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -32,13 +32,24 @@ public class AlertService {
     private InsightRepository insightRepository;
 
     // Service that returns all the unsolved alerts, ordered by priority that belong to a given connection.
-    public AlertPriorityDTO findAll(int connectionIdentifier, String denominationAlike) {
+    public AlertPriorityDTO findAll(int connectionIdentifier, String denominationAlike, String resource, String logs) {
+        if(!logs.equals("true") && !logs.equals("false")) {
+            throw new IllegalArgumentException("Invalid value for logs parameter. Must be 'true' or 'false'.");
+        }
+
         // Instantiate an AlertPriorityDTO
         AlertPriorityDTO response = new AlertPriorityDTO();
 
         for (int priority = 1; priority <= 3; priority++) {
             // Query using the defined parameters
-            Iterable<Alert> queryPriority = alertRepository.findByConnectionIdentifierAndSolvedAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(connectionIdentifier, false, priority, denominationAlike);
+            Iterable<Alert> queryPriority;
+
+            if(logs.equals("true")){
+                queryPriority = alertRepository.findByConnectionIdentifierAndResourceContainingAndSolvedIsNotNullAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(connectionIdentifier, resource, priority, denominationAlike);
+            }else{
+                queryPriority = alertRepository.findByConnectionIdentifierAndResourceContainingAndSolvedAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(connectionIdentifier, resource, null, priority, denominationAlike);
+            }
+
             List<Alert> listByPriority = new ArrayList<>();
             queryPriority.forEach(alert -> listByPriority.add(alert));
 
@@ -143,7 +154,8 @@ public class AlertService {
 
     // Service that ignores (deletes logically) an alert.
     public void ignoreById(Long id) {
-        AlertDTO alertDTO = new AlertDTO(null, null, null, null, true, null);
+        // Is solved set to false
+        AlertDTO alertDTO = new AlertDTO(null, null, null, null, false, null);
         this.updateAlert(id, alertDTO);
     }
 
@@ -156,7 +168,10 @@ public class AlertService {
 
         Alert alert = alertRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Alert not found!"));
         String alertInsightCategoryDenomination = alert.getInsight().getCategory().getDenomination();
-        this.ignoreById(id);
+        
+        // Is solved set to true
+        AlertDTO alertDTO = new AlertDTO(null, null, null, null, true, null);
+        this.updateAlert(id, alertDTO);
         return alertInsightCategoryDenomination;
     }
 }

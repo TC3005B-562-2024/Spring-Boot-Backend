@@ -1,15 +1,14 @@
 package tc3005b224.amazonconnectinsights.service;
 
-import jakarta.transaction.Transactional;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Category;
-import tc3005b224.amazonconnectinsights.models_sql.Connection;
 import tc3005b224.amazonconnectinsights.repository.CategoryRepository;
-
-import java.util.Date;
-import java.util.Optional;
 
 @Service
 @Transactional

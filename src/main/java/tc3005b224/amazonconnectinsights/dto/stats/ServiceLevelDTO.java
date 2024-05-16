@@ -1,7 +1,5 @@
 package tc3005b224.amazonconnectinsights.dto.stats;
 
-import java.util.Date;
-
 public class ServiceLevelDTO {
     private double serviceLevelValue;
     private TimeWindowDTO timeWindow;

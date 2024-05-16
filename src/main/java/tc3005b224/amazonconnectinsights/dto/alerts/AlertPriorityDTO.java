@@ -1,8 +1,9 @@
 package tc3005b224.amazonconnectinsights.dto.alerts;
 
 
-import tc3005b224.amazonconnectinsights.models_sql.Alert;
 import java.util.List;
+
+import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
 public class AlertPriorityDTO {
     private List<Alert> high;

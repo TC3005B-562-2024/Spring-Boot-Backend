@@ -1,7 +1,5 @@
 package tc3005b224.amazonconnectinsights.dto.connections;
 
-import java.util.Date;
-
 public class ConnectionDTO {
     private String denomination;
     private String description;

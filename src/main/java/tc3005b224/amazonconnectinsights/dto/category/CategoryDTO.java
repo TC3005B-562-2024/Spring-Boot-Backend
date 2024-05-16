@@ -1,11 +1,5 @@
 package tc3005b224.amazonconnectinsights.dto.category;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.time.LocalDateTime;
-
 public class CategoryDTO {
 
     private String denomination;
