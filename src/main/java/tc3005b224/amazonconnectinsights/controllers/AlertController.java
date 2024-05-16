@@ -50,10 +50,16 @@ public class AlertController {
             }
 
     )
-    @GetMapping("/connections/{connectionIdentifier}")
-    public ResponseEntity<AlertPriorityDTO> postConnectionAlerts(@PathVariable int connectionIdentifier, @RequestParam(required = false, defaultValue = "") String category, @RequestParam(required = false, defaultValue = "") String resource) {
-        AlertPriorityDTO response = alertService.findAll(connectionIdentifier , category, resource);
-        return ResponseEntity.ok(response);
+    @GetMapping
+    public ResponseEntity<AlertPriorityDTO> postConnectionAlerts(@RequestParam(required = false, defaultValue = "") String category, @RequestParam(required = false, defaultValue = "") String resource, @RequestParam(required = false, defaultValue = "false") String logs) {
+        try {
+            AlertPriorityDTO response = alertService.findAll(1 , category, resource, logs);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e) {
+            // Return error 404 if there is an exception.
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
     }
 
     @Operation(
