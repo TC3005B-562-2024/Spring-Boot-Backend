@@ -32,13 +32,24 @@ public class AlertService {
     private InsightRepository insightRepository;
 
     // Service that returns all the unsolved alerts, ordered by priority that belong to a given connection.
-    public AlertPriorityDTO findAll(int connectionIdentifier, String denominationAlike, String resource) {
+    public AlertPriorityDTO findAll(int connectionIdentifier, String denominationAlike, String resource, String logs) {
+        if(!logs.equals("true") && !logs.equals("false")) {
+            throw new IllegalArgumentException("Invalid value for logs parameter. Must be 'true' or 'false'.");
+        }
+
         // Instantiate an AlertPriorityDTO
         AlertPriorityDTO response = new AlertPriorityDTO();
 
         for (int priority = 1; priority <= 3; priority++) {
             // Query using the defined parameters
-            Iterable<Alert> queryPriority = alertRepository.findByConnectionIdentifierAndResourceContainingAndSolvedAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(connectionIdentifier, resource, null, priority, denominationAlike);
+            Iterable<Alert> queryPriority;
+
+            if(logs.equals("true")){
+                queryPriority = alertRepository.findByConnectionIdentifierAndResourceContainingAndSolvedIsNotNullAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(connectionIdentifier, resource, priority, denominationAlike);
+            }else{
+                queryPriority = alertRepository.findByConnectionIdentifierAndResourceContainingAndSolvedAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(connectionIdentifier, resource, null, priority, denominationAlike);
+            }
+
             List<Alert> listByPriority = new ArrayList<>();
             queryPriority.forEach(alert -> listByPriority.add(alert));
 
