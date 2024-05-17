@@ -168,10 +168,16 @@ public class AlertService {
 
         Alert alert = alertRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Alert not found!"));
         String alertInsightCategoryDenomination = alert.getInsight().getCategory().getDenomination();
-        
+
         // Is solved set to true
         AlertDTO alertDTO = new AlertDTO(null, null, null, null, true, null);
         this.updateAlert(id, alertDTO);
         return alertInsightCategoryDenomination;
+    }
+
+    // New method to find the highest priority of the alerts
+    public String findHighestPriority() {
+        Optional<String> highestPriority = alertRepository.findHighestPriority();
+        return highestPriority.orElse(null);
     }
 }
