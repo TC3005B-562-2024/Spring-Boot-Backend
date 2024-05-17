@@ -18,9 +18,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 import tc3005b224.amazonconnectinsights.service.AlertService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/alerts")
@@ -38,7 +42,7 @@ public class AlertController {
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = AlertPriorityDTO.class)
                             )
-                    }),
+                            }),
                     @ApiResponse(
                             responseCode = "500",
                             description = "Internal error."
@@ -255,5 +259,32 @@ public class AlertController {
             // Return error 404 if there is an exception.
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @Operation(
+            summary = "Returns the highest priority of the alerts.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Highest priority found.",
+                            content = {@Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class)
+                            )
+                            }),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Internal error."
+                    ),
+                    @ApiResponse(
+                            responseCode = "503",
+                            description = "Couldn't connect to database."
+                    ),
+            }
+    )
+    @GetMapping("/highestPriority")
+    public ResponseEntity<AlertHighPriorityDTO> getHighestPriority(@RequestParam(required = false) String resource) {
+        AlertHighPriorityDTO priority = alertService.findHighestPriority("", resource);
+        return ResponseEntity.ok(priority);
     }
 }
