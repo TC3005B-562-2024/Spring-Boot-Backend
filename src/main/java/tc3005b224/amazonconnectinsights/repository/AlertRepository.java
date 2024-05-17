@@ -20,4 +20,7 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
 
     @Query("SELECT MAX(a.insight.category.priority) FROM Alert a WHERE a.solved IS NULL")
     Optional<Integer> findHighestPriority();
+
+    @Query("SELECT MAX(a.insight.category.priority) FROM Alert a WHERE a.solved IS NULL AND a.resource = :resource")
+    Optional<Integer> findHighestPriorityByResource(String resource);
 }

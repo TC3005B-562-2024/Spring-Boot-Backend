@@ -282,8 +282,8 @@ public class AlertController {
             }
     )
     @GetMapping("/highestPriority")
-    public ResponseEntity<Map<String, String>> getHighestPriority() {
-        String priority = alertService.findHighestPriority();
+    public ResponseEntity<Map<String, String>> getHighestPriority(@RequestParam(required = false) String resource) {
+        String priority = alertService.findHighestPriority(resource);
         Map<String, String> response = new HashMap<>();
         response.put("priority", priority != null ? priority : "null");
         return ResponseEntity.ok(response);
