@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 import tc3005b224.amazonconnectinsights.models_sql.Connection;
@@ -18,10 +19,11 @@ import tc3005b224.amazonconnectinsights.repository.AlertRepository;
 import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 import tc3005b224.amazonconnectinsights.repository.InsightRepository;
 import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
+import tc3005b224.amazonconnectinsights.service.BaseService.ConnectClientInfo;
 
 @Service
 @Transactional
-public class AlertService {
+public class AlertService extends BaseService {
     @Autowired
     private AlertRepository alertRepository;
     @Autowired
@@ -176,23 +178,25 @@ public class AlertService {
     }
 
     // New method to find the highest priority of the alerts
-    public String findHighestPriority(String resource) {
+    public AlertHighPriorityDTO findHighestPriority(String token, String resource) {
         Optional<Integer> highestPriority;
+        ConnectClientInfo clientInfo = getConnectClientInfo(token);
         if (resource != null) {
-            highestPriority = alertRepository.findHighestPriorityByResource(resource);
+            highestPriority = alertRepository.findHighestPriorityByResource(resource,
+                    clientInfo.getConnectionIdentifier());
         } else {
-            highestPriority = alertRepository.findHighestPriority();
+            highestPriority = alertRepository.findHighestPriority(clientInfo.getConnectionIdentifier());
         }
 
         if (highestPriority.isPresent()) {
             int priorityValue = highestPriority.get();
             switch (priorityValue) {
                 case 3:
-                    return "high";
+                    return new AlertHighPriorityDTO("high");
                 case 2:
-                    return "medium";
+                    return new AlertHighPriorityDTO("medium");
                 case 1:
-                    return "low";
+                    return new AlertHighPriorityDTO("low");
                 default:
                     return null;
             }

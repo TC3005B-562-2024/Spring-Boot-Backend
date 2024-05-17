@@ -18,9 +18,9 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     Iterable<Alert> findByConnectionIdentifierAndResourceAndSolvedAndInsight_Category_Priority(
             int connectionIdentifier, String resource, boolean solved, int priority);
 
-    @Query("SELECT MAX(a.insight.category.priority) FROM Alert a WHERE a.solved IS NULL")
-    Optional<Integer> findHighestPriority();
+    @Query("SELECT MAX(a.insight.category.priority) FROM Alert a WHERE a.solved IS NULL AND a.connection.identifier = :connectionIdentifier")
+    Optional<Integer> findHighestPriority(int connectionIdentifier);
 
-    @Query("SELECT MAX(a.insight.category.priority) FROM Alert a WHERE a.solved IS NULL AND a.resource = :resource")
-    Optional<Integer> findHighestPriorityByResource(String resource);
+    @Query("SELECT MAX(a.insight.category.priority) FROM Alert a WHERE a.solved IS NULL AND a.resource = :resource AND a.connection.identifier = :connectionIdentifier")
+    Optional<Integer> findHighestPriorityByResource(String resource, int connectionIdentifier);
 }

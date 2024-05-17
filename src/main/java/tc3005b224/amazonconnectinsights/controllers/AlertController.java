@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 import tc3005b224.amazonconnectinsights.service.AlertService;
@@ -282,10 +283,8 @@ public class AlertController {
             }
     )
     @GetMapping("/highestPriority")
-    public ResponseEntity<Map<String, String>> getHighestPriority(@RequestParam(required = false) String resource) {
-        String priority = alertService.findHighestPriority(resource);
-        Map<String, String> response = new HashMap<>();
-        response.put("priority", priority != null ? priority : "null");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<AlertHighPriorityDTO> getHighestPriority(@RequestParam(required = false) String resource) {
+        AlertHighPriorityDTO priority = alertService.findHighestPriority("", resource);
+        return ResponseEntity.ok(priority);
     }
 }
