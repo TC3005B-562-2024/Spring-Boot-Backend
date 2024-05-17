@@ -281,15 +281,11 @@ public class AlertController {
                     ),
             }
     )
-    @GetMapping("/highest-priority")
-    public ResponseEntity<Map<String, String>> getHighestPriorityAlert() {
-        try {
-            String highestPriority = alertService.findHighestPriority();
-            Map<String, String> response = new HashMap<>();
-            response.put("priority", highestPriority);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    @GetMapping("/highestPriority")
+    public ResponseEntity<Map<String, String>> getHighestPriority() {
+        String priority = alertService.findHighestPriority();
+        Map<String, String> response = new HashMap<>();
+        response.put("priority", priority != null ? priority : "null");
+        return ResponseEntity.ok(response);
     }
 }

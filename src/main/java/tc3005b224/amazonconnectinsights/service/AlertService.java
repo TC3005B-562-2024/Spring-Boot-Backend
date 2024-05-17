@@ -177,7 +177,21 @@ public class AlertService {
 
     // New method to find the highest priority of the alerts
     public String findHighestPriority() {
-        Optional<String> highestPriority = alertRepository.findHighestPriority();
-        return highestPriority.orElse(null);
+        Optional<Integer> highestPriority = alertRepository.findHighestPriority();
+        if (highestPriority.isPresent()) {
+            int priorityValue = highestPriority.get();
+            switch (priorityValue) {
+                case 3:
+                    return "high";
+                case 2:
+                    return "medium";
+                case 1:
+                    return "low";
+                default:
+                    return null;
+            }
+        } else {
+            return null;
+        }
     }
 }
