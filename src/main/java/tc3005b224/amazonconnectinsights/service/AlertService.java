@@ -19,7 +19,6 @@ import tc3005b224.amazonconnectinsights.repository.AlertRepository;
 import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 import tc3005b224.amazonconnectinsights.repository.InsightRepository;
 import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
-import tc3005b224.amazonconnectinsights.service.BaseService.ConnectClientInfo;
 
 @Service
 @Transactional
