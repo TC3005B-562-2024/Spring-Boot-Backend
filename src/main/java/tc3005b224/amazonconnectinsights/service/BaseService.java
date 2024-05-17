@@ -145,7 +145,7 @@ public class BaseService {
     @Getter
     @Setter
     @NoArgsConstructor
-    protected class ConnectClientInfo {
+    protected static class ConnectClientInfo {
         private Integer connectionIdentifier;
         private String accessKeyId;
         private String secretAccessKey;

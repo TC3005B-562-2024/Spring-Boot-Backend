@@ -34,23 +34,6 @@ public class InstanceController {
             @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect API", content = @Content),
     })
-    @Operation(summary = "Get the Amazon Connect instance data")
-    @GetMapping({ "/", "" })
-    public ResponseEntity<InstanceDTO> getInstanceData() {
-
-        InstanceDTO instance = new InstanceDTO(
-                "ARN1234",
-                "1",
-                "Call Center CDMX",
-                "https://amazonconnect.com/1",
-                "ACTIVE",
-                "Soporte",
-                false,
-                false,
-                false);
-
-        return ResponseEntity.ok(instance);
-    }
 
     // CONNECTION WITH AWS API ENDPOINT TO RETURN INSTANCE DETAILS
     @Operation(summary = "Get the Amazon Connect Instance Details")
