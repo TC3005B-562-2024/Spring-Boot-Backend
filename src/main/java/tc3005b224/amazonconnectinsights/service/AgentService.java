@@ -3,8 +3,10 @@ package tc3005b224.amazonconnectinsights.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +51,7 @@ public class AgentService extends BaseService {
      * this is the worst case scenario where no contact has a negative sentiment
      * 
      * @param token
-     * @param queues
-     * @param skills
+     * @param resourceId
      * @return Iterable<AgentCardDTO>
      * @throws BadRequestException
      * 
@@ -77,15 +78,13 @@ public class AgentService extends BaseService {
                 clientInfo.getSecretAccessKey(), clientInfo.getRegion())
                 .searchUsers(searchUserRequest.build());
 
-        System.out.println(users);
         // Create the filters to get the user data from the agents retrieved
         Collection<String> userIds = new ArrayList<String>();
         users.users().forEach(
                 user -> {
                     userIds.add(user.id());
                 });
-        
-        
+
         // Get the contacts information for the agents
         GetCurrentUserDataResponse getCurrentUserDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
                 clientInfo.getSecretAccessKey(), clientInfo.getRegion())
@@ -93,48 +92,34 @@ public class AgentService extends BaseService {
                         .instanceId(clientInfo.getInstanceId())
                         .filters(UserDataFilters.builder().agents(userIds).build())
                         .build());
-        System.out.println(getCurrentUserDataResponse);
 
-        if (getCurrentUserDataResponse.userDataList().isEmpty()) {
-            // TODO: If there are no agents making or receiving calls, then do something 
-            // Check if the there is agents connected to the instance but not making calls
-            // and if these agents will be returned by the getCurrentUserDataResponse
-            //--------------------------------------------------------------------
-            //--------------------------------------------------------------------
-            //--------------------------------------------------------------------
-            //-----------Revisa esta cosa Diego del futuro jajaja-----------------
-            //--------------------------------------------------------------------
-            //--------------------------------------------------------------------
-            //--------------------------------------------------------------------
-
-            System.out.println("Agents are not currently making or receiving calls");
+        // Get the contacts and status for the agents
+        // If there are no values in the getCurrentUserDataResponse, create an empty map
+        Map<String, List<String>> contacts = new HashMap<String, List<String>>();
+        Map<String, String> agentStatus = new HashMap<String, String>();
+        if (!getCurrentUserDataResponse.userDataList().isEmpty()) {
+            // Create a map with the contacts for each agent
+            users.users().forEach(
+                    user -> {
+                        List<String> contactIds = new ArrayList<String>();
+                        getCurrentUserDataResponse.userDataList().forEach(
+                                userData -> {
+                                    if (userData.user().id().equals(user.id())) {
+                                        // Add all the contacts to the list
+                                        userData.contacts().forEach(
+                                                contact -> {
+                                                    contactIds.add(contact.contactId());
+                                                });
+                                        // Add the status of the agent
+                                        agentStatus.put(user.id(), userData.status().statusName());
+                                    }
+                                });
+                        contacts.put(user.id(), contactIds);
+                    });
         }
 
-        // Estructura de datos bien loca que tiene un Map juntando los ids de los
-        // usuarios de ambas responses
-        // y los contactos de cada usuario si es que tiene, si no tiene contactos, es
-        // una lista vacia
-        Map<String, List<String>> contacts = new HashMap<String, List<String>>();
-        users.users().forEach(
-                user -> {
-                    List<String> contactIds = new ArrayList<String>();
-                    getCurrentUserDataResponse.userDataList().forEach(
-                            userData -> {
-                                if (userData.user().id().equals(user.id())) {
-                                    userData.contacts().forEach(
-                                            contact -> {
-                                                contactIds.add(contact.contactId());
-                                            });
-                                }
-                            });
-                    contacts.put(user.id(), contactIds);
-                });
-
-
-
-
+        // Create the list of agents to return
         List<AgentCardDTO> agents = new ArrayList<AgentCardDTO>();
-
         users.users().forEach(
                 userData -> {
                     // Get the details of the routing profile
@@ -144,9 +129,9 @@ public class AgentService extends BaseService {
                             .listRoutingProfileQueues(
                                     ListRoutingProfileQueuesRequest.builder().instanceId(clientInfo.getInstanceId())
                                             .routingProfileId(userData.routingProfileId()).build());
-                    List<String> skillsList = new ArrayList<String>();
+                    Set<String> skillsSet = new HashSet<>();
                     routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(queue -> {
-                        skillsList.add(queue.queueName());
+                        skillsSet.add(queue.queueName());
                     });
 
                     // Get the MOST NEGATIVE sentiment status of contacts for the agent
@@ -167,7 +152,7 @@ public class AgentService extends BaseService {
                                                             .segmentTypes(
                                                                     RealTimeContactAnalysisSegmentType.TRANSCRIPT)
                                                             .build())
-                                            .segments().get(0).transcript().sentiment().name());
+                                            .segments().get(0).transcript().sentiment().toString());
                             if (sentiments.contains("NEGATIVE"))
                                 break;
                         }
@@ -182,24 +167,14 @@ public class AgentService extends BaseService {
                         }
                     }
 
-                    // TODO: Get the status of the agent
-                    // Supongo que aqui es sacar el estatus porque no viene en otro lado kaajajajajaja
-                    // Checar: https://docs.aws.amazon.com/connect/latest/APIReference/API_ListAgentStatuses.html
-                    //--------------------------------------------------------------------
-                    //--------------------------------------------------------------------
-                    //--------------------------------------------------------------------
-                    //-----------Revisa esta cosa Diego del futuro jajaja-----------------
-                    //--------------------------------------------------------------------
-                    //--------------------------------------------------------------------
-                    //--------------------------------------------------------------------
-
                     agents.add(new AgentCardDTO(
                             userData.id(),
+                            userData.arn(),
                             userData.identityInfo().firstName() + " "
                                     + userData.identityInfo().lastName(),
-                            "DISCONNECTED",
+                            agentStatus.getOrDefault(userData.id(), "DISCONNECTED"),
                             worstSentiment,
-                            skillsList,
+                            skillsSet,
                             alertService.findHighestPriority(token, userData.arn()).getHighestPriorityAlert()));
                 });
 

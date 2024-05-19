@@ -1,9 +1,5 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
