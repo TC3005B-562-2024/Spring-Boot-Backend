@@ -11,22 +11,11 @@ import tc3005b224.amazonconnectinsights.models_sql.Training;
  */
 @Repository
 public interface TrainingRepository extends CrudRepository<Training, Short> {
-    Iterable<Training> findByIsActiveAndAlertsInAndDenominationIn(boolean active,
-            Iterable<Alert> alerts, Iterable<String> denominations);
-
-    Iterable<Training> findByIsActiveAndAlerts(boolean active, Iterable<Alert> alerts);
-
-    Iterable<Training> findByIsActiveAndDenominationIn(boolean active, Iterable<String> denominations);
-
-    Iterable<Training> findByIsActiveAndAlertsResourceIn(boolean active, Iterable<String> resourceArns);
-
     Iterable<Training> findByIsActive(boolean active);
 
-    Iterable<Training> findByAlertsIn(Iterable<Alert> alerts);
+    Iterable<Training> findByAlerts(Alert alert);
 
-    Iterable<Training> findByAlertsAndDenominationIn(Iterable<Alert> alerts, Iterable<String> denominations);
+    Iterable<Training> findByIsActiveAndAlertsResource(boolean active, String resource);
 
-    Iterable<Training> findByDenominationIn(Iterable<String> denominations);
-    
-    Iterable<Training> findByAlertsResourceIn(Iterable<String> resourceArns);
+    Iterable<Training> findByAlertsResource(String resource);
 }

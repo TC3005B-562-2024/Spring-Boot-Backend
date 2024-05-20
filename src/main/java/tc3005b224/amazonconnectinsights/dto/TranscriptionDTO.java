@@ -1,7 +1,5 @@
 package tc3005b224.amazonconnectinsights.dto;
 
-import java.io.File;
-
 public class TranscriptionDTO {
     private String content;
     private String id;
