@@ -72,6 +72,26 @@ public class TrainingsService extends BaseService {
         }
     }
 
+    /**
+     * Method that returns all the trainings that belong to a given connection and
+     * resource.
+     * 
+     * @param connectionIdentifier
+     * @param resource
+     * @return Iterable<Alert>
+     * 
+     * @author Diego Jacobo Djmr5
+     * 
+     * @see AlertRepository
+     */
+    public Iterable<Alert> findTrainingsAlertsByResource(int connectionIdentifier, String resource) {
+        if (resource == null || resource.isEmpty() || connectionIdentifier < 1) {
+            throw new IllegalArgumentException("Invalid parameters.");
+        }
+        return alertRepository.findByConnectionIdentifierAndResourceContainingAndSolvedAndInsight_Category_Priority(
+                connectionIdentifier, resource, true, 1);
+    }
+
     public TrainingDTO saveTraining(TrainingNoIdDTO newTraining) {
         return convertToDTO(trainingRepository.save(convertToEntity(newTraining, null)));
     }
