@@ -81,8 +81,7 @@ public class InstanceService extends BaseService {
 
 
         InstanceDTO result = new InstanceDTO();
-        result = new InstanceDTO(dataDI.arn(), dataDI.id(), dataDI.instanceAlias(), dataDI.instanceAccessUrl(), dataDI.instanceStatusAsString(), dataDI.serviceRole(), dataDIACL.value(), dataDIAIC.value(), dataDIAOC.value());
+        result = new InstanceDTO(dataDI.arn(), dataDI.id(), dataDIAOC.value(), dataDI.instanceAlias(), dataDI.instanceAccessUrl(), dataDI.instanceStatusAsString(), dataDI.serviceRole(), dataDIACL.value(), dataDIAIC.value());
         return result;
     }
-
 }

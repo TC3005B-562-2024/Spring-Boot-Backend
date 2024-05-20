@@ -28,10 +28,10 @@ public class InstanceController {
      * @see InstanceDTO
      */
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found instance data", content = {
+            @ApiResponse(responseCode = "200", description = "Found Instance Data", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = InstanceDTO.class))
             }),
-            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content),
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect API", content = @Content),
     })
 

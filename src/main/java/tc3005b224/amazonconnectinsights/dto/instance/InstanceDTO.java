@@ -29,18 +29,16 @@ public class InstanceDTO {
 
     public InstanceDTO() {
     }
-
-    public InstanceDTO(String arn, String id, String instanceAlias, String instanceAccessUrl, String instanceStatus,
-            String serviceRole, String contactLensEnabled, String inboundCallsEnable, String outboundCallsEnable) {
+    public InstanceDTO(String arn, String id, String outboundCallsEnable, String instanceAlias, String instanceAccessUrl, String instanceStatus, String serviceRole, String contactLensEnabled, String inboundCallsEnable) {
         this.arn = arn;
         this.id = id;
+        this.outboundCallsEnable = outboundCallsEnable;
         this.instanceAlias = instanceAlias;
         this.instanceAccessUrl = instanceAccessUrl;
         this.instanceStatus = instanceStatus;
         this.serviceRole = serviceRole;
         this.contactLensEnabled = contactLensEnabled;
         this.inboundCallsEnable = inboundCallsEnable;
-        this.outboundCallsEnable = outboundCallsEnable;
     }
 
     public String getArn() {
@@ -91,16 +89,27 @@ public class InstanceDTO {
         this.serviceRole = serviceRole;
     }
 
-    public String isContactLensEnabled() {
+    public String getContactLensEnabled() {
         return contactLensEnabled;
     }
 
-    public String isInboundCallsEnable() {
+    public void setContactLensEnabled(String contactLensEnabled) {
+        this.contactLensEnabled = contactLensEnabled;
+    }
+
+    public String getInboundCallsEnable() {
         return inboundCallsEnable;
     }
 
-    public String isOutboundCallsEnable() {
+    public void setInboundCallsEnable(String inboundCallsEnable) {
+        this.inboundCallsEnable = inboundCallsEnable;
+    }
+
+    public String getOutboundCallsEnable() {
         return outboundCallsEnable;
     }
 
+    public void setOutboundCallsEnable(String outboundCallsEnable) {
+        this.outboundCallsEnable = outboundCallsEnable;
+    }
 }
