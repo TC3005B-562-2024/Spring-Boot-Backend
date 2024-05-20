@@ -129,9 +129,9 @@ public class AgentService extends BaseService {
                             .listRoutingProfileQueues(
                                     ListRoutingProfileQueuesRequest.builder().instanceId(clientInfo.getInstanceId())
                                             .routingProfileId(userData.routingProfileId()).build());
-                    Set<String> skillsSet = new HashSet<>();
+                    Set<String> queuesSet = new HashSet<>();
                     routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(queue -> {
-                        skillsSet.add(queue.queueName());
+                        queuesSet.add(queue.queueName());
                     });
 
                     // Get the MOST NEGATIVE sentiment status of contacts for the agent
@@ -174,7 +174,7 @@ public class AgentService extends BaseService {
                                     + userData.identityInfo().lastName(),
                             agentStatus.getOrDefault(userData.id(), "DISCONNECTED"),
                             worstSentiment,
-                            skillsSet,
+                            queuesSet,
                             alertService.findHighestPriority(token, userData.arn()).getHighestPriorityAlert()));
                 });
 

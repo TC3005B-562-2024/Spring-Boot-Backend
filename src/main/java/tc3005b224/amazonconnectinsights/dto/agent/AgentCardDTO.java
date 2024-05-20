@@ -15,6 +15,6 @@ public class AgentCardDTO {
     private String name;
     private String status;
     private String emotion;
-    private Iterable<String> skills;
+    private Iterable<String> queues;
     private String highestPriorityAlert;
 }
