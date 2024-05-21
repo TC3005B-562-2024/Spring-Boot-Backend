@@ -1,4 +1,4 @@
-package tc3005b224.amazonconnectinsights.dto.agent;
+package tc3005b224.amazonconnectinsights.dto.queue;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,12 +9,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgentCardDTO {
+public class QueueCardDTO {
     private String id;
     private String arn;
     private String name;
+    private String description;
     private String status;
-    private String emotion;
-    private Iterable<String> queues;
-    private String highestPriorityAlert;
+    private Integer maxContacts;
+    private Integer totalAgents;
 }

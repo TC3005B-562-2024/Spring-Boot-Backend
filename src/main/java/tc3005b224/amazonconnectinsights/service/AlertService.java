@@ -176,7 +176,20 @@ public class AlertService extends BaseService {
         return alertInsightCategoryDenomination;
     }
 
-    // New method to find the highest priority of the alerts
+    /**
+     * New method to find the highest priority of the alerts
+     * TODO: Add check for unexisting resource
+     * 
+     * @param token
+     * @param resource
+     * @return AlertHighPriorityDTO
+     * 
+     * @author Andrew Williams SirPotat28
+     * 
+     * @see AlertRepository
+     * @see AlertHighPriorityDTO
+     * @see ConnectClientInfo
+     */
     public AlertHighPriorityDTO findHighestPriority(String token, String resource) {
         Optional<Integer> highestPriority;
         ConnectClientInfo clientInfo = getConnectClientInfo(token);
@@ -197,10 +210,10 @@ public class AlertService extends BaseService {
                 case 1:
                     return new AlertHighPriorityDTO("low");
                 default:
-                    return null;
+                    return new AlertHighPriorityDTO(null);
             }
         } else {
-            return null;
+            return new AlertHighPriorityDTO(null);
         }
     }
 }
