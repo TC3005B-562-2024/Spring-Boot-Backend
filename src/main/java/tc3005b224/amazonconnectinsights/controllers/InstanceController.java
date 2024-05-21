@@ -1,6 +1,7 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,8 +40,25 @@ public class InstanceController {
     @Operation(summary = "Get the Amazon Connect Instance Details")
     @GetMapping
     public ResponseEntity<InstanceDTO> getInstanceData(@RequestParam(required = true) String token) {
-        InstanceDTO response = instanceService.getInstanceDetails(token);
-        return ResponseEntity.ok(response);
+        try {
+            InstanceDTO response = instanceService.getInstanceDetails(token);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
     }
-
+    // CONNECTION WITH AWS API ENDPOINT TEST TO RETURN CONNECITON ERROR
+    @Operation(summary = "Test Endpoint For Connection Error With Amazon Connect API")
+    @GetMapping("/test")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect API", content = @Content),
+    })
+    public ResponseEntity<InstanceDTO> getInstanceDataError(@RequestParam(required = true) String token) {
+        try {
+            InstanceDTO response = instanceService.getInstanceDetailsWithError(token);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+    }
 }
