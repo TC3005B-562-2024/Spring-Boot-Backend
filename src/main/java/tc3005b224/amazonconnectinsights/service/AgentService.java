@@ -1,6 +1,5 @@
 package tc3005b224.amazonconnectinsights.service;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,21 +17,16 @@ import software.amazon.awssdk.services.connect.model.DescribeContactResponse;
 import software.amazon.awssdk.services.connect.model.DescribeRoutingProfileRequest;
 import software.amazon.awssdk.services.connect.model.DescribeUserRequest;
 import software.amazon.awssdk.services.connect.model.DescribeUserResponse;
-import software.amazon.awssdk.services.connect.model.FilterV2;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataRequest;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataResponse;
-import software.amazon.awssdk.services.connect.model.GetMetricDataV2Request;
-import software.amazon.awssdk.services.connect.model.GetMetricDataV2Response;
 import software.amazon.awssdk.services.connect.model.ListRealtimeContactAnalysisSegmentsV2Request;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesResponse;
-import software.amazon.awssdk.services.connect.model.MetricV2;
 import software.amazon.awssdk.services.connect.model.RealTimeContactAnalysisSegmentType;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest.Builder;
 import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
 import software.amazon.awssdk.services.connect.model.StringCondition;
-import software.amazon.awssdk.services.connect.model.ThresholdV2;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import software.amazon.awssdk.services.connect.model.UserSearchCriteria;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
@@ -40,6 +34,7 @@ import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
@@ -50,6 +45,9 @@ public class AgentService extends BaseService {
 
     @Autowired
     private TrainingsService trainingsService;
+
+    @Autowired
+    private MetricService metricService;
 
     /**
      * Get all the agents general information required to display at the agent cards
@@ -76,7 +74,8 @@ public class AgentService extends BaseService {
         // If a resourceId is provided, filter the agents by that resourceId
         if (!resourceId.isEmpty()) {
             UserSearchCriteria criteria = UserSearchCriteria.builder().stringCondition(
-                    StringCondition.builder().comparisonType("EXACT").fieldName("RoutingProfileId").value(resourceId).build())
+                    StringCondition.builder().comparisonType("EXACT").fieldName("RoutingProfileId").value(resourceId)
+                            .build())
                     .build();
             searchUserRequest.searchCriteria(criteria);
         }
@@ -228,46 +227,19 @@ public class AgentService extends BaseService {
                                 .routingProfileId(agent.user().routingProfileId()).build())
                 .routingProfile().name();
 
-        // Obtain metrics
-        // TODO: Añadir métricas
-        // https://docs.aws.amazon.com/connect/latest/APIReference/API_GetMetricDataV2.html#API_GetMetricDataV2_RequestSyntax
-        Collection<MetricV2> metricsToSearch = new ArrayList<>();
-        metricsToSearch.add(MetricV2.builder().name("ABANDONMENT_RATE").build());
-        metricsToSearch.add(MetricV2.builder().name("AGENT_SCHEDULE_ADHERENCE").build());
-        metricsToSearch.add(MetricV2.builder().name("AGENT_OCCUPANCY").build());
-        metricsToSearch.add(MetricV2.builder().name("AVG_QUEUE_ANSWER_TIME").build());
-        metricsToSearch.add(MetricV2.builder().name("AVG_RESOLUTION_TIME").build());
-        metricsToSearch.add(MetricV2.builder().name("PERCENT_CASES_FIRST_CONTACT_RESOLVED").build());
-        metricsToSearch.add(MetricV2.builder().name("SERVICE_LEVEL")
-                .threshold(ThresholdV2.builder().thresholdValue(7200.0).comparison("LT").build()).build());
-        GetMetricDataV2Response metrics = getConnectClient(
-                clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(),
-                clientInfo.getRegion()).getMetricDataV2(
-                        GetMetricDataV2Request.builder()
-                                .startTime(Instant.now().minusSeconds(7200))
-                                .endTime(Instant.now())
-                                .filters(
-                                        FilterV2.builder()
-                                                .filterKey("AGENT")
-                                                .filterValues(agentId)
-                                                .build())
-                                .metrics(
-                                    metricsToSearch
-                                )
-                                .resourceArn(agent.user().arn())
-                                .build());
-
         // Obtener contactos
         // TODO: Obtener el promedio de las duraciones de las llamadas
         List<ContactInformationDTO> contacts = new ArrayList<>();
         agentCurrentDataResponse.userDataList().forEach(userData -> {
             userData.contacts().forEach(contact -> {
                 // TODO: Review, it can be different due to the timezones
-                DescribeContactResponse contactDetails = getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(),
-                        clientInfo.getRegion()).describeContact(DescribeContactRequest.builder()
-                        .instanceId(clientInfo.getInstanceId())
-                        .contactId(contact.contactId())
-                        .build());
+                DescribeContactResponse contactDetails = getConnectClient(clientInfo.getAccessKeyId(),
+                        clientInfo.getSecretAccessKey(),
+                        clientInfo.getRegion()).describeContact(
+                                DescribeContactRequest.builder()
+                                        .instanceId(clientInfo.getInstanceId())
+                                        .contactId(contact.contactId())
+                                        .build());
                 String sentiment = null;
                 if (clientInfo.getContactLensEnabled()) {
                     sentiment = getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(),
@@ -279,6 +251,7 @@ public class AgentService extends BaseService {
                                             .build())
                             .segments().get(0).transcript().sentiment().toString();
                 }
+                // TODO: Change the durationAboveAverage to the real value
                 contacts.add(new ContactInformationDTO(contact.contactId(),
                         contactDetails.contact().agentInfo().connectedToAgentTimestamp().toString(),
                         true, sentiment));
@@ -305,6 +278,9 @@ public class AgentService extends BaseService {
         Iterable<Alert> trainings = trainingsService
                 .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
 
+        // Get the agent metrics
+        InformationSectionListDTO metrics = metricService.getMetricsById(token, "AGENT", agent.user().arn());
+
         return new AgentDTO(
                 agentId,
                 agent.user().arn(),
@@ -312,6 +288,7 @@ public class AgentService extends BaseService {
                 agentInformation,
                 contacts,
                 alerts,
-                trainings);
+                trainings,
+                metrics);
     }
 }
