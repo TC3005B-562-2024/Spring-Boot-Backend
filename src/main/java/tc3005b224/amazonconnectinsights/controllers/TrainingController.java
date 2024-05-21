@@ -2,6 +2,7 @@ package tc3005b224.amazonconnectinsights.controllers;
 
 import java.util.List;
 import java.util.Map;
+import java.security.Principal;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +56,9 @@ public class TrainingController {
         @Operation(summary = "Get the list of all trainings data")
         @PostMapping("")
         public ResponseEntity<?> getTrainingsData(
-                        @RequestBody(required = false) List<FilterDTO> filters) throws BadRequestException {
+                        @RequestBody(required = false) Principal principal, List<FilterDTO> filters) throws BadRequestException {
                 try {
+                        System.out.println(principal.getName());
                         return ResponseEntity.ok(trainingService.findAll(filters));
                 } catch (Exception e) {
                         e.printStackTrace();
