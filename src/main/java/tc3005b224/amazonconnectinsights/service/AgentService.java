@@ -76,7 +76,7 @@ public class AgentService extends BaseService {
         // If a resourceId is provided, filter the agents by that resourceId
         if (!resourceId.isEmpty()) {
             UserSearchCriteria criteria = UserSearchCriteria.builder().stringCondition(
-                    StringCondition.builder().comparisonType("EXACT").fieldName("ResourceId").value(resourceId).build())
+                    StringCondition.builder().comparisonType("EXACT").fieldName("RoutingProfileId").value(resourceId).build())
                     .build();
             searchUserRequest.searchCriteria(criteria);
         }
