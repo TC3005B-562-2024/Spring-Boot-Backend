@@ -51,6 +51,9 @@ public class AgentService extends BaseService {
     @Autowired
     private TrainingsService trainingsService;
 
+    @Autowired
+    private MetricService metricService;
+
     /**
      * Get all the agents general information required to display at the agent cards
      * if more specific information is required, use the findById method
@@ -228,35 +231,6 @@ public class AgentService extends BaseService {
                                 .routingProfileId(agent.user().routingProfileId()).build())
                 .routingProfile().name();
 
-        // Obtain metrics
-        // TODO: Añadir métricas
-        // https://docs.aws.amazon.com/connect/latest/APIReference/API_GetMetricDataV2.html#API_GetMetricDataV2_RequestSyntax
-        Collection<MetricV2> metricsToSearch = new ArrayList<>();
-        metricsToSearch.add(MetricV2.builder().name("ABANDONMENT_RATE").build());
-        metricsToSearch.add(MetricV2.builder().name("AGENT_SCHEDULE_ADHERENCE").build());
-        metricsToSearch.add(MetricV2.builder().name("AGENT_OCCUPANCY").build());
-        metricsToSearch.add(MetricV2.builder().name("AVG_QUEUE_ANSWER_TIME").build());
-        metricsToSearch.add(MetricV2.builder().name("AVG_RESOLUTION_TIME").build());
-        metricsToSearch.add(MetricV2.builder().name("PERCENT_CASES_FIRST_CONTACT_RESOLVED").build());
-        metricsToSearch.add(MetricV2.builder().name("SERVICE_LEVEL")
-                .threshold(ThresholdV2.builder().thresholdValue(7200.0).comparison("LT").build()).build());
-        GetMetricDataV2Response metrics = getConnectClient(
-                clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(),
-                clientInfo.getRegion()).getMetricDataV2(
-                        GetMetricDataV2Request.builder()
-                                .startTime(Instant.now().minusSeconds(7200))
-                                .endTime(Instant.now())
-                                .filters(
-                                        FilterV2.builder()
-                                                .filterKey("AGENT")
-                                                .filterValues(agentId)
-                                                .build())
-                                .metrics(
-                                    metricsToSearch
-                                )
-                                .resourceArn(agent.user().arn())
-                                .build());
-
         // Obtener contactos
         // TODO: Obtener el promedio de las duraciones de las llamadas
         List<ContactInformationDTO> contacts = new ArrayList<>();
@@ -312,6 +286,8 @@ public class AgentService extends BaseService {
                 agentInformation,
                 contacts,
                 alerts,
-                trainings);
+                trainings,
+                metricService.getMetricsById(token, "AGENT", agent.user().arn())
+                );
     }
 }

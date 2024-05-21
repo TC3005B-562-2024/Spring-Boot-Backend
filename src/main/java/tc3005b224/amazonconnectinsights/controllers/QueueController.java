@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tc3005b224.amazonconnectinsights.dto.queue.QueueCardDTO;
+import tc3005b224.amazonconnectinsights.dto.queue.QueueDTO;
 import tc3005b224.amazonconnectinsights.service.QueueService;
 
 @RestController
@@ -21,6 +22,16 @@ public class QueueController {
         try {
             Iterable<QueueCardDTO> queueCards = queueService.findAll("1", "");
             return ResponseEntity.ok(queueCards);
+        }catch (Exception e) {
+            System.out.println(e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{queueId}")
+    public ResponseEntity<QueueDTO> getIndividualQueue(@PathVariable String queueId) {
+        try {
+            return ResponseEntity.ok(queueService.findById("1", queueId));
         }catch (Exception e) {
             System.out.println(e);
             return ResponseEntity.notFound().build();
