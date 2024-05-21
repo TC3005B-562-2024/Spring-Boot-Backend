@@ -137,7 +137,8 @@ public class BaseService {
             accessKeyId,
             secretAccessKey,
             instanceId,
-            Region.of(region)
+            Region.of(region),
+            false
             );
     }
 
@@ -151,5 +152,6 @@ public class BaseService {
         private String secretAccessKey;
         private String instanceId;
         private Region region;
+        private Boolean contactLensEnabled;
     }
 }

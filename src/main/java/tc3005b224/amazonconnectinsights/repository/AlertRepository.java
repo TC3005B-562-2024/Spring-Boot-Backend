@@ -12,6 +12,9 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     Iterable<Alert> findByConnectionIdentifierAndResourceContainingAndSolvedIsNotNullAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(
             int connectionIdentifier, String resource, int priority, String denominationAlike);
 
+    Iterable<Alert> findByConnectionIdentifierAndResourceContainingAndSolvedAndInsight_Category_Priority(
+            int connectionIdentifier, String resource, boolean solved, int priority);
+
     Iterable<Alert> findByConnectionIdentifierAndResourceContainingAndSolvedAndInsight_Category_PriorityAndInsight_Category_DenominationContaining(
             int connectionIdentifier, String resource, Boolean solved, int priority, String denominationAlike);
 
