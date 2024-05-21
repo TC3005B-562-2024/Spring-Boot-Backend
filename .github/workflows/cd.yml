@@ -54,7 +54,7 @@ jobs:
         run: |
           gcloud run deploy ${{ secrets.REP_IMG_NAME }} \
             --image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.REP_IMG_NAME }}/${{ secrets.REP_IMG_NAME }} \
-            --update-env-vars DB_URL=${{ secrets.DB_URL }},DB_USERNAME=${{ secrets.DB_USERNAME }},DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            --update-env-vars DB_URL=${{ secrets.DB_URL }},DB_USERNAME=${{ secrets.DB_USERNAME }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},aws_accessKeyId=${{ secrets.AWS_ACCESSKEYID }},aws_secretAccessKey=${{ secrets.AWS_SECRETACCESSKEY }},aws_region=${{ secrets.AWS_REGION }},aws_connect_instanceId=${{ secrets.AWS_CONNECT_INSTANCEID }} \
             --platform=managed \
             --port=${{ secrets.PORT }} \
             --region=${{ secrets.GCP_REGION }} \

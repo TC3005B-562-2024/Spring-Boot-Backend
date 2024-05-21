@@ -36,7 +36,6 @@ public class BaseService {
 
     @Value("${aws_connect_instanceId}")
     private String instanceId;
-
     /**
      * Decodes a URL encoded string.
      *
@@ -100,7 +99,6 @@ public class BaseService {
     /**
      * A function that maps the valid values from the inputted fields parameter to a
      * given Class
-     *
      * @param <T>
      * @param fields
      * @param entityInstance
@@ -133,19 +131,21 @@ public class BaseService {
     protected ConnectClientInfo getConnectClientInfo(String token) {
         // If token matches, returns data from the database
         return new ConnectClientInfo(
-                1,
-                accessKeyId,
-                secretAccessKey,
-                instanceId,
-                Region.of(region)
-        );
+            1,
+            accessKeyId,
+            secretAccessKey,
+            instanceId,
+            Region.of(region)
+            );
+
     }
 
     @AllArgsConstructor
     @Getter
     @Setter
     @NoArgsConstructor
-    protected static class ConnectClientInfo {
+    protected class ConnectClientInfo {
+
         private Integer connectionIdentifier;
         private String accessKeyId;
         private String secretAccessKey;
@@ -153,3 +153,4 @@ public class BaseService {
         private Region region;
     }
 }
+

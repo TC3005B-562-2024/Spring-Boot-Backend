@@ -30,7 +30,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
 	<dependencies>
 
 		<dependency>
@@ -89,11 +88,7 @@
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>connect</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>tc3005b.562.2.2024</groupId>
-			<artifactId>amazon-connect-insights</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+
 	</dependencies>
 
 	<build>
