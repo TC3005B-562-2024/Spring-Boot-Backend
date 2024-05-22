@@ -36,6 +36,10 @@ public class BaseService {
 
     @Value("${aws_connect_instanceId}")
     private String instanceId;
+
+    @Value("${aws_connect_instanceArn}")
+    private String instanceArn;
+    
     /**
      * Decodes a URL encoded string.
      *
@@ -135,7 +139,9 @@ public class BaseService {
             accessKeyId,
             secretAccessKey,
             instanceId,
-            Region.of(region)
+            instanceArn,
+            Region.of(region),
+            false
             );
 
     }
@@ -150,7 +156,9 @@ public class BaseService {
         private String accessKeyId;
         private String secretAccessKey;
         private String instanceId;
+        private String instanceArn;
         private Region region;
+        private Boolean contactLensEnabled;
     }
 }
 

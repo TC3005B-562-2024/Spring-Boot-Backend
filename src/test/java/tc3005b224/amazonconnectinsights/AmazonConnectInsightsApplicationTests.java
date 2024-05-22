@@ -9,6 +9,4 @@ class AmazonConnectInsightsApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
-
 }
