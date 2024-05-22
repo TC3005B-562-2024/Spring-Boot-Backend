@@ -6,9 +6,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
+
 
 @SpringBootApplication
 @OpenAPIDefinition(
@@ -18,6 +21,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
 
 		}
 )
+@EnableScheduling
 public class AmazonConnectInsightsApplication {
 
 	public static void main(String[] args) {
