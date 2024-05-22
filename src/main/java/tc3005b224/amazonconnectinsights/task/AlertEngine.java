@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AlertEngine {
-    private volatile boolean running = true;
+    private volatile boolean running = false;
 
     @Scheduled(fixedRate = 1000)
     public void mainTask() {
