@@ -6,13 +6,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tc3005b224.amazonconnectinsights.task.AlertEngine;
+import tc3005b224.amazonconnectinsights.task.AlertEngineTask;
 
 @RestController
 @RequestMapping("/alert-engine")
 public class AlertEngineController {
     @Autowired
-    private AlertEngine alertEngineTask;
+    private AlertEngineTask alertEngineTask;
 
     @PostMapping("/start")
     public String startTask() {

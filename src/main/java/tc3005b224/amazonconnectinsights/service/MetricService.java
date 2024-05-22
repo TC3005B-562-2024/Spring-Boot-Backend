@@ -20,7 +20,7 @@ import software.amazon.awssdk.services.connect.model.ThresholdV2;
 public class MetricService extends BaseService {
     public InformationSectionListDTO getMetricsById(String token, String resourceType, String resourceArn) throws BadRequestException {
         // Check if the resource type is valid.
-        if(!resourceType.equals("AGENT") && !resourceType.equals("QUEUE")){
+        if(!resourceType.equals("AGENT") && !resourceType.equals("QUEUE") && !resourceType.equals("ROUTING_PROFILE")){
             throw new BadRequestException("Invalid resource type");
         }
         
