@@ -1,5 +1,6 @@
 package tc3005b224.amazonconnectinsights.dto.queue;
 
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
 
 
@@ -17,7 +18,7 @@ public class QueueDTO {
     private String arn;
     private InformationSectionListDTO information;
     private InformationSectionListDTO metrics;
-    private String alerts;
+    private AlertPriorityDTO alerts;
     private String trainings;
     private String agents;
 }

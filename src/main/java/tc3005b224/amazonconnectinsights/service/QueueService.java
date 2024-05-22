@@ -1,28 +1,45 @@
 package tc3005b224.amazonconnectinsights.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.apache.coyote.BadRequestException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.services.connect.model.DescribeQueueResponse;
+import software.amazon.awssdk.services.connect.model.DescribeQueueRequest;
+import software.amazon.awssdk.services.connect.model.DescribeRoutingProfileResponse;
+import software.amazon.awssdk.services.connect.model.DescribeRoutingProfileRequest;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataRequest;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataResponse;
-import software.amazon.awssdk.services.connect.model.DescribeQueueRequest;
+import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesRequest;
+import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesResponse;
+import software.amazon.awssdk.services.connect.model.SearchContactsResponse;
+import software.amazon.awssdk.services.connect.model.SearchContactsTimeRange;
+import software.amazon.awssdk.services.connect.model.SearchCriteria;
+import software.amazon.awssdk.services.connect.model.SearchContactsRequest;
 import software.amazon.awssdk.services.connect.model.SearchQueuesRequest;
 import software.amazon.awssdk.services.connect.model.SearchQueuesResponse;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueCardDTO;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationSectionDTO;
+import software.amazon.awssdk.services.connect.model.SearchRoutingProfilesRequest;
+import software.amazon.awssdk.services.connect.model.SearchRoutingProfilesResponse;
 
 @Service
 public class QueueService extends BaseService {
     @Autowired
     private MetricService metricService;
+    @Autowired
+    private AlertService alertService;
 
     /**
      * Get all the queues general information required to display at the queue cards
@@ -124,6 +141,124 @@ public class QueueService extends BaseService {
     }
 
     /**
+     * Get the routing profiles of an specific queue.
+     * 
+     * @param token
+     * @param queueId
+     * @return String
+     * 
+     * @author Moisés Adame
+     * @return 
+     * @return 
+     * 
+     */
+    public String getQueueRoutingProfiles(String token, String queueId) {
+        // Create a client info
+        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+
+        // Iterate over the routing profiles
+        SearchRoutingProfilesRequest.Builder searchRoutingProfilesRequest = SearchRoutingProfilesRequest.builder().instanceId(clientInfo.getInstanceId());
+        SearchRoutingProfilesResponse routingProfiles = getConnectClient(
+            clientInfo.getAccessKeyId(), 
+            clientInfo.getSecretAccessKey(), 
+            clientInfo.getRegion()
+        ).searchRoutingProfiles(searchRoutingProfilesRequest.build());
+
+        // Set of routing profiles
+        Set<String> routingProfileNames = new HashSet<String>();
+
+        routingProfiles.routingProfiles().forEach(
+            routingProfile -> {
+                ListRoutingProfileQueuesResponse routingProfileQueues = getConnectClient(
+                    clientInfo.getAccessKeyId(),
+                    clientInfo.getSecretAccessKey(),
+                    clientInfo.getRegion()
+                ).listRoutingProfileQueues(
+                    ListRoutingProfileQueuesRequest
+                    .builder()
+                    .instanceId(clientInfo.getInstanceId())
+                    .routingProfileId(routingProfile.routingProfileId())
+                    .build()
+                );
+
+                routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(
+                    routingProfileQueue -> {
+                        if (routingProfileQueue.queueId().equals(queueId)) {
+                            DescribeRoutingProfileResponse routingProfileInfo = getConnectClient(
+                                clientInfo.getAccessKeyId(),
+                                clientInfo.getSecretAccessKey(),
+                                clientInfo.getRegion()
+                            ).describeRoutingProfile(
+                                DescribeRoutingProfileRequest
+                                .builder()
+                                .instanceId(clientInfo.getInstanceId())
+                                .routingProfileId(routingProfile.routingProfileId())
+                                .build()
+                            );
+
+                            routingProfileNames.add(routingProfileInfo.routingProfile().name());
+                        }
+                    }
+                );
+            }
+        );
+
+        // Join the set of routing profile names in a string
+        String result = String.join(", ", routingProfileNames);
+
+        return result;
+    }
+    
+    /**
+     * Get the information of a specific queue.
+     * 
+     * @param token
+     * @param queueId
+     * @return InformationSectionListDTO
+     * 
+     * @see InformationSectionListDTO
+     * @see InformationSectionDTO
+     * @see ConnectClientInfo
+     * @see DescribeQueueRequest
+     * @see DescribeQueueResponse
+     * @see BadRequestException
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public InformationSectionListDTO getQueueInformation(String token, String queueId) {
+        // Create the information section list.
+        InformationSectionListDTO informationSectionListDTO = new InformationSectionListDTO();
+
+        // Add title to the information section list.
+        informationSectionListDTO.setSectionTitle("Information");
+
+        // Get the client info
+        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+
+        // Request for describing an individual queue.
+        DescribeQueueRequest.Builder describeQueueRequest = DescribeQueueRequest.builder().instanceId(clientInfo.getInstanceId()).queueId(queueId);
+        DescribeQueueResponse queuesInfo = getConnectClient(
+            clientInfo.getAccessKeyId(), 
+            clientInfo.getSecretAccessKey(),
+            clientInfo.getRegion()
+        ).describeQueue(describeQueueRequest.build());
+
+        // Create a list of sections.
+        List<InformationSectionDTO> sections = new ArrayList<>();
+        sections.add(new InformationSectionDTO("Name", queuesInfo.queue().name(), "black"));
+        sections.add(new InformationSectionDTO("Hours Of Operation", queuesInfo.queue().hoursOfOperationId(), "black"));
+        sections.add(new InformationSectionDTO("Total Agents", findAgentsInQueue(token, queueId).toString(), "black"));
+        sections.add(new InformationSectionDTO("Skills", getQueueRoutingProfiles(token, queueId), "black"));
+        sections.add(getQueueContactsInformationSection(token, queueId, queuesInfo.queue().maxContacts()));
+
+        // Add the sections to the information section list.
+        informationSectionListDTO.setSections(sections);
+        
+        return informationSectionListDTO;
+    }
+
+    /**
      * Get the information of a specific queue
      * 
      * @param token
@@ -151,11 +286,68 @@ public class QueueService extends BaseService {
         return new QueueDTO(
             queuesInfo.queue().queueId(),
             queuesInfo.queue().queueArn(),
+            getQueueInformation(token, queueId),
             metricService.getMetricsById(token, "QUEUE", queuesInfo.queue().queueArn()),
-            new InformationSectionListDTO(),
-            "alerts",
+            alertService.findAll(1 , "", queuesInfo.queue().queueArn(), "false"),
             "trainings",
             "agents"
         );
+    }
+
+    /**
+     * Get the number of contacts of an especific queue.
+     * 
+     * @param token
+     * @param queueId
+     * @return InformationSectionDTO
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public InformationSectionDTO getQueueContactsInformationSection(String token, String queueId, Integer maxContacts) {
+        if(maxContacts == null){
+            return new InformationSectionDTO("Contacts", "Unlimited", "green");
+        }
+        
+        // Request for getting the queue information.
+        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+
+        List<String> queueIds = new ArrayList<>();
+        queueIds.add(queueId);
+
+        SearchContactsResponse contacts = getConnectClient(
+            clientInfo.getAccessKeyId(),
+            clientInfo.getSecretAccessKey(),
+            clientInfo.getRegion()
+        ).searchContacts(
+            SearchContactsRequest
+            .builder()
+            .instanceId(clientInfo.getInstanceId())
+            .searchCriteria(
+                SearchCriteria
+                .builder()
+                .queueIds(queueIds)
+                .build()
+            )
+            .timeRange(
+                SearchContactsTimeRange
+                .builder()
+                .startTime(Instant.now().minusSeconds(7200))
+                .endTime(Instant.now())
+                .type("CONNECTED_TO_AGENT_TIMESTAMP")
+                .build()
+            )
+            .build()
+        );
+
+        // Create a new InformationSectionDTO object and return it.
+        String bannerColor = "green";
+        if(contacts.contacts().size() == maxContacts){
+            bannerColor = "red";
+        }else if(contacts.contacts().size() >= maxContacts * 0.5){
+            bannerColor = "yellow";
+        }
+        
+        return new InformationSectionDTO("Contacts", String.valueOf(contacts.contacts().size()), bannerColor);
     }
 }
