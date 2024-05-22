@@ -446,7 +446,17 @@ public class QueueService extends BaseService {
         return trainings;
     }
 
-
+    /**
+     * Get a list of the AgentDTO (complete information) of the agents
+     * in the queue.
+     * 
+     * @param token
+     * @param agents
+     * @return List<AgentDTO>
+     * 
+     * @author Moisés Adame
+     * 
+     */
     public List<AgentDTO> getAgentInformationInQueue(String token, List<UserData> agents) {
         // List of the agentDTO's
         List<AgentDTO> agentDTOs = new ArrayList<AgentDTO>();
