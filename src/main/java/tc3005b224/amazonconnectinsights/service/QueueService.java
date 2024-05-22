@@ -34,6 +34,7 @@ import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueCardDTO;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionDTO;
 import software.amazon.awssdk.services.connect.model.SearchRoutingProfilesRequest;
 import software.amazon.awssdk.services.connect.model.SearchRoutingProfilesResponse;
@@ -47,6 +48,8 @@ public class QueueService extends BaseService {
     private MetricService metricService;
     @Autowired
     private AlertService alertService;
+    @Autowired
+    private AgentService agentService;
 
     /**
      * Get all the queues general information required to display at the queue cards
@@ -289,6 +292,8 @@ public class QueueService extends BaseService {
             clientInfo.getRegion()
         ).describeQueue(describeQueueRequest.build());
 
+        List<UserData> agents = findAgentsInQueue(token, queueId);
+
         // Create a new QueueDTO object and return it.
         return new QueueDTO(
             queuesInfo.queue().queueId(),
@@ -296,8 +301,8 @@ public class QueueService extends BaseService {
             getQueueInformation(token, queueId),
             metricService.getMetricsById(token, "QUEUE", queuesInfo.queue().queueArn()),
             alertService.findAll(1 , "", queuesInfo.queue().queueArn(), "false"),
-            getTrainings(token, queuesInfo.queue().queueArn(), findAgentsInQueue(token, queueId)),
-            "agents"
+            getTrainings(token, queuesInfo.queue().queueArn(), agents),
+            getAgentInformationInQueue(token, agents)
         );
     }
 
@@ -439,5 +444,24 @@ public class QueueService extends BaseService {
         );
 
         return trainings;
+    }
+
+
+    public List<AgentDTO> getAgentInformationInQueue(String token, List<UserData> agents) {
+        // List of the agentDTO's
+        List<AgentDTO> agentDTOs = new ArrayList<AgentDTO>();
+
+        // Iterate over the agents and get their information.
+        agents.forEach(
+            agent -> {
+                try {
+                    agentDTOs.add(agentService.findById(token, agent.user().arn()));
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        );
+
+        return agentDTOs;
     }
 }
