@@ -1,6 +1,5 @@
 package tc3005b224.amazonconnectinsights.service;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,21 +17,19 @@ import software.amazon.awssdk.services.connect.model.DescribeContactResponse;
 import software.amazon.awssdk.services.connect.model.DescribeRoutingProfileRequest;
 import software.amazon.awssdk.services.connect.model.DescribeUserRequest;
 import software.amazon.awssdk.services.connect.model.DescribeUserResponse;
-import software.amazon.awssdk.services.connect.model.FilterV2;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataRequest;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataResponse;
-import software.amazon.awssdk.services.connect.model.GetMetricDataV2Request;
-import software.amazon.awssdk.services.connect.model.GetMetricDataV2Response;
 import software.amazon.awssdk.services.connect.model.ListRealtimeContactAnalysisSegmentsV2Request;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesResponse;
-import software.amazon.awssdk.services.connect.model.MetricV2;
+import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
+import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
 import software.amazon.awssdk.services.connect.model.RealTimeContactAnalysisSegmentType;
+import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest.Builder;
 import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
 import software.amazon.awssdk.services.connect.model.StringCondition;
-import software.amazon.awssdk.services.connect.model.ThresholdV2;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import software.amazon.awssdk.services.connect.model.UserSearchCriteria;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
@@ -40,6 +37,7 @@ import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
@@ -79,15 +77,74 @@ public class AgentService extends BaseService {
         // If a resourceId is provided, filter the agents by that resourceId
         if (!resourceId.isEmpty()) {
             UserSearchCriteria criteria = UserSearchCriteria.builder().stringCondition(
-                    StringCondition.builder().comparisonType("EXACT").fieldName("RoutingProfileId").value(resourceId).build())
+                    StringCondition.builder().comparisonType("EXACT").fieldName("RoutingProfileId").value(resourceId)
+                            .build())
                     .build();
             searchUserRequest.searchCriteria(criteria);
         }
 
         // Get the agents / users from the instance
-        SearchUsersResponse users = getConnectClient(clientInfo.getAccessKeyId(),
+        SearchUsersResponse users = null;
+        users = getConnectClient(clientInfo.getAccessKeyId(),
                 clientInfo.getSecretAccessKey(), clientInfo.getRegion())
                 .searchUsers(searchUserRequest.build());
+        if (users.users().isEmpty()) {
+            // If there is no agents with the resourceId, try to get the agents from the
+            // queues
+            // The resourceId might be from a queue, in that case, get the agents from the
+            // routing profile
+            try {
+                ListRoutingProfilesResponse routingProfiles = getConnectClient(clientInfo.getAccessKeyId(),
+                        clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                        .listRoutingProfiles(ListRoutingProfilesRequest.builder()
+                                .instanceId(clientInfo.getInstanceId()).build());
+                Set<String> routingProfileIdsAssociatedToTheQueue = new HashSet<>();
+                for (int i = 0; i < routingProfiles.routingProfileSummaryList().size(); i++) {
+                    RoutingProfileSummary routingProfile = routingProfiles.routingProfileSummaryList().get(i);
+                    ListRoutingProfileQueuesResponse routingProfileQueues = getConnectClient(
+                            clientInfo.getAccessKeyId(),
+                            clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                            .listRoutingProfileQueues(
+                                    ListRoutingProfileQueuesRequest.builder().instanceId(clientInfo.getInstanceId())
+                                            .routingProfileId(routingProfile.id()).build());
+                    for (int j = 0; j < routingProfileQueues.routingProfileQueueConfigSummaryList().size(); j++) {
+                        if (routingProfileQueues.routingProfileQueueConfigSummaryList().get(j).queueId()
+                                .equals(resourceId)) {
+                            routingProfileIdsAssociatedToTheQueue.add(routingProfile.id());
+                        }
+                    }
+
+                }
+                if (routingProfileIdsAssociatedToTheQueue.size() > 0) {
+                    // Reset the searchUserRequest
+                    Builder newSearchUserRequest = SearchUsersRequest.builder()
+                            .instanceId(clientInfo.getInstanceId());
+
+                    List<UserSearchCriteria> criterias = new ArrayList<UserSearchCriteria>();
+
+                    routingProfileIdsAssociatedToTheQueue.forEach(
+                            routingProfileSetValue -> {
+                                criterias.add(UserSearchCriteria.builder()
+                                        .stringCondition(StringCondition.builder().comparisonType("EXACT")
+                                                .fieldName("RoutingProfileId")
+                                                .value(routingProfileSetValue).build())
+                                        .build());
+                            });
+                    // Retrieve the new agents associated to the routing profiles associated to the
+                    // queue
+                    users = getConnectClient(clientInfo.getAccessKeyId(),
+                            clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                            .searchUsers(newSearchUserRequest
+                                    .searchCriteria(UserSearchCriteria.builder().andConditions(criterias).build())
+                                    .build());
+                } else {
+                    throw new BadRequestException("Sorry, we could found any agent in the resourceId, Xd");
+                }
+            } catch (Exception e2) {
+                throw new BadRequestException(
+                        "Sorry, there was an error retrieving the agents. Please review the parameters provided.");
+            }
+        }
 
         // Create the filters to get the user data from the agents retrieved
         Collection<String> userIds = new ArrayList<String>();
@@ -95,6 +152,9 @@ public class AgentService extends BaseService {
                 user -> {
                     userIds.add(user.id());
                 });
+        if (userIds.isEmpty()) {
+            throw new BadRequestException("There are no agents with the resourceId provided");
+        }
 
         // Get the contacts information for the agents
         GetCurrentUserDataResponse getCurrentUserDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
@@ -188,7 +248,6 @@ public class AgentService extends BaseService {
                             queuesSet,
                             alertService.findHighestPriority(token, userData.arn()).getHighestPriorityAlert()));
                 });
-
         return agents;
     };
 
@@ -237,11 +296,13 @@ public class AgentService extends BaseService {
         agentCurrentDataResponse.userDataList().forEach(userData -> {
             userData.contacts().forEach(contact -> {
                 // TODO: Review, it can be different due to the timezones
-                DescribeContactResponse contactDetails = getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(),
-                        clientInfo.getRegion()).describeContact(DescribeContactRequest.builder()
-                        .instanceId(clientInfo.getInstanceId())
-                        .contactId(contact.contactId())
-                        .build());
+                DescribeContactResponse contactDetails = getConnectClient(clientInfo.getAccessKeyId(),
+                        clientInfo.getSecretAccessKey(),
+                        clientInfo.getRegion()).describeContact(
+                                DescribeContactRequest.builder()
+                                        .instanceId(clientInfo.getInstanceId())
+                                        .contactId(contact.contactId())
+                                        .build());
                 String sentiment = null;
                 if (clientInfo.getContactLensEnabled()) {
                     sentiment = getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(),
@@ -253,6 +314,7 @@ public class AgentService extends BaseService {
                                             .build())
                             .segments().get(0).transcript().sentiment().toString();
                 }
+                // TODO: Change the durationAboveAverage to the real value
                 contacts.add(new ContactInformationDTO(contact.contactId(),
                         contactDetails.contact().agentInfo().connectedToAgentTimestamp().toString(),
                         true, sentiment));
@@ -279,6 +341,9 @@ public class AgentService extends BaseService {
         Iterable<Alert> trainings = trainingsService
                 .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
 
+        // Get the agent metrics
+        InformationSectionListDTO metrics = metricService.getMetricsById(token, "AGENT", agent.user().arn());
+
         return new AgentDTO(
                 agentId,
                 agent.user().arn(),
@@ -287,7 +352,6 @@ public class AgentService extends BaseService {
                 contacts,
                 alerts,
                 trainings,
-                metricService.getMetricsById(token, "AGENT", agent.user().arn())
-                );
+                metrics);
     }
 }
