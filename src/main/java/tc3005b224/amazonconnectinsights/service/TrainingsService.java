@@ -1,8 +1,6 @@
 package tc3005b224.amazonconnectinsights.service;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -13,7 +11,6 @@ import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-import tc3005b224.amazonconnectinsights.dto.filter.FilterDTO;
 import tc3005b224.amazonconnectinsights.dto.training.TrainingDTO;
 import tc3005b224.amazonconnectinsights.dto.training.TrainingNoIdDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
@@ -52,102 +49,47 @@ public class TrainingsService extends BaseService {
                 .collect(Collectors.toList());
     }
 
-    public Iterable<TrainingDTO> findAll(List<FilterDTO> filters) throws BadRequestException {
+    public Iterable<TrainingDTO> findAll(String resource, String alertId, String isActive) throws BadRequestException {
         // Avoid excessive stream operations
-        if (filters == null) {
+        if (resource.isEmpty() && alertId.isEmpty() && isActive.isEmpty()) {
             return convertToListDTO(trainingRepository.findAll());
-        } else if (filters.isEmpty()) {
-            return convertToListDTO(trainingRepository.findAll());
-        }
-
-        // Limit the number of filters
-        if (filters.size() > 3) {
-            throw new BadRequestException("Too many filters");
-        }
-
-        // Extract valid filter values from the list of filters
-        Optional<Boolean> activeFilterValue = filters.stream()
-                .filter(filter -> filter.getFilterKey().equals("isActive"))
-                .map(filter -> filter.getFilterValues().get(0))
-                .map(value -> {
-                    try {
-                        return Boolean.parseBoolean(value);
-                    } catch (Error ex) {
-                        return null;
-                    }
-                })
-                .findFirst();
-        Optional<Iterable<Alert>> alertsFilterValues = Optional.ofNullable(filters.stream()
-                .filter(filter -> filter.getFilterKey().equals("alerts"))
-                .map(filter -> filter.getFilterValues().stream()
-                        .map(value -> {
-                            try {
-                                return alertRepository.findById(Long.parseLong(value)).orElse(null);
-                            } catch (Error ex) {
-                                return null;
-                            }
-                        })
-                        .collect(Collectors.toList()))
-                .findFirst()
-                .orElse(null));
-        Optional<Iterable<String>> denominationsFilterValues = Optional.ofNullable(filters.stream()
-                .filter(filter -> filter.getFilterKey().equals("denomination"))
-                .map(filter -> filter.getFilterValues())
-                .findFirst()
-                .orElse(null));
-        Optional<Iterable<String>> resourceArnsFilterValues = Optional.ofNullable(filters.stream()
-                .filter(filter -> filter.getFilterKey().equals("resource"))
-                .map(filter -> filter.getFilterValues())
-                .findFirst()
-                .orElse(null));
-
-        // Filters: isActive, alerts, denomination
-        if (activeFilterValue.isPresent() &&
-                alertsFilterValues.isPresent() &&
-                denominationsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByIsActiveAndAlertsInAndDenominationIn(
-                    activeFilterValue.get(),
-                    alertsFilterValues.get(),
-                    denominationsFilterValues.get()));
-            // Filters: isActive, alerts
-        } else if (activeFilterValue.isPresent() && alertsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByIsActiveAndAlerts(
-                    activeFilterValue.get(),
-                    alertsFilterValues.get()));
-            // Filters: isActive, denomination
-        } else if (activeFilterValue.isPresent() && denominationsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByIsActiveAndDenominationIn(
-                    activeFilterValue.get(),
-                    denominationsFilterValues.get()));
-            // Filters: isActive, resourceArn
-        } else if (activeFilterValue.isPresent() && resourceArnsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByIsActiveAndAlertsResourceIn(
-                    activeFilterValue.get(),
-                    resourceArnsFilterValues.get()));
-            // Filters: isActive
-        } else if (activeFilterValue.isPresent()) {
-            return convertToListDTO(trainingRepository.findByIsActive(
-                    activeFilterValue.get()));
-            // Filters: alerts, denomination
-        } else if (alertsFilterValues.isPresent() && denominationsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByAlertsAndDenominationIn(
-                    alertsFilterValues.get(),
-                    denominationsFilterValues.get()));
-            // Filters: alerts
-        } else if (alertsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByAlertsIn(
-                    alertsFilterValues.get()));
-            // Filters: denomination
-        } else if (denominationsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByDenominationIn(
-                    denominationsFilterValues.get()));
-            // Filters: resourceArn
-        } else if (resourceArnsFilterValues.isPresent()) {
-            return convertToListDTO(trainingRepository.findByAlertsResourceIn(
-                    resourceArnsFilterValues.get()));
+        } else if (!resource.isEmpty() && alertId.isEmpty() && !isActive.isEmpty()) {
+            if (isActive.equals("true")) {
+                return convertToListDTO(trainingRepository.findByIsActiveAndAlertsResource(true, resource));
+            } else if (isActive.equals("false")) {
+                return convertToListDTO(trainingRepository.findByIsActiveAndAlertsResource(false, resource));
+            } else {
+                throw new BadRequestException("Invalid value at isActive: " + isActive);
+            }
+        } else if (!resource.isEmpty() && alertId.isEmpty() && isActive.isEmpty()) {
+            return convertToListDTO(trainingRepository.findByAlertsResource(resource));
+        } else if (resource.isEmpty() && !alertId.isEmpty() && isActive.isEmpty()) {
+            Alert alert = alertRepository.findById(Long.parseLong(alertId)).orElseThrow(
+                    () -> new BadRequestException("Invalid alertId"));
+            return convertToListDTO(trainingRepository.findByAlerts(alert));
         } else {
             throw new BadRequestException("Invalid filters");
         }
+    }
+
+    /**
+     * Method that returns all the trainings that belong to a given connection and
+     * resource.
+     * 
+     * @param connectionIdentifier
+     * @param resource
+     * @return Iterable<Alert>
+     * 
+     * @author Diego Jacobo Djmr5
+     * 
+     * @see AlertRepository
+     */
+    public Iterable<Alert> findTrainingsAlertsByResource(int connectionIdentifier, String resource) {
+        if (resource == null || resource.isEmpty() || connectionIdentifier < 1) {
+            throw new IllegalArgumentException("Invalid parameters.");
+        }
+        return alertRepository.findByConnectionIdentifierAndResourceContainingAndSolvedAndInsight_Category_Priority(
+                connectionIdentifier, resource, true, 1);
     }
 
     public TrainingDTO saveTraining(TrainingNoIdDTO newTraining) {

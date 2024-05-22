@@ -1,6 +1,5 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
-import java.util.List;
 import java.util.Map;
 import java.security.Principal;
 
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import tc3005b224.amazonconnectinsights.dto.filter.FilterDTO;
 import tc3005b224.amazonconnectinsights.dto.training.TrainingDTO;
 import tc3005b224.amazonconnectinsights.dto.training.TrainingNoIdDTO;
 import tc3005b224.amazonconnectinsights.service.TrainingsService;
@@ -54,12 +53,14 @@ public class TrainingController {
                         @ApiResponse(responseCode = "503", description = "Couldn't connect to Database", content = @Content),
         })
         @Operation(summary = "Get the list of all trainings data")
-        @PostMapping("")
+        @GetMapping("")
         public ResponseEntity<?> getTrainingsData(
-                        @RequestBody(required = false) Principal principal, List<FilterDTO> filters) throws BadRequestException {
+                        @RequestParam(required = false, defaultValue = "") String resource,
+                        @RequestParam(required = false, defaultValue = "") String alertId,
+                        @RequestParam(required = false, defaultValue = "") String isActive,
+                        @RequestBody(required = false) Principal principal) throws BadRequestException {
                 try {
-                        System.out.println(principal.getName());
-                        return ResponseEntity.ok(trainingService.findAll(filters));
+                        return ResponseEntity.ok(trainingService.findAll(resource, alertId, isActive));
                 } catch (Exception e) {
                         e.printStackTrace();
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -72,7 +73,7 @@ public class TrainingController {
          * @param trainingId
          * @return TrainingDTO
          * @author Diego Jacobo Djmr5
-         * @throws NotFoundException 
+         * @throws NotFoundException
          * @see TrainingDTO
          */
         @ApiResponses(value = {
@@ -85,7 +86,8 @@ public class TrainingController {
         })
         @Operation(summary = "Get the training data by its id")
         @GetMapping("{trainingId}")
-        public ResponseEntity<TrainingDTO> getTrainingData(@PathVariable("trainingId") Short trainingId) throws NotFoundException {
+        public ResponseEntity<TrainingDTO> getTrainingData(@PathVariable("trainingId") Short trainingId)
+                        throws NotFoundException {
                 try {
                         return ResponseEntity.ok(trainingService.findById(trainingId));
                 } catch (NotFoundException e) {
@@ -109,7 +111,7 @@ public class TrainingController {
                         @ApiResponse(responseCode = "500", description = "Internal error", content = @Content),
                         @ApiResponse(responseCode = "503", description = "Couldn't connect to Database", content = @Content),
         })
-        @PostMapping("/create")
+        @PostMapping("")
         public ResponseEntity<TrainingDTO> saveTrainingData(@RequestBody TrainingNoIdDTO newTraining) {
                 return ResponseEntity.ok(trainingService.saveTraining(newTraining));
         }
