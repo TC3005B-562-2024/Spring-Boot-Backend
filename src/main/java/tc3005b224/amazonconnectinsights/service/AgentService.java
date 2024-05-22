@@ -354,24 +354,4 @@ public class AgentService extends BaseService {
                 trainings,
                 metrics);
     }
-
-    public Iterable<String> test(String resourceId) throws Exception {
-        ConnectClientInfo clientInfo = getConnectClientInfo("token");
-        UserSearchCriteria criteria = UserSearchCriteria.builder().stringCondition(
-                StringCondition.builder().comparisonType("EXACT").fieldName("RoutingProfileId").value(resourceId)
-                        .build())
-                .build();
-        SearchUsersRequest searchUserRequest = SearchUsersRequest.builder().instanceId(clientInfo.getInstanceId())
-                .searchCriteria(criteria).build();
-        SearchUsersResponse users = getConnectClient(clientInfo.getAccessKeyId(),
-                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
-                .searchUsers(searchUserRequest);
-        List<String> response = new ArrayList<String>();
-        users.users().forEach(
-                user -> {
-                    response.add(user.id());
-                });
-        return response;
-    }
-
 }

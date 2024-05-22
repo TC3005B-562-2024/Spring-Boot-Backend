@@ -41,16 +41,4 @@ public class AgentController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
-    @GetMapping("/test")
-    public ResponseEntity<Iterable<String>> test(
-            @RequestParam(required = false, defaultValue = "") String resourceid) {
-        try {
-            return ResponseEntity.ok(agentService.test(resourceid));
-        } catch (Exception e) {
-            // Return error 404 if there is an exception.
-            System.out.println(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.valueOf(500));
-        }
-    }
 }
