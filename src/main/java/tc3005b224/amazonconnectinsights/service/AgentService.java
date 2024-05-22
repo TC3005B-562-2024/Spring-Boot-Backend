@@ -22,7 +22,10 @@ import software.amazon.awssdk.services.connect.model.GetCurrentUserDataResponse;
 import software.amazon.awssdk.services.connect.model.ListRealtimeContactAnalysisSegmentsV2Request;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesResponse;
+import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
+import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
 import software.amazon.awssdk.services.connect.model.RealTimeContactAnalysisSegmentType;
+import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest.Builder;
 import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
@@ -81,9 +84,67 @@ public class AgentService extends BaseService {
         }
 
         // Get the agents / users from the instance
-        SearchUsersResponse users = getConnectClient(clientInfo.getAccessKeyId(),
+        SearchUsersResponse users = null;
+        users = getConnectClient(clientInfo.getAccessKeyId(),
                 clientInfo.getSecretAccessKey(), clientInfo.getRegion())
                 .searchUsers(searchUserRequest.build());
+        if (users.users().isEmpty()) {
+            // If there is no agents with the resourceId, try to get the agents from the
+            // queues
+            // The resourceId might be from a queue, in that case, get the agents from the
+            // routing profile
+            try {
+                ListRoutingProfilesResponse routingProfiles = getConnectClient(clientInfo.getAccessKeyId(),
+                        clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                        .listRoutingProfiles(ListRoutingProfilesRequest.builder()
+                                .instanceId(clientInfo.getInstanceId()).build());
+                Set<String> routingProfileIdsAssociatedToTheQueue = new HashSet<>();
+                for (int i = 0; i < routingProfiles.routingProfileSummaryList().size(); i++) {
+                    RoutingProfileSummary routingProfile = routingProfiles.routingProfileSummaryList().get(i);
+                    ListRoutingProfileQueuesResponse routingProfileQueues = getConnectClient(
+                            clientInfo.getAccessKeyId(),
+                            clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                            .listRoutingProfileQueues(
+                                    ListRoutingProfileQueuesRequest.builder().instanceId(clientInfo.getInstanceId())
+                                            .routingProfileId(routingProfile.id()).build());
+                    for (int j = 0; j < routingProfileQueues.routingProfileQueueConfigSummaryList().size(); j++) {
+                        if (routingProfileQueues.routingProfileQueueConfigSummaryList().get(j).queueId()
+                                .equals(resourceId)) {
+                            routingProfileIdsAssociatedToTheQueue.add(routingProfile.id());
+                        }
+                    }
+
+                }
+                if (routingProfileIdsAssociatedToTheQueue.size() > 0) {
+                    // Reset the searchUserRequest
+                    Builder newSearchUserRequest = SearchUsersRequest.builder()
+                            .instanceId(clientInfo.getInstanceId());
+
+                    List<UserSearchCriteria> criterias = new ArrayList<UserSearchCriteria>();
+
+                    routingProfileIdsAssociatedToTheQueue.forEach(
+                            routingProfileSetValue -> {
+                                criterias.add(UserSearchCriteria.builder()
+                                        .stringCondition(StringCondition.builder().comparisonType("EXACT")
+                                                .fieldName("RoutingProfileId")
+                                                .value(routingProfileSetValue).build())
+                                        .build());
+                            });
+                    // Retrieve the new agents associated to the routing profiles associated to the
+                    // queue
+                    users = getConnectClient(clientInfo.getAccessKeyId(),
+                            clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                            .searchUsers(newSearchUserRequest
+                                    .searchCriteria(UserSearchCriteria.builder().andConditions(criterias).build())
+                                    .build());
+                } else {
+                    throw new BadRequestException("Sorry, we could found any agent in the resourceId, Xd");
+                }
+            } catch (Exception e2) {
+                throw new BadRequestException(
+                        "Sorry, there was an error retrieving the agents. Please review the parameters provided.");
+            }
+        }
 
         // Create the filters to get the user data from the agents retrieved
         Collection<String> userIds = new ArrayList<String>();
@@ -91,6 +152,9 @@ public class AgentService extends BaseService {
                 user -> {
                     userIds.add(user.id());
                 });
+        if (userIds.isEmpty()) {
+            throw new BadRequestException("There are no agents with the resourceId provided");
+        }
 
         // Get the contacts information for the agents
         GetCurrentUserDataResponse getCurrentUserDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
@@ -184,7 +248,6 @@ public class AgentService extends BaseService {
                             queuesSet,
                             alertService.findHighestPriority(token, userData.arn()).getHighestPriorityAlert()));
                 });
-
         return agents;
     };
 
@@ -291,4 +354,24 @@ public class AgentService extends BaseService {
                 trainings,
                 metrics);
     }
+
+    public Iterable<String> test(String resourceId) throws Exception {
+        ConnectClientInfo clientInfo = getConnectClientInfo("token");
+        UserSearchCriteria criteria = UserSearchCriteria.builder().stringCondition(
+                StringCondition.builder().comparisonType("EXACT").fieldName("RoutingProfileId").value(resourceId)
+                        .build())
+                .build();
+        SearchUsersRequest searchUserRequest = SearchUsersRequest.builder().instanceId(clientInfo.getInstanceId())
+                .searchCriteria(criteria).build();
+        SearchUsersResponse users = getConnectClient(clientInfo.getAccessKeyId(),
+                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .searchUsers(searchUserRequest);
+        List<String> response = new ArrayList<String>();
+        users.users().forEach(
+                user -> {
+                    response.add(user.id());
+                });
+        return response;
+    }
+
 }
