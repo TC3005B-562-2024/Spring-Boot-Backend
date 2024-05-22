@@ -19,7 +19,7 @@ import software.amazon.awssdk.services.connect.ConnectClient;
 /**
  * Base service class with common functionalities that might be used in most
  * services.
- * 
+ *
  * @version 1.0
  * @author Diego Jacobo Djmr5
  */
@@ -42,10 +42,10 @@ public class BaseService {
     
     /**
      * Decodes a URL encoded string.
-     * 
+     *
      * Example: decodeUrl("https%3A%2F%2Fwww.google.com") ->
      * "https://www.google.com"
-     * 
+     *
      * @param url
      * @return String as ASCII
      * @author Diego Jacobo Djmr5
@@ -60,9 +60,9 @@ public class BaseService {
 
     /**
      * Convert a value to a target specific type.
-     * 
+     *
      * Example: convertValue("123", Integer.class) -> 123
-     * 
+     *
      * @param value
      * @param targetType
      * @return the value converted to the target type
@@ -88,7 +88,7 @@ public class BaseService {
      * Check if the fields parameter contains the identifier field. An exception is
      * thrown if the identifier field is present because the identifier field cannot
      * be modified.
-     * 
+     *
      * @param fields
      * @return void
      * @throws IllegalArgumentException if the identifier field is present
@@ -103,7 +103,6 @@ public class BaseService {
     /**
      * A function that maps the valid values from the inputted fields parameter to a
      * given Class
-     * 
      * @param <T>
      * @param fields
      * @param entityInstance
@@ -144,6 +143,7 @@ public class BaseService {
             Region.of(region),
             false
             );
+
     }
 
     @AllArgsConstructor
@@ -151,6 +151,7 @@ public class BaseService {
     @Setter
     @NoArgsConstructor
     protected class ConnectClientInfo {
+
         private Integer connectionIdentifier;
         private String accessKeyId;
         private String secretAccessKey;
@@ -160,3 +161,4 @@ public class BaseService {
         private Boolean contactLensEnabled;
     }
 }
+
