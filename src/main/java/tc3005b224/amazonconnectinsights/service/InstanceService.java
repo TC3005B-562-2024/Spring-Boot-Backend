@@ -1,9 +1,5 @@
 package tc3005b224.amazonconnectinsights.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.services.connect.model.DescribeInstanceRequest;
@@ -14,8 +10,6 @@ import software.amazon.awssdk.services.connect.model.DescribeInstanceAttributeRe
 import software.amazon.awssdk.services.connect.model.DescribeInstanceAttributeResponse;
 import software.amazon.awssdk.services.connect.model.Attribute;
 
-
-import software.amazon.awssdk.services.connect.model.InstanceStatus;
 import tc3005b224.amazonconnectinsights.dto.instance.InstanceDTO;
 
 @Service
