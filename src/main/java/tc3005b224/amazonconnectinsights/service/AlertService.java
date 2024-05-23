@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -215,5 +216,24 @@ public class AlertService extends BaseService {
         } else {
             return new AlertHighPriorityDTO(null);
         }
+    }
+
+    /**
+     * Service that returns all the alerts where is_solved is 1, has_training is 1 and the resource is the same as the one given.
+     * 
+     * @param token
+     * @param resource
+     * @return List<Alert>
+     * @throws BadRequestException
+     * 
+     * @see Alert
+     * @see BadRequestException
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public Iterable<Alert> findTrainingAlerts(String token, String resource) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        return alertRepository.findByConnectionIdentifierAndResourceAndSolvedAndHasTraining(clientInfo.getConnectionIdentifier(), resource, true, true);
     }
 }
