@@ -156,6 +156,8 @@ public class AgentService extends BaseService {
         if (userIds.isEmpty()) {
             throw new BadRequestException("There are no agents with the resourceId provided");
         }
+        System.out.println(userIds);
+        System.out.println(userIds.size());
 
         // Get the contacts information for the agents
         GetCurrentUserDataResponse getCurrentUserDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
@@ -317,7 +319,9 @@ public class AgentService extends BaseService {
                 }
                 // TODO: Change the durationAboveAverage to the real value
                 contacts.add(new ContactInformationDTO(contact.contactId(),
-                        contactDetails.contact().agentInfo().connectedToAgentTimestamp().toString(),
+                        contactDetails.contact().agentInfo() != null
+                                ? contactDetails.contact().agentInfo().connectedToAgentTimestamp().toString()
+                                : null,
                         true, sentiment));
             });
         });
@@ -337,8 +341,12 @@ public class AgentService extends BaseService {
         });
 
         String name = agent.user().identityInfo().firstName() + " " + agent.user().identityInfo().lastName();
+        String agentStatus = null;
+        if (!agentCurrentDataResponse.userDataList().isEmpty()) {
+            agentStatus = agentCurrentDataResponse.userDataList().get(0).status().statusName();
+        }
         AgentInformationDTO agentInformation = new AgentInformationDTO(name, routingProfileName,
-                agentCurrentDataResponse.userDataList().get(0).status().statusName());
+                agentStatus);
         Iterable<Alert> trainings = trainingsService
                 .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
 
