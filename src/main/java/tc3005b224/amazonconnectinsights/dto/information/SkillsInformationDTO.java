@@ -8,18 +8,10 @@ public class SkillsInformationDTO {
     // -- ATTRIBUTES
     private String title;
     private List<InformationSectionDTO> sections = new ArrayList<>();
-    private String alias;
-    private Instant createdAt;
-    private Long totalAgents;
 
     // -- CONSTRUCTORS
     public SkillsInformationDTO(String alias, Instant createdAt, Long totalAgents) {
-        this.title = "Information";
-
-        // Assign the new attributes
-        this.alias = alias;
-        this.createdAt = createdAt;
-        this.totalAgents = totalAgents;
+        this.title = "Skills Information";
 
         // Create a InformationSectionDTO for the agent's alias.
         InformationSectionDTO aliasSection = new InformationSectionDTO("Alias", alias, "black");
@@ -51,29 +43,5 @@ public class SkillsInformationDTO {
 
     public void setSections(List<InformationSectionDTO> sections) {
         this.sections = sections;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Long getTotalAgents() {
-        return totalAgents;
-    }
-
-    public void setTotalAgents(Long totalAgents) {
-        this.totalAgents = totalAgents;
     }
 }

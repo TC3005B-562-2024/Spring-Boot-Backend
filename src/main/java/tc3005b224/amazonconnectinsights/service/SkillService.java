@@ -1,5 +1,6 @@
 package tc3005b224.amazonconnectinsights.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +14,9 @@ import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
 import software.amazon.awssdk.services.connect.model.RoutingProfile;
 import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
+import tc3005b224.amazonconnectinsights.dto.information.SkillsInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
@@ -60,24 +63,32 @@ public class SkillService extends BaseService {
                 .describeRoutingProfile(describeRoutingProfileRequest);
         RoutingProfile data = describeRoutingProfileResponse.routingProfile();
         AlertPriorityDTO alerts = alertService.findByResource(clientInfo.getConnectionIdentifier(), data.routingProfileArn());
+
+        Instant createdAt = Instant.now(); // Mocked creation time
+        SkillsInformationDTO skillsInformationDTO = new SkillsInformationDTO(data.name(), createdAt, data.numberOfAssociatedUsers());
         return new SkillDTO(
                 skillId,
                 data.name(),
-                null,
+                createdAt, // Assuming createdAt is a mock
                 data.numberOfAssociatedUsers(),
-                null,
-                null,
-                null,
-                null,
-                null,
+                null, // serviceLevel
+                null, // acr
+                null, // asa
+                null, // fcr
+                null, // adherence
                 alerts,
-                null,
-                null);
+                skillsInformationDTO, // skillsInformationDTO
+                null, // trainings
+                null  // agents
+        );
     }
     
     // Service that retrieves the Skills (Routing Profile) of an agent given its agentId.
-    public List<SkillBriefDTO> findByAgentId(String isntanceId, String agentId) throws Exception {
+    public SkillsInformationDTO findByAgentId(String isntanceId, String agentId) throws Exception {
         // TODO: Call Amazon Connect endpoint capable of retrieveng the Skills of an agent.
+        String alias = "Agent Alias";
+        Instant createdAt = Instant.now();
+        Long totalAgents = 10L;
 
         // Mock Skills
         SkillBriefDTO serviceSkill = new SkillBriefDTO("1", "routing-profile:1", "Service", "phone_in_talk");
@@ -100,6 +111,6 @@ public class SkillService extends BaseService {
             throw new Exception("Agent with id: " + agentId + ", not found!");
         }
 
-        return result;
+        return new SkillsInformationDTO(alias, createdAt, totalAgents);
     }
 }
