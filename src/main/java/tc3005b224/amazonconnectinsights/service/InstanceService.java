@@ -1,5 +1,6 @@
 package tc3005b224.amazonconnectinsights.service;
 
+
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.services.connect.model.DescribeInstanceRequest;
@@ -9,10 +10,12 @@ import software.amazon.awssdk.services.connect.model.Instance;
 import software.amazon.awssdk.services.connect.model.DescribeInstanceAttributeRequest;
 import software.amazon.awssdk.services.connect.model.DescribeInstanceAttributeResponse;
 import software.amazon.awssdk.services.connect.model.Attribute;
+
 import tc3005b224.amazonconnectinsights.dto.instance.InstanceDTO;
 
 @Service
 public class InstanceService extends BaseService {
+
     /**
      * Service that returns the details of the Amazon Connect Instance.
      * 

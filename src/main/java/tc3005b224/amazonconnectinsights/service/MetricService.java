@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Collection;
 
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.services.connect.model.FilterV2;
@@ -18,6 +19,8 @@ import software.amazon.awssdk.services.connect.model.ThresholdV2;
 
 @Service
 public class MetricService extends BaseService {
+    @Autowired
+    private InstanceService instanceService;
     public InformationSectionListDTO getMetricsById(String token, String resourceType, String resourceArn) throws BadRequestException {
         // Check if the resource type is valid.
         if(!resourceType.equals("AGENT") && !resourceType.equals("QUEUE") && !resourceType.equals("ROUTING_PROFILE")){
@@ -57,30 +60,27 @@ public class MetricService extends BaseService {
                 .metrics(
                     metricsToSearch
                 )
-                .resourceArn(clientInfo.getInstanceArn())
+                .resourceArn(instanceService.getInstanceDetails(token).getArn())
                 .build()
         );
-
-        System.out.println(metrics.metricResults().toString());
 
         // Create the information section list.
         InformationSectionListDTO informationSectionListDTO = new InformationSectionListDTO();
         informationSectionListDTO.setSectionTitle("Metrics");
-        
-        // Create list of sections
-        List<InformationSectionDTO> sections = new ArrayList<>();
-        sections.add(new InformationSectionDTO("Abandonment Rate", metrics.metricResults().get(0).collections().get(0).value().toString(), "green"));
-        sections.add(new InformationSectionDTO("Agent Schedule Adherence", metrics.metricResults().get(1).collections().get(0).value().toString(), "green"));
-        sections.add(new InformationSectionDTO("Average Queue Answer Time", metrics.metricResults().get(2).collections().get(0).value().toString(), "green"));
-        sections.add(new InformationSectionDTO("Average Resolution Time", metrics.metricResults().get(3).collections().get(0).value().toString(), "green"));
-        sections.add(new InformationSectionDTO("Percent Cases First Contact Resolved", metrics.metricResults().get(4).collections().get(0).value().toString(), "green"));
-        sections.add(new InformationSectionDTO("Service Level", metrics.metricResults().get(5).collections().get(0).value().toString(), "green"));
-        sections.add(new InformationSectionDTO("Agent Occupancy", metrics.metricResults().get(6).collections().get(0).value().toString(), "green"));
 
-        // Add secrtions to the information section list.
-        informationSectionListDTO.setSections(sections);
+        if(metrics.metricResults().size() > 0){
+            // Create list of sections
+            List<InformationSectionDTO> sections = new ArrayList<>();
+            metrics.metricResults().forEach(metric -> {
+                metric.collections().forEach(collection -> {
+                    String collectionValue = collection.value() == null ? null : collection.value().toString();
+                    InformationSectionDTO section = new InformationSectionDTO(collection.metric().name(), collectionValue, "color");
+                    sections.add(section);
+                });
+            });
 
-        System.out.println(metrics);
+            informationSectionListDTO.setSections(sections);
+        }
 
         return informationSectionListDTO;
     }
