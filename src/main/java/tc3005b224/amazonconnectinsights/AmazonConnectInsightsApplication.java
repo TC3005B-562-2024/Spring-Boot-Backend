@@ -24,6 +24,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 		@Server(url = "https://back-p27ymwll2a-uc.a.run.app/", description = "Google Cloud Run server")
 
 })
+@EnableScheduling
 public class AmazonConnectInsightsApplication {
 
 	public static void main(String[] args) {

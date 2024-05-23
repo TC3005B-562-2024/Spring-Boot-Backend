@@ -37,7 +37,7 @@ import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
-import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
@@ -349,7 +349,7 @@ public class AgentService extends BaseService {
                 .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
 
         // Get the agent metrics
-        InformationSectionListDTO metrics = metricService.getMetricsById(token, "AGENT", agent.user().arn());
+        InformationMetricSectionListDTO metrics = metricService.getMetricsById(token, "AGENT", agent.user().arn());
 
         return new AgentDTO(
                 agentId,

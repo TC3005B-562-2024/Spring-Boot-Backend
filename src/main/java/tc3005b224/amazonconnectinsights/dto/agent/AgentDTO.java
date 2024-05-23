@@ -7,7 +7,7 @@ import lombok.Setter;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
-import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
@@ -23,5 +23,5 @@ public class AgentDTO {
     private Iterable<ContactInformationDTO> contactInformationDTO;
     private AlertPriorityDTO alertPriorityDTO;
     private Iterable<Alert> trainings;
-    private InformationSectionListDTO metrics;
+    private InformationMetricSectionListDTO metrics;
 }

@@ -11,12 +11,12 @@ public class AlertEngineTask {
     @Autowired
     private AlertEngineService alertEngineService;
 
-    private volatile boolean running = false;
+    private volatile boolean running = true;
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedDelay = 1000)
     public void mainTask() {
         if (running) {
-            alertEngineService.sendAlert("Task is already running!");
+            alertEngineService.generateAlerts("token");
         }
     }
 
