@@ -72,7 +72,7 @@ public class AgentService extends BaseService {
             throws BadRequestException {
         ConnectClientInfo clientInfo = getConnectClientInfo(token);
         // Get all the agents
-        Builder searchUserRequest = SearchUsersRequest.builder().instanceId(clientInfo.getInstanceId());
+        Builder searchUserRequest = SearchUsersRequest.builder().instanceId(clientInfo.getInstanceId()).maxResults(500);
 
         // If a resourceId is provided, filter the agents by that resourceId
         if (!resourceId.isEmpty()) {
@@ -135,6 +135,7 @@ public class AgentService extends BaseService {
                     users = getConnectClient(clientInfo.getAccessKeyId(),
                             clientInfo.getSecretAccessKey(), clientInfo.getRegion())
                             .searchUsers(newSearchUserRequest
+                                    .maxResults(500)
                                     .searchCriteria(UserSearchCriteria.builder().andConditions(criterias).build())
                                     .build());
                 } else {
@@ -155,6 +156,8 @@ public class AgentService extends BaseService {
         if (userIds.isEmpty()) {
             throw new BadRequestException("There are no agents with the resourceId provided");
         }
+        System.out.println(userIds);
+        System.out.println(userIds.size());
 
         // Get the contacts information for the agents
         GetCurrentUserDataResponse getCurrentUserDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
