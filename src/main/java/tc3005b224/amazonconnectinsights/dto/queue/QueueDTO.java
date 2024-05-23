@@ -7,6 +7,7 @@ import tc3005b224.amazonconnectinsights.dto.training.TrainingProgressItemDTO;
 
 import java.util.List;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
