@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
+import tc3005b224.amazonconnectinsights.dto.information.SkillsInformationDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
 @NoArgsConstructor @AllArgsConstructor @Getter @Setter
@@ -21,6 +22,7 @@ public class SkillDTO {
     private String fcr;
     private String adherence;
     private AlertPriorityDTO alerts;
+    private SkillsInformationDTO skillsInformationDTO;
     // TODO: Revisar
     private Iterable<Alert> trainings;
     private Iterable<AgentDTO> agents;

@@ -1,5 +1,7 @@
 package tc3005b224.amazonconnectinsights.dto.alerts;
 
+import java.util.Date;
+
 public class AlertDTO {
     private Short connectionId;
 
@@ -13,6 +15,8 @@ public class AlertDTO {
 
     private Boolean trainingCompleted;
 
+    private Date dateTrainingCompleted;
+
     // Constructors, getters, and setters
     public AlertDTO(Short connectionId, Short insightId, Short trainingId, String resource, Boolean solved, Boolean trainingCompleted) {
         this.connectionId = connectionId;
@@ -21,6 +25,11 @@ public class AlertDTO {
         this.resource = resource;
         this.solved = solved;
         this.trainingCompleted = trainingCompleted;
+        if(trainingCompleted){
+            this.dateTrainingCompleted = new Date();
+        }else{
+            this.dateTrainingCompleted = null;
+        }
     }
 
     public Short getConnectionId() {
@@ -73,6 +82,18 @@ public class AlertDTO {
 
     public void setTrainingCompleted(Boolean trainingCompleted) {
         this.trainingCompleted = trainingCompleted;
+    }
+
+    public Date getDateTrainingCompleted() {
+        return dateTrainingCompleted;
+    }
+
+    public void setDateTrainingCompleted() {
+        if(trainingCompleted){
+            this.dateTrainingCompleted = new Date();
+        }else{
+            this.dateTrainingCompleted = null;
+        }
     }
 }
 
