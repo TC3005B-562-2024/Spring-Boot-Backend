@@ -23,24 +23,22 @@ public class InstanceDTO {
     /**
      * Indicates if Contact Lens is enabled in the instance (Sentiment analysis)
      */
-    private boolean contactLensEnabled;
-    private boolean inboundCallsEnable;
-    private boolean outboundCallsEnable;
+    private String contactLensEnabled;
+    private String inboundCallsEnable;
+    private String outboundCallsEnable;
 
     public InstanceDTO() {
     }
-
-    public InstanceDTO(String arn, String id, String instanceAlias, String instanceAccessUrl, String instanceStatus,
-            String serviceRole, boolean contactLensEnabled, boolean inboundCallsEnable, boolean outboundCallsEnable) {
+    public InstanceDTO(String arn, String id, String outboundCallsEnable, String instanceAlias, String instanceAccessUrl, String instanceStatus, String serviceRole, String contactLensEnabled, String inboundCallsEnable) {
         this.arn = arn;
         this.id = id;
+        this.outboundCallsEnable = outboundCallsEnable;
         this.instanceAlias = instanceAlias;
         this.instanceAccessUrl = instanceAccessUrl;
         this.instanceStatus = instanceStatus;
         this.serviceRole = serviceRole;
         this.contactLensEnabled = contactLensEnabled;
         this.inboundCallsEnable = inboundCallsEnable;
-        this.outboundCallsEnable = outboundCallsEnable;
     }
 
     public String getArn() {
@@ -91,28 +89,27 @@ public class InstanceDTO {
         this.serviceRole = serviceRole;
     }
 
-    public boolean isContactLensEnabled() {
+    public String getContactLensEnabled() {
         return contactLensEnabled;
     }
 
-    public void setContactLensEnabled(boolean contactLensEnabled) {
+    public void setContactLensEnabled(String contactLensEnabled) {
         this.contactLensEnabled = contactLensEnabled;
     }
 
-    public boolean isInboundCallsEnable() {
+    public String getInboundCallsEnable() {
         return inboundCallsEnable;
     }
 
-    public void setInboundCallsEnable(boolean inboundCallsEnable) {
+    public void setInboundCallsEnable(String inboundCallsEnable) {
         this.inboundCallsEnable = inboundCallsEnable;
     }
 
-    public boolean isOutboundCallsEnable() {
+    public String getOutboundCallsEnable() {
         return outboundCallsEnable;
     }
 
-    public void setOutboundCallsEnable(boolean outboundCallsEnable) {
+    public void setOutboundCallsEnable(String outboundCallsEnable) {
         this.outboundCallsEnable = outboundCallsEnable;
     }
-
 }
