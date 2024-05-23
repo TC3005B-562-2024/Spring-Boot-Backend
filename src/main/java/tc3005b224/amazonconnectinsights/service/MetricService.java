@@ -39,7 +39,7 @@ public class MetricService extends BaseService {
         if(resourceType.equals("AGENT")){
             resourceParentType = "QUEUE";
         }else if(resourceType.equals("QUEUE")){
-            resourceParentType = "ROUTING_PROFILE";
+            resourceParentType = "QUEUE";
         }
         
         // Metrics to search.
@@ -80,39 +80,35 @@ public class MetricService extends BaseService {
                 .build()
         );
 
-        // Get the metrics of the parent
-        GetMetricDataV2Response parentMetrics;
-
         //  Create a map with the metrics of the parent
         Map<String, Double> parentMetricsMap = new HashMap<>();
-        if(resourceType.equals("AGENT")){
-            parentMetrics = getConnectClient(
-                clientInfo.getAccessKeyId(),
-                clientInfo.getSecretAccessKey(),
-                clientInfo.getRegion()
-            ).getMetricDataV2(
-                GetMetricDataV2Request.builder()
-                    .startTime(Instant.now().minusSeconds(7200))
-                    .endTime(Instant.now())
-                    .filters(
-                        FilterV2.builder()
-                            .filterKey("QUEUE")
-                            .filterValues(getResourceParentArns(token, resourceParentType, resourceArn))
-                            .build()
-                    )
-                    .metrics(
-                        metricsToSearch
-                    )
-                    .resourceArn(instanceService.getInstanceDetails(token).getArn())
-                    .build()
-            );
 
-            parentMetrics.metricResults().forEach(metric -> {
-                metric.collections().forEach(collection -> {
-                    parentMetricsMap.put(collection.metric().name(), collection.value());
-                });
+        // Get the metrics of the parent
+        GetMetricDataV2Response parentMetrics = getConnectClient(
+            clientInfo.getAccessKeyId(),
+            clientInfo.getSecretAccessKey(),
+            clientInfo.getRegion()
+        ).getMetricDataV2(
+            GetMetricDataV2Request.builder()
+                .startTime(Instant.now().minusSeconds(1209600))
+                .endTime(Instant.now())
+                .filters(
+                    FilterV2.builder()
+                        .filterKey(resourceParentType)
+                        .filterValues(getResourceParentArns(token, resourceParentType, resourceArn))
+                        .build()
+                ).metrics(
+                    metricsToSearch
+                )
+                .resourceArn(instanceService.getInstanceDetails(token).getArn())
+                .build()
+        );
+
+        parentMetrics.metricResults().forEach(metric -> {
+            metric.collections().forEach(collection -> {
+                parentMetricsMap.put(collection.metric().name(), collection.value());
             });
-        }
+        });
 
         // Create the information section list.
         InformationMetricSectionListDTO informationSectionListDTO = new InformationMetricSectionListDTO();
@@ -176,8 +172,7 @@ public class MetricService extends BaseService {
                         .filterKey(resourceType)
                         .filterValues(resourceArns)
                         .build()
-                )
-                .metrics(
+                ).metrics(
                     metricsToSearch
                 )
                 .resourceArn(instanceService.getInstanceDetails(token).getArn())
@@ -204,7 +199,7 @@ public class MetricService extends BaseService {
             throw new BadRequestException("Invalid resource type");
         }else{
             ConnectClientInfo clientInfo = getConnectClientInfo(token);
-            List<String> queuesList = new ArrayList<>();
+            List<String> parentList = new ArrayList<>();
 
             if(resourceType.equals("AGENT")){                
                 // Get the agent general information
@@ -233,10 +228,15 @@ public class MetricService extends BaseService {
                 );
         
                 routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(queue -> {
-                    queuesList.add(queue.queueName());
+                    parentList.add(queue.queueName());
                 });
+            }else if(resourceType.equals("QUEUE")){
+                parentList.add(resourceArn);
+            }else if(resourceType.equals("ROUTING_PROFILE")){
+                parentList.add(resourceArn);
             }
-            return queuesList;
+
+            return parentList;
         }
     }
 }

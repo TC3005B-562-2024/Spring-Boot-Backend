@@ -11,7 +11,7 @@ public class AlertEngineTask {
     @Autowired
     private AlertEngineService alertEngineService;
 
-    private volatile boolean running = true;
+    private volatile boolean running = false;
 
     @Scheduled(fixedDelay = 1000)
     public void mainTask() {
