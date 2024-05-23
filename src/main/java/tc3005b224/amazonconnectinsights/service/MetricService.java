@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Collection;
 
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.services.connect.model.FilterV2;
@@ -18,6 +19,8 @@ import software.amazon.awssdk.services.connect.model.ThresholdV2;
 
 @Service
 public class MetricService extends BaseService {
+    @Autowired
+    private InstanceService instanceService;
     public InformationSectionListDTO getMetricsById(String token, String resourceType, String resourceArn) throws BadRequestException {
         // Check if the resource type is valid.
         if(!resourceType.equals("AGENT") && !resourceType.equals("QUEUE") && !resourceType.equals("ROUTING_PROFILE")){
@@ -57,7 +60,7 @@ public class MetricService extends BaseService {
                 .metrics(
                     metricsToSearch
                 )
-                .resourceArn(clientInfo.getInstanceArn())
+                .resourceArn(instanceService.getInstanceDetails(token).getArn())
                 .build()
         );
 
