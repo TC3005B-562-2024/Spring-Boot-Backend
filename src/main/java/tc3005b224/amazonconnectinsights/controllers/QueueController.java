@@ -7,6 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueCardDTO;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueDTO;
 import tc3005b224.amazonconnectinsights.service.QueueService;
@@ -17,6 +22,19 @@ public class QueueController {
     @Autowired
     private QueueService queueService;
 
+    @Operation(
+        summary = "Returns a list of all the Queues inside the instance.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Queues found.",
+                content = {@Content(
+                    mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = QueueCardDTO.class))
+                )}
+            )
+        }
+    )
     @GetMapping
     public ResponseEntity<Iterable<QueueCardDTO>> getAllQueues() {
         try {
@@ -28,12 +46,29 @@ public class QueueController {
         }
     }
 
+    @Operation(
+        summary = "Returns all the information of a specific Queue.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Queue found.",
+                content = {@Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = QueueDTO.class)
+                )}
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Queue not found.",
+                content = @Content
+            )
+        }
+    )
     @GetMapping("/{queueId}")
     public ResponseEntity<QueueDTO> getIndividualQueue(@PathVariable String queueId) {
         try {
             return ResponseEntity.ok(queueService.findById("1", queueId));
         }catch (Exception e) {
-            System.out.println(e);
             return ResponseEntity.notFound().build();
         }
     }

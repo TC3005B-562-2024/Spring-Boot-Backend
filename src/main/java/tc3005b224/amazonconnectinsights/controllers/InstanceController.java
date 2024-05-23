@@ -18,6 +18,7 @@ public class InstanceController {
     @Autowired
     private InstanceService instanceService;
 
+
     @Operation(
         summary = "Get the Amazon Connect Instance Details",
         responses = {
@@ -45,6 +46,7 @@ public class InstanceController {
             ),
         }
     )
+
     @GetMapping
     public ResponseEntity<InstanceDTO> getInstanceData(@RequestParam(required = true) String token) {
         try {
