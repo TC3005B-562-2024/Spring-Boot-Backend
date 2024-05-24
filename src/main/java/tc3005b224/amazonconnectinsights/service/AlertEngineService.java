@@ -204,7 +204,7 @@ public class AlertEngineService extends BaseService {
                         analyzeAbandonmentRate(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AGENT_SCHEDULE_ADHERENCE":
-                        System.out.println("agen: " + sectionValue);
+                        analyzeAgentScheduleAdherence(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AVG_HANDLE_TIME":
                         analyzeAvgHandleTime(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
@@ -297,12 +297,43 @@ public class AlertEngineService extends BaseService {
      * 
      */
     public void analyzeAvgHandleTime(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
-        Short insightId = 17;
+        Short insightId = 10;
         Short trainingId = 1;
         Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
         Boolean valueIsBiggerBy10Percent = sectionValue > sectionParentValue * 1.1;
 
         if(valueIsBiggerBy10Percent && alertDoestExist) {
+            AlertDTO alertDto = new AlertDTO(connectionId, insightId, trainingId, resourceArn, null, null);
+            alertService.saveAlert(alertService.fromDTO(alertDto));
+        }
+    }
+
+    /**
+     * Service that analyzes AGENT_SCHEDULE_ADHERENCE metric and generates alerts if necessary.
+     * 
+     * @param connectionId
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return void
+     * 
+     * @see checkAlertExists
+     * @see AlertDTO
+     * @see alertService
+     * @see Alert
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeAgentScheduleAdherence(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+        Short insightId = 11;
+        Short trainingId = 2;
+        Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
+        Boolean valueIsLowerThan90Percent = sectionValue < 90;
+
+        if(valueIsLowerThan90Percent && alertDoestExist) {
             AlertDTO alertDto = new AlertDTO(connectionId, insightId, trainingId, resourceArn, null, null);
             alertService.saveAlert(alertService.fromDTO(alertDto));
         }
