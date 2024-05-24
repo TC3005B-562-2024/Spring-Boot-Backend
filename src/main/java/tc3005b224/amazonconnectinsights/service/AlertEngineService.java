@@ -1,6 +1,7 @@
 package tc3005b224.amazonconnectinsights.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.coyote.BadRequestException;
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
 import software.amazon.awssdk.services.connect.model.ListUsersRequest;
 import software.amazon.awssdk.services.connect.model.ListUsersResponse;
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
+import tc3005b224.amazonconnectinsights.models_sql.Alert;
 import software.amazon.awssdk.services.connect.model.ListQueuesRequest;
 import software.amazon.awssdk.services.connect.model.ListQueuesResponse;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
@@ -20,25 +23,8 @@ public class AlertEngineService extends BaseService {
     @Autowired
     private MetricService metricService;
 
-    public void sendAlert(String message) {
-        try {
-            List<String> routingProfiles = getRoutingProfilesArns("token");
-            String queues = getQueuesArns("token").toString();
-            String agents = getAgentsArns("token").toString();
-
-            System.out.println("Routing Profiles: ");
-            metricService.getMetricsByList("token", "ROUTING_PROFILE", routingProfiles);
-            System.out.println(routingProfiles);
-            System.out.println("Queues: ");
-            System.out.println(queues);
-            System.out.println("Agents: ");
-            System.out.println(agents);
-            
-            // metricService.getMetricsById("token", "AGENT", "arn:aws:connect:us-east-1:674530197385:instance/7c78bd60-4a9f-40e5-b461-b7a0dfaad848/agent/6887b106-f684-485e-9c47-a6b1e16cdd21");
-        } catch (Exception e) {
-            System.out.println("Catch: " + e.getMessage());
-        }
-    }
+    @Autowired
+    private AlertService alertService;
 
     /**
      * Service that retrieves all the routing profiles arn's of the instance
@@ -174,12 +160,14 @@ public class AlertEngineService extends BaseService {
             List<String> queues = getQueuesArns(token);
             List<String> agents = getAgentsArns(token);
 
+            ConnectClientInfo clientInfo = getConnectClientInfo(token);
+
             routingProfiles.forEach(
                 routingProfileArn -> {
                     try {
                         InformationMetricSectionListDTO metrics = metricService.getMetricsById(token, "ROUTING_PROFILE", routingProfileArn);
                         System.out.println("Routing Profile: " + routingProfileArn);
-                        analyzeMetrics(metrics, "ROUTING_PROFILE", routingProfileArn);
+                        analyzeMetrics(clientInfo.getConnectionIdentifier(), metrics, "ROUTING_PROFILE", routingProfileArn);
                     } catch (BadRequestException e) {
                         System.out.println("Catch: " + e.getMessage());
                     }
@@ -204,12 +192,14 @@ public class AlertEngineService extends BaseService {
      * @author Moisés Adame
      * 
      */
-    public void analyzeMetrics(InformationMetricSectionListDTO metrics, String resourceType, String resource) {
+    public void analyzeMetrics(Short connectionId, InformationMetricSectionListDTO metrics, String resourceType, String resourceArn) {
         // Iterate over the metric sections and analyze them.
         metrics.getSections().forEach(
             section -> {
                 Double sectionValue = section.getSectionValue();
                 Double sectionParentValue = section.getSectionParentValue();
+
+                System.out.println("Section: " + checkAlertExists(resourceArn, (long)16));
 
                 switch (section.getSectionTitle()) {
                     case "ABANDONMENT_RATE":
@@ -231,12 +221,51 @@ public class AlertEngineService extends BaseService {
                         System.out.println("SERVICE_LEVEL" + sectionValue);
                         break;
                     case "AGENT_OCCUPANCY":
-                        System.out.println("AGENT_OCCUPANCY" + sectionValue);
+                        analyzeAgentOccupancy(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     default:
                         break;
                 }
             }
         );
+    }
+
+    /**
+     * Service that checks if a given alert is already in the database.
+     * 
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return Boolean
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public Boolean checkAlertExists(String resourceArn, Long insightId) {
+        Collection<Alert> alerts = ((Collection<Alert>) alertService.checkAlertExists(resourceArn, insightId));
+        return alerts.size() > 0;
+    }
+
+
+    /**
+     * Service that analyzes AGENT_OCCUPANCY metric and generates alerts if necessary.
+     * 
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return void
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeAgentOccupancy(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+        if (resourceType.equals("ROUTING_PROFILE") && sectionValue > 0.8) {
+            AlertDTO alertDto = new AlertDTO(connectionId, (short)16, null, resourceArn, null, null);
+            alertService.saveAlert(alertService.fromDTO(alertDto));
+        }
     }
 }

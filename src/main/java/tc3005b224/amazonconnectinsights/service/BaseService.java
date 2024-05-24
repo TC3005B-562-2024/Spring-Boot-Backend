@@ -132,7 +132,7 @@ public class BaseService {
     protected ConnectClientInfo getConnectClientInfo(String token) {
         // If token matches, returns data from the database
         return new ConnectClientInfo(
-            1,
+            (short) 1,
             accessKeyId,
             secretAccessKey,
             instanceId,
@@ -148,7 +148,7 @@ public class BaseService {
     @NoArgsConstructor
     protected class ConnectClientInfo {
 
-        private Integer connectionIdentifier;
+        private Short connectionIdentifier;
         private String accessKeyId;
         private String secretAccessKey;
         private String instanceId;

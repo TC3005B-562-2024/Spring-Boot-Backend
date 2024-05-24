@@ -27,7 +27,6 @@ import tc3005b224.amazonconnectinsights.service.AlertService;
 
 @RestController
 @RequestMapping("/alerts")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AlertController {
     @Autowired
     private AlertService alertService;

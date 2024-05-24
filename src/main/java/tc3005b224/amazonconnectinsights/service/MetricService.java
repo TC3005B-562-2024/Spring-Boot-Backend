@@ -53,7 +53,7 @@ public class MetricService extends BaseService {
         metricsToSearch.add(MetricV2.builder().name("SERVICE_LEVEL")
                 .threshold(ThresholdV2.builder().thresholdValue(7200.0).comparison("LT").build()).build());
 
-        if(resourceType.equals("AGENT")){
+        if(resourceType.equals("AGENT") || resourceType.equals("ROUTING_PROFILE")){
             metricsToSearch.add(MetricV2.builder().name("AGENT_OCCUPANCY").build());
         }
 
