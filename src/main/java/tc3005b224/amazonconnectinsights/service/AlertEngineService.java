@@ -174,14 +174,12 @@ public class AlertEngineService extends BaseService {
             List<String> queues = getQueuesArns(token);
             List<String> agents = getAgentsArns(token);
 
-            
-
             routingProfiles.forEach(
                 routingProfileArn -> {
                     try {
                         InformationMetricSectionListDTO metrics = metricService.getMetricsById(token, "ROUTING_PROFILE", routingProfileArn);
                         System.out.println("Routing Profile: " + routingProfileArn);
-                        analyzeMetrics(metrics, routingProfileArn);
+                        analyzeMetrics(metrics, "ROUTING_PROFILE", routingProfileArn);
                     } catch (BadRequestException e) {
                         System.out.println("Catch: " + e.getMessage());
                     }
@@ -192,11 +190,27 @@ public class AlertEngineService extends BaseService {
         }
     }
 
-    public void analyzeMetrics(InformationMetricSectionListDTO metrics, String resource) {
+    /**
+     * Service that analyzes the metrics of the instance and generates alerts if necessary.
+     * @param token
+     * 
+     * @return void
+     * 
+     * @see getAgentsArns
+     * @see getQueuesArns
+     * @see getRoutingProfilesArns
+     * @see getMetricsById
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeMetrics(InformationMetricSectionListDTO metrics, String resourceType, String resource) {
         // Iterate over the metric sections and analyze them.
         metrics.getSections().forEach(
             section -> {
                 Double sectionValue = section.getSectionValue();
+                Double sectionParentValue = section.getSectionParentValue();
+
                 switch (section.getSectionTitle()) {
                     case "ABANDONMENT_RATE":
                         System.out.println("ABANDONMENT_RATE" + sectionValue);
