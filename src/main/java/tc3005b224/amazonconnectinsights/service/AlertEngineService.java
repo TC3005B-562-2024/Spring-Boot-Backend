@@ -198,13 +198,16 @@ public class AlertEngineService extends BaseService {
             section -> {
                 Double sectionValue = section.getSectionValue();
                 Double sectionParentValue = section.getSectionParentValue();
-                
+
                 switch (section.getSectionTitle()) {
                     case "ABANDONMENT_RATE":
-                        System.out.println("ABANDONMENT_RATE" + sectionValue);
+                        analyzeAbandonmentRate(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AGENT_SCHEDULE_ADHERENCE":
                         System.out.println("agen: " + sectionValue);
+                        break;
+                    case "AVG_HANDLE_TIME":
+                        analyzeAvgHandleTime(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AVG_QUEUE_ANSWER_TIME":
                         System.out.println("AGENT_SCHEDULE_ADHERENCE" + sectionValue);
@@ -246,7 +249,6 @@ public class AlertEngineService extends BaseService {
         return alerts.size() > 0;
     }
 
-
     /**
      * Service that analyzes AGENT_OCCUPANCY metric and generates alerts if necessary.
      * 
@@ -257,6 +259,11 @@ public class AlertEngineService extends BaseService {
      * 
      * @return void
      * 
+     * @see checkAlertExists
+     * @see AlertDTO
+     * @see alertService
+     * @see Alert
+     * 
      * @author Moisés Adame
      * 
      */
@@ -264,6 +271,69 @@ public class AlertEngineService extends BaseService {
         Short insightId = 16;
 
         if (resourceType.equals("ROUTING_PROFILE") && sectionValue > 0.8 && !checkAlertExists(resourceArn, insightId)) {
+            // TODO: Get agent whose status is "Available" and doesn't belong to the problematic routing profile
+            AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
+            alertService.saveAlert(alertService.fromDTO(alertDto));
+        }
+    }
+
+    /**
+     * Service that analyzes AVG_HANDLE_TIME metric and generates alerts if necessary.
+     * 
+     * @param connectionId
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return void
+     * 
+     * @see checkAlertExists
+     * @see AlertDTO
+     * @see alertService
+     * @see Alert
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeAvgHandleTime(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+        Short insightId = 17;
+        Short trainingId = 1;
+        Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
+        Boolean valueIsBiggerBy10Percent = sectionValue > sectionParentValue * 1.1;
+
+        if(valueIsBiggerBy10Percent && alertDoestExist) {
+            AlertDTO alertDto = new AlertDTO(connectionId, insightId, trainingId, resourceArn, null, null);
+            alertService.saveAlert(alertService.fromDTO(alertDto));
+        }
+    }
+
+    /**
+     * Service that analyzes ABANDONMENT_RATE metric and generates alerts if necessary.
+     * 
+     * @param connectionId
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return void
+     * 
+     * @see checkAlertExists
+     * @see AlertDTO
+     * @see alertService
+     * @see Alert
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeAbandonmentRate(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+        Short insightId = 15;
+        Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
+        Boolean valueIsBiggerThan5Percent = sectionValue > 5;
+
+        if(resourceType.equals("ROUTING_PROFILE") && valueIsBiggerThan5Percent && alertDoestExist) {
+            // TODO: Get agent whose status is "Available" and doesn't belong to the problematic routing profile
             AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
             alertService.saveAlert(alertService.fromDTO(alertDto));
         }
