@@ -30,5 +30,5 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
 
     Iterable<Alert> findByConnectionIdentifierAndResourceAndSolvedAndHasTraining(int connectionIdentifier, String resource, Boolean solved, Boolean hasTraining);
 
-    Iterable<Alert> findByResourceAndInsightIdentifierAndDateRegisteredBetween(String resource, Long insightIdentifier, Date dateFrom, Date dateTo);
+    Iterable<Alert> findByResourceAndInsightIdentifierAndDateRegisteredBetween(String resource, Short insightIdentifier, Date dateFrom, Date dateTo);
 }

@@ -198,9 +198,7 @@ public class AlertEngineService extends BaseService {
             section -> {
                 Double sectionValue = section.getSectionValue();
                 Double sectionParentValue = section.getSectionParentValue();
-
-                System.out.println("Section: " + checkAlertExists(resourceArn, (long)16));
-
+                
                 switch (section.getSectionTitle()) {
                     case "ABANDONMENT_RATE":
                         System.out.println("ABANDONMENT_RATE" + sectionValue);
@@ -243,7 +241,7 @@ public class AlertEngineService extends BaseService {
      * @author Moisés Adame
      * 
      */
-    public Boolean checkAlertExists(String resourceArn, Long insightId) {
+    public Boolean checkAlertExists(String resourceArn, Short insightId) {
         Collection<Alert> alerts = ((Collection<Alert>) alertService.checkAlertExists(resourceArn, insightId));
         return alerts.size() > 0;
     }
@@ -263,8 +261,10 @@ public class AlertEngineService extends BaseService {
      * 
      */
     public void analyzeAgentOccupancy(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
-        if (resourceType.equals("ROUTING_PROFILE") && sectionValue > 0.8) {
-            AlertDTO alertDto = new AlertDTO(connectionId, (short)16, null, resourceArn, null, null);
+        Short insightId = 16;
+
+        if (resourceType.equals("ROUTING_PROFILE") && sectionValue > 0.8 && !checkAlertExists(resourceArn, insightId)) {
+            AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
             alertService.saveAlert(alertService.fromDTO(alertDto));
         }
     }

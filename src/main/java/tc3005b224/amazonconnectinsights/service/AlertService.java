@@ -251,7 +251,10 @@ public class AlertService extends BaseService {
      * @author Moisés Adame
      * 
      */
-    public Iterable<Alert> checkAlertExists(String resource, Long insightIdentifier) {
-        return alertRepository.findByResourceAndInsightIdentifierAndDateRegisteredBetween(resource, insightIdentifier, new Date(), new Date(System.currentTimeMillis() - 3600 * 1000));
+    public Iterable<Alert> checkAlertExists(String resource, Short insightIdentifier) {
+        Date currentDate = new Date();
+        Date currentMinusOneHourDate = new Date(System.currentTimeMillis() - 3600 * 1000);
+
+        return alertRepository.findByResourceAndInsightIdentifierAndDateRegisteredBetween(resource, insightIdentifier, currentMinusOneHourDate, currentDate);
     }
 }

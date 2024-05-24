@@ -25,7 +25,7 @@ public class AlertDTO {
         this.resource = resource;
         this.solved = solved;
         this.trainingCompleted = trainingCompleted;
-        if(trainingCompleted){
+        if(trainingCompleted != null && trainingCompleted){
             this.dateTrainingCompleted = new Date();
         }else{
             this.dateTrainingCompleted = null;
@@ -89,7 +89,7 @@ public class AlertDTO {
     }
 
     public void setDateTrainingCompleted() {
-        if(trainingCompleted){
+        if(trainingCompleted != null && trainingCompleted){
             this.dateTrainingCompleted = new Date();
         }else{
             this.dateTrainingCompleted = null;
