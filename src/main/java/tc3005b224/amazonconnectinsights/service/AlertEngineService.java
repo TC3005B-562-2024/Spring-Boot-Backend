@@ -210,7 +210,7 @@ public class AlertEngineService extends BaseService {
                         analyzeAvgHandleTime(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AVG_QUEUE_ANSWER_TIME":
-                        System.out.println("AGENT_SCHEDULE_ADHERENCE" + sectionValue);
+                        analyzeAvgQueueAnswerTime(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AVG_RESOLUTION_TIME":
                         System.out.println("AVG_RESOLUTION_TIME" + sectionValue);
@@ -219,7 +219,7 @@ public class AlertEngineService extends BaseService {
                         System.out.println("PERCENT_CASES_FIRST_CONTACT_RESOLVED" + sectionValue);
                         break;
                     case "SERVICE_LEVEL":
-                        System.out.println("SERVICE_LEVEL" + sectionValue);
+                        analyzeServiceLevel(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AGENT_OCCUPANCY":
                         analyzeAgentOccupancy(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
@@ -334,6 +334,37 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsLowerThan90Percent = sectionValue < 90;
 
         if(valueIsLowerThan90Percent && alertDoestExist) {
+            AlertDTO alertDto = new AlertDTO(connectionId, insightId, trainingId, resourceArn, null, null);
+            alertService.saveAlert(alertService.fromDTO(alertDto));
+        }
+    }
+
+    /**
+     * Service that analyzes AVG_QUEUE_ANSWER_TIME metric and generates alerts if necessary.
+     * 
+     * @param connectionId
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return void
+     * 
+     * @see checkAlertExists
+     * @see AlertDTO
+     * @see alertService
+     * @see Alert
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeAvgQueueAnswerTime(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+        Short insightId = 12;
+        Short trainingId = 3;
+        Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
+        Boolean valueIsBiggerBy10Percent = sectionValue > sectionParentValue * 1.1;
+
+        if(!resourceType.equals("AGENT") && valueIsBiggerBy10Percent && alertDoestExist) {
             AlertDTO alertDto = new AlertDTO(connectionId, insightId, trainingId, resourceArn, null, null);
             alertService.saveAlert(alertService.fromDTO(alertDto));
         }
