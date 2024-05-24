@@ -338,4 +338,35 @@ public class AlertEngineService extends BaseService {
             alertService.saveAlert(alertService.fromDTO(alertDto));
         }
     }
+
+    /**
+     * Service that analyzes SERVICE_LEVEL metric and generates alerts if necessary.
+     * 
+     * @param connectionId
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return void
+     * 
+     * @see checkAlertExists
+     * @see AlertDTO
+     * @see alertService
+     * @see Alert
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeServiceLevel(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+        Short insightId = 14;
+        Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
+        Boolean valueIsLowerThan80Percent = sectionValue < 80;
+
+        if(resourceType.equals("ROUTING_PROFILE") && valueIsLowerThan80Percent && alertDoestExist) {
+            // TODO: Get agent whose status is "Available" and doesn't belong to the problematic routing profile.
+            AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
+            alertService.saveAlert(alertService.fromDTO(alertDto));
+        }
+    }
 }
