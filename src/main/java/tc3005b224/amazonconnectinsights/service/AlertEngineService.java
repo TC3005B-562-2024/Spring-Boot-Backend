@@ -207,7 +207,7 @@ public class AlertEngineService extends BaseService {
                         analyzeAgentScheduleAdherence(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AVG_HANDLE_TIME":
-                        analyzeAvgHandleTime(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
+                        analyzeAvgHandleTimeTraining(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AVG_QUEUE_ANSWER_TIME":
                         analyzeAvgQueueAnswerTime(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
@@ -278,7 +278,7 @@ public class AlertEngineService extends BaseService {
     }
 
     /**
-     * Service that analyzes AVG_HANDLE_TIME metric and generates alerts if necessary.
+     * Service that analyzes AVG_HANDLE_TIME metric and generates training alerts if necessary.
      * 
      * @param connectionId
      * @param sectionValue
@@ -296,7 +296,7 @@ public class AlertEngineService extends BaseService {
      * @author Moisés Adame
      * 
      */
-    public void analyzeAvgHandleTime(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+    public void analyzeAvgHandleTimeTraining(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
         Short insightId = 10;
         Short trainingId = 1;
         Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
@@ -427,6 +427,39 @@ public class AlertEngineService extends BaseService {
 
         if(resourceType.equals("ROUTING_PROFILE") && valueIsLowerThan80Percent && alertDoestExist) {
             // TODO: Get agent whose status is "Available" and doesn't belong to the problematic routing profile.
+            AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
+            alertService.saveAlert(alertService.fromDTO(alertDto));
+        }
+    }
+
+    /**
+     * Service that analyzes AVG_HANDLE_TIME metric and generates intervene alerts if necessary.
+     * 
+     * @param connectionId
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return void
+     * 
+     * @see checkAlertExists
+     * @see AlertDTO
+     * @see alertService
+     * @see Alert
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeAvgHandleTimeIntervene(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+        Short insightId = 13;
+        Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
+        Boolean valueIsBiggerBy50Percent = sectionValue > sectionParentValue * 1.5;
+
+        // Check contacts that are being handled by the problematic agent
+        // If one of the has a "NEGATIVE" sentimente, raise the alert 
+
+        if(resourceType.equals("AGENT") && valueIsBiggerBy50Percent && alertDoestExist) {
             AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
             alertService.saveAlert(alertService.fromDTO(alertDto));
         }
