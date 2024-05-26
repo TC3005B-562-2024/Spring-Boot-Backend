@@ -40,4 +40,15 @@ public class AgentController {
             return new ResponseEntity<>(error, error.getStatusCode());
         }
     }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> test(@RequestParam(required = false) String routingProfileId) {
+        try {
+            return ResponseEntity.ok(agentService.findAvailableAgentNotInRoutingProfile("null", routingProfileId));
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
+    }
 }
