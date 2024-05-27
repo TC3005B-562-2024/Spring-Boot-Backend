@@ -32,12 +32,15 @@ import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
 import software.amazon.awssdk.services.connect.model.StringCondition;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import software.amazon.awssdk.services.connect.model.UserSearchCriteria;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentAvailableToTransferListDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentMinimalDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
+import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
@@ -51,6 +54,9 @@ public class AgentService extends BaseService {
 
     @Autowired
     private MetricService metricService;
+
+    @Autowired
+    private SkillService skillService;
 
     /**
      * Get all the agents general information required to display at the agent cards
@@ -360,5 +366,83 @@ public class AgentService extends BaseService {
                 alerts,
                 trainings,
                 metrics);
+    }
+
+    /**
+     * Get the available agents that are not in a given routing profile. Access to
+     * the agents attribute of the returned object to get the list of agents. The
+     * cappedRoutingProfileId attribute is the routing profile id that was used to
+     * get the agents that are not within it.
+     * 
+     * @param token
+     * @param routingProfileId
+     * @return AgentAvailableToTransferListDTO
+     * @throws Exception
+     * 
+     * @author Diego Jacobo Djmr5
+     * 
+     * @see AgentAvailableToTransferListDTO
+     */
+    public AgentAvailableToTransferListDTO findAvailableAgentNotInRoutingProfile(String token, String routingProfileId)
+            throws Exception {
+        // Handle exceptions
+        if (routingProfileId == null || routingProfileId.isEmpty())
+            throw new BadRequestException("The routingProfileId is required");
+        if (token == null || token.isEmpty())
+            throw new BadRequestException("The user information was not provided");
+
+        // Get the client info based on the token
+        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+
+        // Get all the agents from the routing profile
+        SearchUsersResponse routingProfileUsers = getConnectClient(clientInfo.getAccessKeyId(),
+                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .searchUsers(SearchUsersRequest.builder()
+                        .instanceId(clientInfo.getInstanceId())
+                        .searchCriteria(UserSearchCriteria.builder()
+                                .stringCondition(StringCondition.builder()
+                                        .comparisonType("EXACT")
+                                        .fieldName("RoutingProfileId")
+                                        .value(routingProfileId)
+                                        .build())
+                                .build())
+                        .build());
+
+        List<String> agentsIdsInRoutingProfile = new ArrayList<>();
+        routingProfileUsers.users().forEach(user -> {
+            agentsIdsInRoutingProfile.add(user.id());
+        });
+
+        // Get the real-time data of the agent
+        Iterable<SkillBriefDTO> skills = skillService.findByInstance(token);
+        List<String> skillsIds = new ArrayList<>();
+        skills.forEach(skill -> {
+            if (!skill.getId().equals(routingProfileId)) {
+                skillsIds.add(skill.getId());
+            }
+        });
+
+        GetCurrentUserDataResponse agentCurrentDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
+                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .getCurrentUserData(GetCurrentUserDataRequest.builder()
+                        .instanceId(clientInfo.getInstanceId())
+                        .filters(UserDataFilters.builder().routingProfiles(skillsIds).build())
+                        .build());
+
+        // Create the list of available agents not in the routing profile
+        List<AgentMinimalDTO> availableAgents = new ArrayList<>();
+        agentCurrentDataResponse.userDataList().forEach(userData -> {
+            if (userData.status().statusName().equals("Available")
+                    && !agentsIdsInRoutingProfile.contains(userData.user().id()) && userData.contacts().isEmpty()) {
+                availableAgents.add(new AgentMinimalDTO(
+                        userData.user().id(),
+                        null,
+                        userData.status().statusName(),
+                        userData.routingProfile().id()));
+            }
+        });
+
+        // Obtener contactos
+        return new AgentAvailableToTransferListDTO(routingProfileId, availableAgents);
     }
 }
