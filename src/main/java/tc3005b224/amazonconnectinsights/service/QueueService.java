@@ -302,7 +302,7 @@ public class QueueService extends BaseService {
             metricService.getMetricsById(token, "QUEUE", queuesInfo.queue().queueArn()),
             alertService.findAll(1 , "", queuesInfo.queue().queueArn(), "false"),
             getTrainings(token, queuesInfo.queue().queueArn(), agents),
-            getAgentInformationInQueue(token, agents)
+            agentService.findAll(token, queueId)
         );
     }
 
