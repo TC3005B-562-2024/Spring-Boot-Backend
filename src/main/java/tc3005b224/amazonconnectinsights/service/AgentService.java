@@ -162,8 +162,6 @@ public class AgentService extends BaseService {
         if (userIds.isEmpty()) {
             throw new BadRequestException("There are no agents with the resourceId provided");
         }
-        System.out.println(userIds);
-        System.out.println(userIds.size());
 
         // Get the contacts information for the agents
         GetCurrentUserDataResponse getCurrentUserDataResponse = getConnectClient(clientInfo.getAccessKeyId(),

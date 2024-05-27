@@ -71,7 +71,7 @@ public class AgentController {
             @ApiResponse(responseCode = "500", description = "Internal error."),
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
     })
-    @GetMapping("/availables-to-transfer")
+    @GetMapping("/available-to-transfer")
     public ResponseEntity<?> test(@RequestParam(required = true) String routingProfileId) {
         try {
             return ResponseEntity.ok(agentService.findAvailableAgentNotInRoutingProfile("null", routingProfileId));
