@@ -1,13 +1,11 @@
 package tc3005b224.amazonconnectinsights;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import org.junit.jupiter.api.Test;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,14 +13,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import tc3005b224.amazonconnectinsights.dto.category.CategoryDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Category;
 import tc3005b224.amazonconnectinsights.repository.CategoryRepository;
 import tc3005b224.amazonconnectinsights.service.CategoryService;
-import java.io.IOException;
-import java.util.Optional;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 
 @SpringBootTest

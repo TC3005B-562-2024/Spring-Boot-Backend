@@ -8,8 +8,6 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import software.amazon.awssdk.services.connect.model.DescribeRoutingProfileRequest;
-import software.amazon.awssdk.services.connect.model.DescribeRoutingProfileResponse;
 import software.amazon.awssdk.services.connect.model.RoutingProfile;
 import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
@@ -55,14 +53,7 @@ public class SkillService extends BaseService {
     public SkillDTO findById(String userUuid, String skillId) throws BadRequestException {
         // Get the client info
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        DescribeRoutingProfileRequest describeRoutingProfileRequest = DescribeRoutingProfileRequest.builder()
-                .instanceId(clientInfo.getInstanceId())
-                .routingProfileId(skillId)
-                .build();
-        DescribeRoutingProfileResponse describeRoutingProfileResponse = getConnectClient(clientInfo.getAccessKeyId(),
-                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
-                .describeRoutingProfile(describeRoutingProfileRequest);
-        RoutingProfile data = describeRoutingProfileResponse.routingProfile();
+        RoutingProfile data = routingProfileService.getRoutingProfile(userUuid, skillId);
         AlertPriorityDTO alerts = alertService.findByResource(userUuid, data.routingProfileArn());
 
         Instant createdAt = Instant.now(); // TODO: Change Mocked creation time
