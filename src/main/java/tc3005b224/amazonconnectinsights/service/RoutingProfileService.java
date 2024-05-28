@@ -2,10 +2,13 @@ package tc3005b224.amazonconnectinsights.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
 import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
 
+@Service
 public class RoutingProfileService extends BaseService {
     public Iterable<RoutingProfileSummary> getRoutingProfiles(String userUuid) {
         // Get the client info
