@@ -1,6 +1,5 @@
 package tc3005b224.amazonconnectinsights.service;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,7 +30,6 @@ import software.amazon.awssdk.services.connect.model.SearchUsersRequest;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest.Builder;
 import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
 import software.amazon.awssdk.services.connect.model.StringCondition;
-import software.amazon.awssdk.services.connect.model.ThresholdV2;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import software.amazon.awssdk.services.connect.model.UserSearchCriteria;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentAvailableToTransferListDTO;
