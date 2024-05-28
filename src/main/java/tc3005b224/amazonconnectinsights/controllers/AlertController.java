@@ -42,7 +42,8 @@ public class AlertController {
     public ResponseEntity<AlertPriorityDTO> postConnectionAlerts(
             @RequestParam(required = false, defaultValue = "") String category,
             @RequestParam(required = false, defaultValue = "") String resource,
-            @RequestParam(required = false, defaultValue = "false") String logs, @RequestBody Principal principal) {
+            @RequestParam(required = false, defaultValue = "false") String logs,
+            Principal principal) {
         try {
             AlertPriorityDTO response = alertService.findAll(principal.getName(), category, resource, logs);
             return ResponseEntity.ok(response);
@@ -60,7 +61,7 @@ public class AlertController {
             @ApiResponse(responseCode = "500", description = "Internal error."),
             @ApiResponse(responseCode = "503", description = "Couldn't connect to database.") })
     @GetMapping("/{alertIdentifier}")
-    public ResponseEntity<?> getIndividualAlert(@PathVariable Long alertIdentifier, @RequestBody Principal principal) {
+    public ResponseEntity<?> getIndividualAlert(@PathVariable Long alertIdentifier, Principal principal) {
         Alert queriedAlert;
         try {
             queriedAlert = alertService.findByIdentifier(principal.getName(), alertIdentifier);
@@ -87,7 +88,7 @@ public class AlertController {
 
     )
     @PostMapping("")
-    public ResponseEntity<?> postAlert(@RequestBody AlertDTO dto, @RequestBody Principal principal) {
+    public ResponseEntity<?> postAlert(@RequestBody AlertDTO dto, Principal principal) {
         try {
             alertService.saveAlert(principal.getName(), alertService.fromDTO(dto));
             return ResponseEntity.ok("Alert added successfully");
@@ -104,7 +105,8 @@ public class AlertController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to database."),
     })
     @PutMapping("/{alertIdentifier}")
-    public ResponseEntity<?> putAlert(@PathVariable Long alertIdentifier, @RequestBody AlertDTO alertDTO, Principal principal) {
+    public ResponseEntity<?> putAlert(@PathVariable Long alertIdentifier,
+            @RequestBody AlertDTO alertDTO, Principal principal) {
         Alert queriedAlert;
         try {
             queriedAlert = alertService.findByIdentifier(principal.getName(), alertIdentifier);
@@ -135,7 +137,7 @@ public class AlertController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to database."),
     })
     @DeleteMapping("/{alertIdentifier}")
-    public ResponseEntity<?> putAlert(@PathVariable Long alertIdentifier, @RequestBody Principal principal) {
+    public ResponseEntity<?> putAlert(@PathVariable Long alertIdentifier, Principal principal) {
         try {
             alertService.deleteById(principal.getName(), alertIdentifier);
             return ResponseEntity.ok("Alert deleted successfully");
@@ -150,7 +152,7 @@ public class AlertController {
             @ApiResponse(responseCode = "404", description = "Invalid alertIdentifier."),
     })
     @PostMapping("/{alertIdentifier}/ignore")
-    public ResponseEntity<?> ignoreAlert(@PathVariable Long alertIdentifier, @RequestBody Principal principal) {
+    public ResponseEntity<?> ignoreAlert(@PathVariable Long alertIdentifier, Principal principal) {
         try {
             alertService.ignoreById(principal.getName(), alertIdentifier);
             return ResponseEntity.ok("Alert ignored successfully.");
@@ -165,7 +167,7 @@ public class AlertController {
             @ApiResponse(responseCode = "404", description = "Invalid alertIdentifier."),
     })
     @PostMapping("/{alertIdentifier}/accept")
-    public ResponseEntity<?> acceptAlert(@PathVariable Long alertIdentifier, @RequestBody Principal principal) {
+    public ResponseEntity<?> acceptAlert(@PathVariable Long alertIdentifier, Principal principal) {
         try {
             String alertInsightCategoryDenomination = alertService.acceptById(principal.getName(), alertIdentifier);
             return ResponseEntity.ok("Alert of type: " + alertInsightCategoryDenomination + ", accepted.");
@@ -183,7 +185,7 @@ public class AlertController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to database."),
     })
     @GetMapping("/highestPriority")
-    public ResponseEntity<AlertHighPriorityDTO> getHighestPriority(@RequestParam(required = false) String resource, @RequestBody Principal principal) {
+    public ResponseEntity<AlertHighPriorityDTO> getHighestPriority(@RequestParam(required = false) String resource, Principal principal) {
         AlertHighPriorityDTO priority = alertService.findHighestPriority(principal.getName(), resource);
         return ResponseEntity.ok(priority);
     }
