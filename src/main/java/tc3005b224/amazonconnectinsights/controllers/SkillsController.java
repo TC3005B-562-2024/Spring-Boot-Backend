@@ -3,9 +3,11 @@ package tc3005b224.amazonconnectinsights.controllers;
 import java.security.Principal;
 import java.util.List;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,10 +33,17 @@ public class SkillsController {
     }
 
     @GetMapping("/{skillId}")
-    public ResponseEntity<SkillDTO> getSkillById(
+    public ResponseEntity<?> getSkillById(
             @PathVariable String skillId,
             @RequestBody Principal principal) {
-        SkillDTO response = skillService.findById(principal.getName(), skillId);
+        SkillDTO response;
+        try {
+            response = skillService.findById(principal.getName(), skillId);
+        } catch (BadRequestException e) {
+            // Return error if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
         return ResponseEntity.ok(response);
     }
 }
