@@ -40,7 +40,6 @@ import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
-import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
@@ -56,7 +55,7 @@ public class AgentService extends BaseService {
     private MetricService metricService;
 
     @Autowired
-    private SkillService skillService;
+    private RoutingProfileService routingProfileService;
 
     /**
      * Get all the agents general information required to display at the agent cards
@@ -414,11 +413,11 @@ public class AgentService extends BaseService {
         });
 
         // Get the real-time data of the agent
-        Iterable<SkillBriefDTO> skills = skillService.findByInstance(userUuid);
+        Iterable<RoutingProfileSummary> skills = routingProfileService.getRoutingProfiles(userUuid);
         List<String> skillsIds = new ArrayList<>();
         skills.forEach(skill -> {
-            if (!skill.getId().equals(routingProfileId)) {
-                skillsIds.add(skill.getId());
+            if (!skill.id().equals(routingProfileId)) {
+                skillsIds.add(skill.id());
             }
         });
 
