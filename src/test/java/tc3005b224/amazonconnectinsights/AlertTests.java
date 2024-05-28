@@ -1,7 +1,6 @@
 package tc3005b224.amazonconnectinsights;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
@@ -17,15 +16,12 @@ import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.client.RestTemplate;
 import tc3005b224.amazonconnectinsights.repository.AlertRepository;
 import tc3005b224.amazonconnectinsights.service.AlertService;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @SpringBootTest
@@ -76,7 +72,7 @@ class AlertTests {
     // Test the creation of an alert, and then retrieve it by its id to check if it was created correctly.
     @Test
     public void findAlertByIdTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
@@ -105,7 +101,7 @@ class AlertTests {
     // Test the addition of an alert to the database, and then check if it was added correctly.
     @Test
     public void addAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         String alertJson = new ObjectMapper().writeValueAsString(alert);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/alerts")
@@ -121,11 +117,11 @@ class AlertTests {
     // Test the update of an alert in the database, and then check if it was updated correctly.
     @Test
     public void updateAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
-        AlertDTO updatedAlert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", true, true);
+        AlertDTO updatedAlert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         String updatedAlertJson = new ObjectMapper().writeValueAsString(updatedAlert);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/alerts/"+savedAlert.getId())
@@ -144,7 +140,7 @@ class AlertTests {
     // Test the deletion of an alert from the database, and then check if it was deleted correctly.
     @Test
     public void deleteAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
@@ -161,7 +157,7 @@ class AlertTests {
     // Test the ignoring of an alert in the database, and then check if it was ignored correctly.
     @Test
     public void ignoreAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
@@ -179,7 +175,7 @@ class AlertTests {
     // Test the acceptance of an alert in the database, and then check if it was accepted correctly.
     @Test
     public void acceptAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
