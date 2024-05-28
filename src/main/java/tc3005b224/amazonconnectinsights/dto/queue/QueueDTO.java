@@ -1,6 +1,11 @@
 package tc3005b224.amazonconnectinsights.dto.queue;
 
+import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
+import tc3005b224.amazonconnectinsights.dto.training.TrainingProgressItemDTO;
+
+import java.util.List;
 
 
 import lombok.AllArgsConstructor;
@@ -17,7 +22,7 @@ public class QueueDTO {
     private String arn;
     private InformationSectionListDTO information;
     private InformationSectionListDTO metrics;
-    private String alerts;
-    private String trainings;
-    private String agents;
+    private AlertPriorityDTO alerts;
+    private List<TrainingProgressItemDTO> trainings;
+    private Iterable<AgentCardDTO> agents;
 }

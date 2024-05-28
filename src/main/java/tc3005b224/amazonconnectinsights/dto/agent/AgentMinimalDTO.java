@@ -4,17 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgentCardDTO {
+@ToString
+public class AgentMinimalDTO {
     private String id;
-    private String arn;
     private String name;
     private String status;
-    private String sentiment;
-    private Iterable<String> queues;
-    private String topPriorityAlert;
+    private String routingProfileId;
 }
