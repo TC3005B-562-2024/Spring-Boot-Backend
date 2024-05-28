@@ -65,7 +65,7 @@ public class AgentService extends BaseService {
      * and c is the amount of total contacts all agents have
      * this is the worst case scenario where no contact has a negative sentiment
      * 
-     * @param token
+     * @param userUuid
      * @param resourceId
      * @return Iterable<AgentCardDTO>
      * @throws BadRequestException
@@ -74,9 +74,9 @@ public class AgentService extends BaseService {
      * 
      * @see AgentCardDTO
      */
-    public Iterable<AgentCardDTO> findAll(String token, String resourceId)
+    public Iterable<AgentCardDTO> findAll(String userUuid, String resourceId)
             throws BadRequestException {
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         // Get all the agents
         Builder searchUserRequest = SearchUsersRequest.builder().instanceId(clientInfo.getInstanceId()).maxResults(500);
 
@@ -253,7 +253,7 @@ public class AgentService extends BaseService {
                             agentStatus.getOrDefault(userData.id(), "DISCONNECTED"),
                             worstSentiment,
                             queuesSet,
-                            alertService.findHighestPriority(token, userData.arn()).getHighestPriorityAlert()));
+                            alertService.findHighestPriority(userUuid, userData.arn()).getHighestPriorityAlert()));
                 });
         return agents;
     };
@@ -261,7 +261,7 @@ public class AgentService extends BaseService {
     /**
      * Get the detailed agent information by the agentId
      * 
-     * @param token
+     * @param userUuid
      * @param agentId
      * @return AgentDTO
      * @throws Exception
@@ -271,8 +271,8 @@ public class AgentService extends BaseService {
      * 
      * @see AgentDTO
      */
-    public AgentDTO findById(String token, String agentId) throws Exception {
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+    public AgentDTO findById(String userUuid, String agentId) throws Exception {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
         // Get the agent general information
         DescribeUserResponse agent = getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(),
@@ -280,7 +280,7 @@ public class AgentService extends BaseService {
                         DescribeUserRequest.builder().instanceId(clientInfo.getInstanceId()).userId(agentId).build());
 
         // Get the alerts of the agent
-        AlertPriorityDTO alerts = alertService.findByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
+        AlertPriorityDTO alerts = alertService.findByResource(userUuid, agent.user().arn());
 
         // Get the real-time data of the agent
         GetCurrentUserDataResponse agentCurrentDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
@@ -355,7 +355,7 @@ public class AgentService extends BaseService {
                 .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
 
         // Get the agent metrics
-        InformationSectionListDTO metrics = metricService.getMetricsById(token, "AGENT", agent.user().arn());
+        InformationSectionListDTO metrics = metricService.getMetricsById(userUuid, "AGENT", agent.user().arn());
 
         return new AgentDTO(
                 agentId,
@@ -374,7 +374,7 @@ public class AgentService extends BaseService {
      * cappedRoutingProfileId attribute is the routing profile id that was used to
      * get the agents that are not within it.
      * 
-     * @param token
+     * @param userUuid
      * @param routingProfileId
      * @return AgentAvailableToTransferListDTO
      * @throws Exception
@@ -383,16 +383,16 @@ public class AgentService extends BaseService {
      * 
      * @see AgentAvailableToTransferListDTO
      */
-    public AgentAvailableToTransferListDTO findAvailableAgentNotInRoutingProfile(String token, String routingProfileId)
+    public AgentAvailableToTransferListDTO findAvailableAgentNotInRoutingProfile(String userUuid, String routingProfileId)
             throws Exception {
         // Handle exceptions
         if (routingProfileId == null || routingProfileId.isEmpty())
             throw new BadRequestException("The routingProfileId is required");
-        if (token == null || token.isEmpty())
+        if (userUuid == null || userUuid.isEmpty())
             throw new BadRequestException("The user information was not provided");
 
         // Get the client info based on the token
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
         // Get all the agents from the routing profile
         SearchUsersResponse routingProfileUsers = getConnectClient(clientInfo.getAccessKeyId(),
@@ -414,7 +414,7 @@ public class AgentService extends BaseService {
         });
 
         // Get the real-time data of the agent
-        Iterable<SkillBriefDTO> skills = skillService.findByInstance(token);
+        Iterable<SkillBriefDTO> skills = skillService.findByInstance(userUuid);
         List<String> skillsIds = new ArrayList<>();
         skills.forEach(skill -> {
             if (!skill.getId().equals(routingProfileId)) {

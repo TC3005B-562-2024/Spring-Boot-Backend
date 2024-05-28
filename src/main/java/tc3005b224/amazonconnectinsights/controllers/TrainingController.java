@@ -1,7 +1,6 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
 import java.util.Map;
-import java.security.Principal;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +56,7 @@ public class TrainingController {
         public ResponseEntity<?> getTrainingsData(
                         @RequestParam(required = false, defaultValue = "") String resource,
                         @RequestParam(required = false, defaultValue = "") String alertId,
-                        @RequestParam(required = false, defaultValue = "") String isActive,
-                        @RequestBody(required = false) Principal principal) throws BadRequestException {
+                        @RequestParam(required = false, defaultValue = "") String isActive) throws BadRequestException {
                 try {
                         return ResponseEntity.ok(trainingService.findAll(resource, alertId, isActive));
                 } catch (Exception e) {

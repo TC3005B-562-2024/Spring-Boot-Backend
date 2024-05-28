@@ -73,7 +73,7 @@ public class InsightController {
         }
         catch(Exception e) {
             // Return error 404 if there is an exception.
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
     }

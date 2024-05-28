@@ -1,11 +1,14 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,9 +38,9 @@ public class AgentController {
     })
     @GetMapping
     public ResponseEntity<?> getAllAgents(
-            @RequestParam(required = false, defaultValue = "") String resourceid) {
+            @RequestParam(required = false, defaultValue = "") String resourceid, @RequestBody Principal principal) {
         try {
-            return ResponseEntity.ok(agentService.findAll("1", resourceid));
+            return ResponseEntity.ok(agentService.findAll(principal.getName(), resourceid));
         } catch (Exception e) {
             // Return error if there is an exception.
             ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
@@ -54,9 +57,9 @@ public class AgentController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
     })
     @GetMapping("/{agentId}")
-    public ResponseEntity<?> getIndividualAgent(@PathVariable String agentId) {
+    public ResponseEntity<?> getIndividualAgent(@PathVariable String agentId, @RequestBody Principal principal) {
         try {
-            return ResponseEntity.ok(agentService.findById("1", agentId));
+            return ResponseEntity.ok(agentService.findById(principal.getName(), agentId));
         } catch (Exception e) {
             // Return error 404 if there is an exception.
             ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
@@ -72,9 +75,9 @@ public class AgentController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
     })
     @GetMapping("/available-to-transfer")
-    public ResponseEntity<?> test(@RequestParam(required = true) String routingProfileId) {
+    public ResponseEntity<?> test(@RequestParam(required = true) String routingProfileId, @RequestBody Principal principal) {
         try {
-            return ResponseEntity.ok(agentService.findAvailableAgentNotInRoutingProfile("null", routingProfileId));
+            return ResponseEntity.ok(agentService.findAvailableAgentNotInRoutingProfile(principal.getName(), routingProfileId));
         } catch (Exception e) {
             // Return error 404 if there is an exception.
             ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
