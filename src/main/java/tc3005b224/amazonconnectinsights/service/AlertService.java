@@ -34,10 +34,14 @@ public class AlertService extends BaseService {
     private InsightRepository insightRepository;
 
     // Service that returns all the unsolved alerts, ordered by priority that belong to a given connection.
-    public AlertPriorityDTO findAll(int connectionIdentifier, String denominationAlike, String resource, String logs) {
+    public AlertPriorityDTO findAll(String userUuid, String denominationAlike, String resource, String logs) {
         if(!logs.equals("true") && !logs.equals("false")) {
             throw new IllegalArgumentException("Invalid value for logs parameter. Must be 'true' or 'false'.");
         }
+
+        // Get the connection identifier
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+        int connectionIdentifier = clientInfo.getConnectionIdentifier();
 
         // Instantiate an AlertPriorityDTO
         AlertPriorityDTO response = new AlertPriorityDTO();
@@ -68,18 +72,27 @@ public class AlertService extends BaseService {
         return response;
     }
 
-    // Service that returns an alert given its alertId, if it is not found, returns a null.
-    public Alert findByIdentifier(Long id) {
+    // Service that returns an alert given its alertId, if it is not found, returns
+    // a null.
+    public Alert findByIdentifier(String userUuid, Long id) throws Exception {
         Optional<Alert> alertsOptional = alertRepository.findById(id);
 
-        if(alertsOptional.isPresent()) {
-            return alertsOptional.get();
+        if (alertsOptional.isPresent()) {
+            if (alertsOptional.get().getConnection().getIdentifier() == getConnectClientInfo(userUuid)
+                    .getConnectionIdentifier()) {
+                return alertsOptional.get();
+            }
+            throw new Exception("Unauthorized access to alert");
         }
         return null;
     }
 
     // Service that returns all the unsolved alerts, ordered by priority that belong to a given resource given its resourceArn.
-    public AlertPriorityDTO findByResource(int connectionIdentifier, String resourceArn){
+    public AlertPriorityDTO findByResource(String userUuid, String resourceArn){
+        // Get the client information
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+        int connectionIdentifier = clientInfo.getConnectionIdentifier();
+        
         // Instantiate an AlertPriorityDTO
         AlertPriorityDTO response = new AlertPriorityDTO();
 
@@ -116,13 +129,31 @@ public class AlertService extends BaseService {
     }
 
     // Method that stores a new alert to the database.
-    public Alert saveAlert(Alert newAlert) {
+    public Alert saveAlert(String userUuid, Alert newAlert) throws BadRequestException {
+        // Get the client information
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+        int connectionIdentifier = clientInfo.getConnectionIdentifier();
+
+        // Check if the connection is the same as the one that is trying to be accessed
+        if (newAlert.getConnection().getIdentifier() != connectionIdentifier) {
+            throw new BadRequestException("Unauthorized access to connection");
+        }
+        
         return alertRepository.save(newAlert);
     }
 
     // Method that gets an AlertDTO and an Alert as an input, updating only the AlertDTO attributes that are null.
-    public void updateAlert(Long alertIdentifier, AlertDTO alertDTO) {
-        Alert queriedAlert = this.findByIdentifier(alertIdentifier);
+    public void updateAlert(String userUuid, Long alertIdentifier, AlertDTO alertDTO) throws Exception {
+        // Get the client information
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+        int connectionIdentifier = clientInfo.getConnectionIdentifier();
+
+        // Verify that the alert connection is the same as the one that is trying to be accessed
+        if (alertDTO.getConnectionId() != connectionIdentifier) {
+            throw new Exception("Unauthorized access to connection");
+        }
+        
+        Alert queriedAlert = this.findByIdentifier(userUuid, alertIdentifier);
 
         Connection connection = null;
         Insight insight = null;
@@ -145,25 +176,29 @@ public class AlertService extends BaseService {
 
         queriedAlert.updateFromDTO(alertDTO, connection, insight, training);
 
-        this.saveAlert(queriedAlert);
+        this.saveAlert(userUuid, queriedAlert);
     }
 
     // Service that checks if the alert exists, if id does deletes it, otherwise raises an exception.
-    public void deleteById(Long id) {
+    public void deleteById(String userUuid, Long id) throws Exception {
         alertRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Alert not found!"));
+        if (alertRepository.findById(id).get().getConnection().getIdentifier() != getConnectClientInfo(userUuid)
+                .getConnectionIdentifier()) {
+            throw new Exception("Unauthorized access to alert");
+        }
         alertRepository.deleteById(id);
     }
 
     // Service that ignores (deletes logically) an alert.
-    public void ignoreById(Long id) {
+    public void ignoreById(String userUuid, Long id) throws Exception {
         // Is solved set to false
         AlertDTO alertDTO = new AlertDTO(null, null, null, null, false, null);
-        this.updateAlert(id, alertDTO);
+        this.updateAlert(userUuid, id, alertDTO);
     }
 
     // Service that accepts an alert and executes a series of functions so that
     // the insight of that alert is followed.
-    public String acceptById(Long id) {
+    public String acceptById(String userUuid, Long id) throws Exception {
         // TODO: If category = Training, save training to DB.
         // TODO: If category = Intervene, barge into call.
         // TODO: If category = Transfer, move agent to the desired resurce.
@@ -173,7 +208,7 @@ public class AlertService extends BaseService {
 
         // Is solved set to true
         AlertDTO alertDTO = new AlertDTO(null, null, null, null, true, null);
-        this.updateAlert(id, alertDTO);
+        this.updateAlert(userUuid, id, alertDTO);
         return alertInsightCategoryDenomination;
     }
 
@@ -181,7 +216,7 @@ public class AlertService extends BaseService {
      * New method to find the highest priority of the alerts
      * TODO: Add check for unexisting resource
      * 
-     * @param token
+     * @param userUuid
      * @param resource
      * @return AlertHighPriorityDTO
      * 
@@ -191,9 +226,9 @@ public class AlertService extends BaseService {
      * @see AlertHighPriorityDTO
      * @see ConnectClientInfo
      */
-    public AlertHighPriorityDTO findHighestPriority(String token, String resource) {
+    public AlertHighPriorityDTO findHighestPriority(String userUuid, String resource) {
         Optional<Integer> highestPriority;
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         if (resource != null) {
             highestPriority = alertRepository.findHighestPriorityByResource(resource,
                     clientInfo.getConnectionIdentifier());
@@ -221,7 +256,7 @@ public class AlertService extends BaseService {
     /**
      * Service that returns all the alerts where is_solved is 1, has_training is 1 and the resource is the same as the one given.
      * 
-     * @param token
+     * @param userUuid
      * @param resource
      * @return List<Alert>
      * @throws BadRequestException
@@ -232,8 +267,8 @@ public class AlertService extends BaseService {
      * @author Moisés Adame
      * 
      */
-    public Iterable<Alert> findTrainingAlerts(String token, String resource) {
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+    public Iterable<Alert> findTrainingAlerts(String userUuid, String resource) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         return alertRepository.findByConnectionIdentifierAndResourceAndSolvedAndHasTraining(clientInfo.getConnectionIdentifier(), resource, true, true);
     }
 }

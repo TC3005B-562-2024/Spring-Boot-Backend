@@ -74,32 +74,4 @@ public class SkillService extends BaseService {
                 null,
                 null);
     }
-    
-    // Service that retrieves the Skills (Routing Profile) of an agent given its agentId.
-    public List<SkillBriefDTO> findByAgentId(String isntanceId, String agentId) throws Exception {
-        // TODO: Call Amazon Connect endpoint capable of retrieveng the Skills of an agent.
-
-        // Mock Skills
-        SkillBriefDTO serviceSkill = new SkillBriefDTO("1", "routing-profile:1", "Service", "phone_in_talk");
-        SkillBriefDTO salesSkill = new SkillBriefDTO("2", "routing-profile:2", "Sales", "phone_in_talk");
-        SkillBriefDTO supportSkill = new SkillBriefDTO("3", "routing-profile:3", "Support", "phone_in_talk");
-        SkillBriefDTO qualitySkill = new SkillBriefDTO("4", "routing-profile:4", "Quality", "phone_in_talk");
-
-        // Add Skills to list
-        List<SkillBriefDTO> result = new ArrayList<SkillBriefDTO>();
-
-        if(Objects.equals(agentId, "1")){
-            result.add(serviceSkill);
-            result.add(salesSkill);
-            result.add(supportSkill);
-            result.add(qualitySkill);
-        } else if (Objects.equals(agentId, "2")) {
-            result.add(supportSkill);
-            result.add(qualitySkill);
-        }else {
-            throw new Exception("Agent with id: " + agentId + ", not found!");
-        }
-
-        return result;
-    }
 }
