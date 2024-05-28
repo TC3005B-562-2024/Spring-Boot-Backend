@@ -19,13 +19,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentAvailableToTransferListDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentTransferDTO;
 import tc3005b224.amazonconnectinsights.service.AgentService;
+import tc3005b224.amazonconnectinsights.service.UserService;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/agents")
 public class AgentController {
     @Autowired
     private AgentService agentService;
+
+    @Autowired
+    private UserService userService;
 
     @Operation(summary = "Returns a list of agents that might be filtered by a resource id.", responses = {
             @ApiResponse(responseCode = "200", description = "List of agents.", content = {
@@ -74,13 +82,35 @@ public class AgentController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
     })
     @GetMapping("/available-to-transfer")
-    public ResponseEntity<?> test(@RequestParam(required = true) String routingProfileId, Principal principal) {
+    public ResponseEntity<?> getAvailableAgentsToTransfer(@RequestParam(required = true) String routingProfileId,
+            Principal principal) {
         try {
-            return ResponseEntity.ok(agentService.findAvailableAgentNotInRoutingProfile(principal.getName(), routingProfileId));
+            return ResponseEntity
+                    .ok(agentService.findAvailableAgentNotInRoutingProfile(principal.getName(), routingProfileId));
         } catch (Exception e) {
             // Return error 404 if there is an exception.
             ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
             return new ResponseEntity<>(error, error.getStatusCode());
         }
     }
+
+    @Operation(summary = "Transfer an agent to a routing profile.", responses = {
+            @ApiResponse(responseCode = "200", description = "Agent transferred."),
+            @ApiResponse(responseCode = "500", description = "Internal error."),
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
+    })
+    @PostMapping("transfer")
+    public ResponseEntity<?> transfer(@RequestBody AgentTransferDTO agentTransferDTO, Principal principal) {
+        try {
+            // Try to transfer the agent
+            userService.transfer(principal.getName(), agentTransferDTO.getUserId(),
+                    agentTransferDTO.getRoutingProfileId());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
+    }
+
 }

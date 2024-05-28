@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.connect.model.SearchUsersRequest;
 import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest.Builder;
 import software.amazon.awssdk.services.connect.model.StringCondition;
+import software.amazon.awssdk.services.connect.model.UpdateUserRoutingProfileRequest;
 import software.amazon.awssdk.services.connect.model.UserData;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import software.amazon.awssdk.services.connect.model.UserSearchCriteria;
@@ -146,5 +147,32 @@ public class UserService extends BaseService {
 
         // Return the list of users
         return getCurrentUserDataResponse.userDataList();
+    }
+
+    /**
+     * Service that calls amazon connects UpdateUserRoutingProfile and transfers an
+     * agent to a different routing profile.
+     * 
+     * @param userUuid
+     * @param agentId
+     * @param destinationRoutingProfileId
+     * 
+     * @author Diego Jacobo Djmr5
+     */
+    public void transfer(String userUuid, String agentId, String destinationRoutingProfileId) {
+        // Get the client info
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+
+        // Build the request for the UpdateUserRoutingProfile endpoint
+        UpdateUserRoutingProfileRequest updateUserRoutingProfileRequest = UpdateUserRoutingProfileRequest.builder()
+                .instanceId(clientInfo.getInstanceId())
+                .userId(agentId)
+                .routingProfileId(destinationRoutingProfileId)
+                .build();
+        
+        // Make the request
+        getConnectClient(clientInfo.getAccessKeyId(),
+                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .updateUserRoutingProfile(updateUserRoutingProfileRequest);
     }
 }
