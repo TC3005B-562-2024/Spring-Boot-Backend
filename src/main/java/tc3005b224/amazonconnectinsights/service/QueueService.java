@@ -222,7 +222,7 @@ public class QueueService extends BaseService {
     /**
      * Get the information of a specific queue.
      * 
-     * @param token
+     * @param userUuid
      * @param queueId
      * @return InformationSectionListDTO
      * 
@@ -236,7 +236,7 @@ public class QueueService extends BaseService {
      * @author Moisés Adame
      * 
      */
-    public InformationSectionListDTO getQueueInformation(String token, String queueId) {
+    public InformationSectionListDTO getQueueInformation(String userUuid, String queueId) {
         // Create the information section list.
         InformationSectionListDTO informationSectionListDTO = new InformationSectionListDTO();
 
@@ -244,7 +244,7 @@ public class QueueService extends BaseService {
         informationSectionListDTO.setSectionTitle("Information");
 
         // Get the client info
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
         // Request for describing an individual queue.
         DescribeQueueRequest.Builder describeQueueRequest = DescribeQueueRequest.builder().instanceId(clientInfo.getInstanceId()).queueId(queueId);
@@ -258,9 +258,9 @@ public class QueueService extends BaseService {
         List<InformationSectionDTO> sections = new ArrayList<>();
         sections.add(new InformationSectionDTO("Name", queuesInfo.queue().name(), "black"));
         sections.add(new InformationSectionDTO("Hours Of Operation", queuesInfo.queue().hoursOfOperationId(), "black"));
-        sections.add(new InformationSectionDTO("Total Agents", Integer.toString(findAgentsInQueue(token, queueId).size()), "black"));
-        sections.add(new InformationSectionDTO("Skills", getQueueRoutingProfiles(token, queueId), "black"));
-        sections.add(getQueueContactsInformationSection(token, queueId, queuesInfo.queue().maxContacts()));
+        sections.add(new InformationSectionDTO("Total Agents", Integer.toString(findAgentsInQueue(userUuid, queueId).size()), "black"));
+        sections.add(new InformationSectionDTO("Skills", getQueueRoutingProfiles(userUuid, queueId), "black"));
+        sections.add(getQueueContactsInformationSection(userUuid, queueId, queuesInfo.queue().maxContacts()));
 
         // Add the sections to the information section list.
         informationSectionListDTO.setSections(sections);
@@ -271,7 +271,7 @@ public class QueueService extends BaseService {
     /**
      * Get the information of a specific queue
      * 
-     * @param token
+     * @param userUuid
      * @param queueId
      * @return QueueDTO
      * @throws BadRequestException
@@ -282,9 +282,9 @@ public class QueueService extends BaseService {
      * @author Moisés Adame
      * 
      */
-    public QueueDTO findById(String token, String queueId) throws BadRequestException {
+    public QueueDTO findById(String userUuid, String queueId) throws BadRequestException {
         // Request for getting the queue information.
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         DescribeQueueRequest.Builder describeQueueRequest = DescribeQueueRequest.builder().instanceId(clientInfo.getInstanceId()).queueId(queueId);
         DescribeQueueResponse queuesInfo = getConnectClient(
             clientInfo.getAccessKeyId(),
@@ -292,37 +292,37 @@ public class QueueService extends BaseService {
             clientInfo.getRegion()
         ).describeQueue(describeQueueRequest.build());
 
-        List<UserData> agents = findAgentsInQueue(token, queueId);
+        List<UserData> agents = findAgentsInQueue(userUuid, queueId);
 
         // Create a new QueueDTO object and return it.
         return new QueueDTO(
             queuesInfo.queue().queueId(),
             queuesInfo.queue().queueArn(),
-            getQueueInformation(token, queueId),
-            metricService.getMetricsById(token, "QUEUE", queuesInfo.queue().queueArn()),
-            alertService.findAll(1 , "", queuesInfo.queue().queueArn(), "false"),
-            getTrainings(token, queuesInfo.queue().queueArn(), agents),
-            agentService.findAll(token, queueId)
+            getQueueInformation(userUuid, queueId),
+            metricService.getMetricsById(userUuid, "QUEUE", queuesInfo.queue().queueArn()),
+            alertService.findAll(userUuid , "", queuesInfo.queue().queueArn(), "false"),
+            getTrainings(userUuid, queuesInfo.queue().queueArn(), agents),
+            agentService.findAll(userUuid, queueId)
         );
     }
 
     /**
      * Get the number of contacts of an especific queue.
      * 
-     * @param token
+     * @param userUuid
      * @param queueId
      * @return InformationSectionDTO
      * 
      * @author Moisés Adame
      * 
      */
-    public InformationSectionDTO getQueueContactsInformationSection(String token, String queueId, Integer maxContacts) {
+    public InformationSectionDTO getQueueContactsInformationSection(String userUuid, String queueId, Integer maxContacts) {
         if(maxContacts == null){
             return new InformationSectionDTO("Contacts", "Unlimited", "green");
         }
         
         // Request for getting the queue information.
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
         List<String> queueIds = new ArrayList<>();
         queueIds.add(queueId);
@@ -366,14 +366,14 @@ public class QueueService extends BaseService {
     /**
      * Get trainings of a specific queue.
      * 
-     * @param token
+     * @param userUuid
      * @param queueId
      * @return List<TrainingProgressItemDTO>
      * 
      * @author Moisés Adame
      * 
      */
-    public List<TrainingProgressItemDTO> getTrainings(String token, String queueArn, List<UserData> agents) {
+    public List<TrainingProgressItemDTO> getTrainings(String userUuid, String queueArn, List<UserData> agents) {
         // Create a new list of TrainingProgressItemDTO
         List<TrainingProgressItemDTO> trainings = new ArrayList<TrainingProgressItemDTO>();
 
@@ -382,12 +382,12 @@ public class QueueService extends BaseService {
         Map<String, Float> trainingProgress = new HashMap<String, Float>();
 
         // Insntiate a client info.
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
         // Iterate over the agents and get the total trainings per agent.
         agents.forEach(
             agent -> {
-                Iterable<Alert> alerts = alertService.findTrainingAlerts(token, agent.user().arn());
+                Iterable<Alert> alerts = alertService.findTrainingAlerts(userUuid, agent.user().arn());
                 alerts.forEach(
                     alert -> {
                         Integer totalTraings = totalTrainings.get(agent.user().arn());
@@ -404,7 +404,7 @@ public class QueueService extends BaseService {
         // Iterate over the agents and get their progress.
         agents.forEach(
             agent -> {
-                Iterable<Alert> alerts = alertService.findTrainingAlerts(token, agent.user().arn());
+                Iterable<Alert> alerts = alertService.findTrainingAlerts(userUuid, agent.user().arn());
                 alerts.forEach(
                     alert -> {
                         if(alert.getTrainingCompleted()){
@@ -429,9 +429,9 @@ public class QueueService extends BaseService {
         trainingProgress.forEach(
             (arn, progress) -> {
                 DescribeUserResponse user = getConnectClient(
-                    getConnectClientInfo(token).getAccessKeyId(),
-                    getConnectClientInfo(token).getSecretAccessKey(),
-                    getConnectClientInfo(token).getRegion()
+                    getConnectClientInfo(userUuid).getAccessKeyId(),
+                    getConnectClientInfo(userUuid).getSecretAccessKey(),
+                    getConnectClientInfo(userUuid).getRegion()
                 ).describeUser(
                     DescribeUserRequest
                     .builder()

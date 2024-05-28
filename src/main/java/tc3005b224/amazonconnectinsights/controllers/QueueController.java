@@ -1,10 +1,15 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.web.exchanges.HttpExchange.Principal;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,11 +41,12 @@ public class QueueController {
         }
     )
     @GetMapping
-    public ResponseEntity<Iterable<QueueCardDTO>> getAllQueues() {
+    public ResponseEntity<Iterable<QueueCardDTO>> getAllQueues(@RequestParam(required = false) String resourceId,
+            @RequestBody Principal principal) {
         try {
-            Iterable<QueueCardDTO> queueCards = queueService.findAll("1", "");
+            Iterable<QueueCardDTO> queueCards = queueService.findAll(principal.getName(), resourceId);
             return ResponseEntity.ok(queueCards);
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e);
             return ResponseEntity.notFound().build();
         }
@@ -65,11 +71,13 @@ public class QueueController {
         }
     )
     @GetMapping("/{queueId}")
-    public ResponseEntity<QueueDTO> getIndividualQueue(@PathVariable String queueId) {
+    public ResponseEntity<?> getIndividualQueue(@PathVariable String queueId, @RequestBody Principal principal) {
         try {
-            return ResponseEntity.ok(queueService.findById("1", queueId));
-        }catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(queueService.findById(principal.getName(), queueId));
+        } catch (Exception e) {
+            // Return error if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
         }
     }
 }

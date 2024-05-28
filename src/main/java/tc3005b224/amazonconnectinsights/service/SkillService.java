@@ -3,7 +3,6 @@ package tc3005b224.amazonconnectinsights.service;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,9 @@ public class SkillService extends BaseService {
     private AgentService agentService;
     
     // Service that calls amazon connects ListRoutingProfiles and returns a list of SkillBriefDO
-    public List<SkillBriefDTO> findByInstance(String token) {
+    public List<SkillBriefDTO> findByInstance(String userUuid) {
         // Get the client info
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         // Build the request for the ListRoutingProfiles endpoint using the instanceId
         ListRoutingProfilesRequest listRoutingProfilesRequest = ListRoutingProfilesRequest.builder()
                 .instanceId(clientInfo.getInstanceId())
@@ -62,9 +61,9 @@ public class SkillService extends BaseService {
     }
 
     // Service that retrieves the Skill (Routing Profile) information given its skillId.
-    public SkillDTO findById(String token, String skillId) throws BadRequestException {
+    public SkillDTO findById(String userUuid, String skillId) throws BadRequestException {
         // Get the client info
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         DescribeRoutingProfileRequest describeRoutingProfileRequest = DescribeRoutingProfileRequest.builder()
                 .instanceId(clientInfo.getInstanceId())
                 .routingProfileId(skillId)
@@ -73,17 +72,17 @@ public class SkillService extends BaseService {
                 clientInfo.getSecretAccessKey(), clientInfo.getRegion())
                 .describeRoutingProfile(describeRoutingProfileRequest);
         RoutingProfile data = describeRoutingProfileResponse.routingProfile();
-        AlertPriorityDTO alerts = alertService.findByResource(clientInfo.getConnectionIdentifier(), data.routingProfileArn());
+        AlertPriorityDTO alerts = alertService.findByResource(userUuid, data.routingProfileArn());
 
         Instant createdAt = Instant.now(); // TODO: Change Mocked creation time
         SkillsInformationDTO skillsInformationDTO = new SkillsInformationDTO(data.name(), createdAt, data.numberOfAssociatedUsers());
 
-        InformationSectionListDTO metrics = metricService.getMetricsById(token, "ROUTING_PROFILE", data.routingProfileArn());
+        InformationSectionListDTO metrics = metricService.getMetricsById(userUuid, "ROUTING_PROFILE", data.routingProfileArn());
         
         Iterable<Alert> trainings = trainingsService
                 .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), data.routingProfileArn());
         
-        Iterable<AgentCardDTO> agents = agentService.findAll(token, skillId);
+        Iterable<AgentCardDTO> agents = agentService.findAll(userUuid, skillId);
                 
         SkillDTO response = new SkillDTO(
         skillId,
