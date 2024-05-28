@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import software.amazon.awssdk.services.connect.ConnectClient;
+import software.amazon.awssdk.services.connect.model.MonitorContactRequest;
+import software.amazon.awssdk.services.connect.model.MonitorContactResponse;
+import software.amazon.awssdk.services.connect.model.MonitorCapability;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
@@ -21,6 +25,7 @@ import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 import tc3005b224.amazonconnectinsights.repository.InsightRepository;
 import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
 
+
 @Service
 @Transactional
 public class AlertService extends BaseService {
@@ -32,6 +37,25 @@ public class AlertService extends BaseService {
     private TrainingRepository trainingRepository;
     @Autowired
     private InsightRepository insightRepository;
+
+    //Service to monitor a contact via BARGE
+    public MonitorContactResponse monitorContact(String token, String contactId) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+
+        ConnectClient connectClient = getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(), clientInfo.getRegion());
+
+
+        String userId = "ProvitionalUserID";
+
+        MonitorContactRequest request = MonitorContactRequest.builder()
+                .instanceId(clientInfo.getInstanceId())
+                .contactId(contactId)
+                .userId(userId)
+                .allowedMonitorCapabilities(MonitorCapability.BARGE)
+                .build();
+
+        return connectClient.monitorContact(request);
+    }
 
     // Service that returns all the unsolved alerts, ordered by priority that belong to a given connection.
     public AlertPriorityDTO findAll(int connectionIdentifier, String denominationAlike, String resource, String logs) {

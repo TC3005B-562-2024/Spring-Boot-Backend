@@ -25,12 +25,21 @@ import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 import tc3005b224.amazonconnectinsights.service.AlertService;
 
+import software.amazon.awssdk.services.connect.model.MonitorContactResponse;
+
 @RestController
 @RequestMapping("/alerts")
 @CrossOrigin(origins = "http://localhost:5173")
 public class AlertController {
     @Autowired
     private AlertService alertService;
+
+    @GetMapping("/monitor-contact")
+    public MonitorContactResponse monitorContact(
+            @RequestParam String token,
+            @RequestParam String contactId) {
+        return alertService.monitorContact(token, contactId);
+    }
 
     @Operation(
             summary = "Returns an AlertPriorityDTO, which has multiple lists of alerts ordered by priority.",
