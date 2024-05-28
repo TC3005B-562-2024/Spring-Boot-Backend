@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +37,7 @@ public class AgentController {
     })
     @GetMapping
     public ResponseEntity<?> getAllAgents(
-            @RequestParam(required = false, defaultValue = "") String resourceid, @RequestBody Principal principal) {
+            @RequestParam(required = false, defaultValue = "") String resourceid, Principal principal) {
         try {
             return ResponseEntity.ok(agentService.findAll(principal.getName(), resourceid));
         } catch (Exception e) {
@@ -57,7 +56,7 @@ public class AgentController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
     })
     @GetMapping("/{agentId}")
-    public ResponseEntity<?> getIndividualAgent(@PathVariable String agentId, @RequestBody Principal principal) {
+    public ResponseEntity<?> getIndividualAgent(@PathVariable String agentId, Principal principal) {
         try {
             return ResponseEntity.ok(agentService.findById(principal.getName(), agentId));
         } catch (Exception e) {
@@ -75,7 +74,7 @@ public class AgentController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
     })
     @GetMapping("/available-to-transfer")
-    public ResponseEntity<?> test(@RequestParam(required = true) String routingProfileId, @RequestBody Principal principal) {
+    public ResponseEntity<?> test(@RequestParam(required = true) String routingProfileId, Principal principal) {
         try {
             return ResponseEntity.ok(agentService.findAvailableAgentNotInRoutingProfile(principal.getName(), routingProfileId));
         } catch (Exception e) {
