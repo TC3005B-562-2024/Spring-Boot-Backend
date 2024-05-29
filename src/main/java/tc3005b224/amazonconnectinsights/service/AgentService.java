@@ -466,7 +466,7 @@ public class AgentService extends BaseService {
      * 
      * @author Moisés Adame
      */
-    public Set<String> getNegativeSentimentContacts(String userUuid, String agentId) throws Exception {
+    public Set<String> getNegativeSentimentContacts(String userUuid, String agentId) {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
         SearchContactsResponse contacts = getConnectClient(
