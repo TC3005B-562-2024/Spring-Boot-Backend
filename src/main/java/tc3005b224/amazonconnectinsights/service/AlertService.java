@@ -143,16 +143,7 @@ public class AlertService extends BaseService {
     }
 
     // Method that gets an AlertDTO and an Alert as an input, updating only the AlertDTO attributes that are null.
-    public void updateAlert(String userUuid, Long alertIdentifier, AlertDTO alertDTO) throws Exception {
-        // Get the client information
-        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        int connectionIdentifier = clientInfo.getConnectionIdentifier();
-
-        // Verify that the alert connection is the same as the one that is trying to be accessed
-        if (alertDTO.getConnectionId() != connectionIdentifier) {
-            throw new Exception("Unauthorized access to connection");
-        }
-        
+    public void updateAlert(String userUuid, Long alertIdentifier, AlertDTO alertDTO) throws Exception {        
         Alert queriedAlert = this.findByIdentifier(userUuid, alertIdentifier);
 
         Connection connection = null;
@@ -192,7 +183,8 @@ public class AlertService extends BaseService {
     // Service that ignores (deletes logically) an alert.
     public void ignoreById(String userUuid, Long id) throws Exception {
         // Is solved set to false
-        AlertDTO alertDTO = new AlertDTO(null, null, null, null, false, null);
+        AlertDTO alertDTO = new AlertDTO();
+        alertDTO.setSolved(false);
         this.updateAlert(userUuid, id, alertDTO);
     }
 
@@ -207,7 +199,8 @@ public class AlertService extends BaseService {
         String alertInsightCategoryDenomination = alert.getInsight().getCategory().getDenomination();
 
         // Is solved set to true
-        AlertDTO alertDTO = new AlertDTO(null, null, null, null, true, null);
+        AlertDTO alertDTO = new AlertDTO();
+        alertDTO.setSolved(true);
         this.updateAlert(userUuid, id, alertDTO);
         return alertInsightCategoryDenomination;
     }

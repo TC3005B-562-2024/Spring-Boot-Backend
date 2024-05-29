@@ -1,7 +1,5 @@
 package tc3005b224.amazonconnectinsights.dto.alerts;
 
-import java.util.Date;
-
 public class AlertDTO {
     private Short connectionId;
 
@@ -9,27 +7,39 @@ public class AlertDTO {
 
     private Short trainingId;
 
+    private String interveneContact;
+
+    private String interveneAgent;
+
+    private String originalRoutingProfile;
+
+    private String destinationRoutingProfile;
+
+    private String transferedAgent;
+
     private String resource;
 
     private Boolean solved;
 
     private Boolean trainingCompleted;
 
-    private Date dateTrainingCompleted;
-
     // Constructors, getters, and setters
-    public AlertDTO(Short connectionId, Short insightId, Short trainingId, String resource, Boolean solved, Boolean trainingCompleted) {
+    public AlertDTO() {
+        ;
+    }
+    
+    public AlertDTO(Short connectionId, Short insightId, Short trainingId, String interveneContact, String interveneAgent, String originalRoutingProfile, String destinationRoutingProfile, String transferedAgent, String resource, Boolean solved, Boolean trainingCompleted) {
         this.connectionId = connectionId;
         this.insightId = insightId;
         this.trainingId = trainingId;
+        this.interveneContact = interveneContact;
+        this.interveneAgent = interveneAgent;
+        this.originalRoutingProfile = originalRoutingProfile;
+        this.destinationRoutingProfile = destinationRoutingProfile;
+        this.transferedAgent = transferedAgent;
         this.resource = resource;
         this.solved = solved;
         this.trainingCompleted = trainingCompleted;
-        if(trainingCompleted){
-            this.dateTrainingCompleted = new Date();
-        }else{
-            this.dateTrainingCompleted = null;
-        }
     }
 
     public Short getConnectionId() {
@@ -54,6 +64,46 @@ public class AlertDTO {
 
     public void setTrainingId(Short trainingId) {
         this.trainingId = trainingId;
+    }
+
+    public String getInterveneContact() {
+        return interveneContact;
+    }
+
+    public void setInterveneContact(String interveneContact) {
+        this.interveneContact = interveneContact;
+    }
+
+    public String getInterveneAgent() {
+        return interveneAgent;
+    }
+
+    public void setInterveneAgent(String interveneAgent) {
+        this.interveneAgent = interveneAgent;
+    }
+
+    public String getOriginalRoutingProfile() {
+        return originalRoutingProfile;
+    }
+
+    public void setOriginalRoutingProfile(String originalRoutingProfile) {
+        this.originalRoutingProfile = originalRoutingProfile;
+    }
+
+    public String getDestinationRoutingProfile() {
+        return destinationRoutingProfile;
+    }
+
+    public void setDestinationRoutingProfile(String destinationRoutingProfile) {
+        this.destinationRoutingProfile = destinationRoutingProfile;
+    }
+
+    public String getTransferedAgent() {
+        return transferedAgent;
+    }
+
+    public void setTransferedAgent(String transferedAgent) {
+        this.transferedAgent = transferedAgent;
     }
 
     public String getResource() {
@@ -82,18 +132,6 @@ public class AlertDTO {
 
     public void setTrainingCompleted(Boolean trainingCompleted) {
         this.trainingCompleted = trainingCompleted;
-    }
-
-    public Date getDateTrainingCompleted() {
-        return dateTrainingCompleted;
-    }
-
-    public void setDateTrainingCompleted() {
-        if(trainingCompleted){
-            this.dateTrainingCompleted = new Date();
-        }else{
-            this.dateTrainingCompleted = null;
-        }
     }
 }
 
