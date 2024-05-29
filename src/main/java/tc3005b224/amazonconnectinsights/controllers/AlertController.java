@@ -186,7 +186,8 @@ public class AlertController {
             return ResponseEntity.ok("Alert of type: " + alertInsightCategoryDenomination + ", accepted.");
         } catch (Exception e) {
             // Return error 404 if there is an exception.
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
         }
     }
 
