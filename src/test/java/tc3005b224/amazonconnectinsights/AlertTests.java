@@ -75,7 +75,7 @@ class AlertTests {
     // Test the creation of an alert, and then retrieve it by its id to check if it was created correctly.
     @Test
     public void findAlertByIdTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
@@ -104,7 +104,7 @@ class AlertTests {
     // Test the addition of an alert to the database, and then check if it was added correctly.
     @Test
     public void addAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         String alertJson = new ObjectMapper().writeValueAsString(alert);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/alerts")
@@ -120,11 +120,11 @@ class AlertTests {
     // Test the update of an alert in the database, and then check if it was updated correctly.
     @Test
     public void updateAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
-        AlertDTO updatedAlert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", true, true);
+        AlertDTO updatedAlert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         String updatedAlertJson = new ObjectMapper().writeValueAsString(updatedAlert);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/alerts/"+savedAlert.getId())
@@ -143,7 +143,7 @@ class AlertTests {
     // Test the deletion of an alert from the database, and then check if it was deleted correctly.
     @Test
     public void deleteAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
@@ -160,7 +160,7 @@ class AlertTests {
     // Test the ignoring of an alert in the database, and then check if it was ignored correctly.
     @Test
     public void ignoreAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
@@ -178,7 +178,7 @@ class AlertTests {
     // Test the acceptance of an alert in the database, and then check if it was accepted correctly.
     @Test
     public void acceptAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 

@@ -25,12 +25,15 @@ import tc3005b224.amazonconnectinsights.service.UserService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import tc3005b224.amazonconnectinsights.service.ContactService;
 
 @RestController
 @RequestMapping("/agents")
 public class AgentController {
     @Autowired
     private AgentService agentService;
+    @Autowired
+    private ContactService contactService;
 
     @Autowired
     private UserService userService;
@@ -106,6 +109,27 @@ public class AgentController {
             userService.transfer(principal.getName(), agentTransferDTO.getUserId(),
                     agentTransferDTO.getRoutingProfileId());
             return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
+    }
+
+    @Operation(summary = "Transfer an agent to a routing profile.", responses = {
+            @ApiResponse(responseCode = "200", description = "Agent transferred.", content = {
+                    @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = AgentTransferDTO.class)))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal error."),
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
+    })
+    @GetMapping("/{agentId}/contacts")
+    public ResponseEntity<?> getContacts(@PathVariable String agentId, Principal principal) {
+        try {
+            // Return 200 if there is no exception.
+            return new ResponseEntity<>(
+                    contactService.findAllContactsByUserId(principal.getName(), agentId),
+                    HttpStatus.OK);
         } catch (Exception e) {
             // Return error 404 if there is an exception.
             ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();

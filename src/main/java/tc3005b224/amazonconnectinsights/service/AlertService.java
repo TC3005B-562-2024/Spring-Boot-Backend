@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import software.amazon.awssdk.services.connect.model.MonitorCapability;
+import software.amazon.awssdk.services.connect.model.MonitorContactRequest;
+import software.amazon.awssdk.services.connect.model.MonitorContactResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
@@ -21,6 +24,7 @@ import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 import tc3005b224.amazonconnectinsights.repository.InsightRepository;
 import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
 
+
 @Service
 @Transactional
 public class AlertService extends BaseService {
@@ -32,6 +36,23 @@ public class AlertService extends BaseService {
     private TrainingRepository trainingRepository;
     @Autowired
     private InsightRepository insightRepository;
+
+    //Service to monitor a contact via BARGE
+    public MonitorContactResponse monitorContact(String userUuid, String contactId) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+
+        String userId = "7d76a01c-674f-431b-94ed-2d9a936ff3e3";
+
+        MonitorContactRequest request = MonitorContactRequest.builder()
+                .instanceId(clientInfo.getInstanceId())
+                .contactId(contactId)
+                .userId(userId)
+                .allowedMonitorCapabilities(MonitorCapability.SILENT_MONITOR, MonitorCapability.BARGE)
+                .build();
+
+        return getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .monitorContact(request);
+    }
 
     // Service that returns all the unsolved alerts, ordered by priority that belong to a given connection.
     public AlertPriorityDTO findAll(String userUuid, String denominationAlike, String resource, String logs) {
@@ -143,16 +164,7 @@ public class AlertService extends BaseService {
     }
 
     // Method that gets an AlertDTO and an Alert as an input, updating only the AlertDTO attributes that are null.
-    public void updateAlert(String userUuid, Long alertIdentifier, AlertDTO alertDTO) throws Exception {
-        // Get the client information
-        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        int connectionIdentifier = clientInfo.getConnectionIdentifier();
-
-        // Verify that the alert connection is the same as the one that is trying to be accessed
-        if (alertDTO.getConnectionId() != connectionIdentifier) {
-            throw new Exception("Unauthorized access to connection");
-        }
-        
+    public void updateAlert(String userUuid, Long alertIdentifier, AlertDTO alertDTO) throws Exception {        
         Alert queriedAlert = this.findByIdentifier(userUuid, alertIdentifier);
 
         Connection connection = null;
@@ -192,7 +204,8 @@ public class AlertService extends BaseService {
     // Service that ignores (deletes logically) an alert.
     public void ignoreById(String userUuid, Long id) throws Exception {
         // Is solved set to false
-        AlertDTO alertDTO = new AlertDTO(null, null, null, null, false, null);
+        AlertDTO alertDTO = new AlertDTO();
+        alertDTO.setSolved(false);
         this.updateAlert(userUuid, id, alertDTO);
     }
 
@@ -207,7 +220,8 @@ public class AlertService extends BaseService {
         String alertInsightCategoryDenomination = alert.getInsight().getCategory().getDenomination();
 
         // Is solved set to true
-        AlertDTO alertDTO = new AlertDTO(null, null, null, null, true, null);
+        AlertDTO alertDTO = new AlertDTO();
+        alertDTO.setSolved(true);
         this.updateAlert(userUuid, id, alertDTO);
         return alertInsightCategoryDenomination;
     }

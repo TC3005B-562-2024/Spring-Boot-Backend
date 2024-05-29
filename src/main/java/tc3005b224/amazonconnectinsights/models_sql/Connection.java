@@ -23,6 +23,12 @@ public class Connection {
     @Column(name = "identifier")
     private int identifier;
 
+    @Column(name = "uid")
+    private String uid;
+
+    @Column(name = "supervisor")
+    private String supervisor;
+
     @Column(name = "denomination", nullable = false, length = 100)
     private String denomination;
 
@@ -47,6 +53,8 @@ public class Connection {
         ;
     }
     public Connection(ConnectionDTO connectionDTO) {
+        this.uid = connectionDTO.getUid();
+        this.supervisor = connectionDTO.getSupervisor();
         this.denomination = connectionDTO.getDenomination();
         this.description = connectionDTO.getDescription();
         this.dateJoined = new Date();
@@ -56,6 +64,14 @@ public class Connection {
 
     public void updateFromDTO(ConnectionDTO connectionDTO){
         this.dateUpdated = new Date();
+
+        if(connectionDTO.getUid() != null){
+            this.uid = connectionDTO.getUid();
+        }
+
+        if(connectionDTO.getSupervisor() != null){
+            this.supervisor = connectionDTO.getSupervisor();
+        }
 
         if(connectionDTO.getDenomination() != null){
             this.denomination = connectionDTO.getDenomination();
@@ -76,6 +92,22 @@ public class Connection {
 
     public void setIdentifier(int identifier) {
         this.identifier = identifier;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getSupervisor() {
+        return supervisor;
+    }
+
+    public void setSupervisor(String supervisor) {
+        this.supervisor = supervisor;
     }
 
     public String getDenomination() {
