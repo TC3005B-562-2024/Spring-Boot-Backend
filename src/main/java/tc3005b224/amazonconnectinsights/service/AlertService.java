@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import software.amazon.awssdk.services.connect.model.MonitorCapability;
+import software.amazon.awssdk.services.connect.model.MonitorContactRequest;
+import software.amazon.awssdk.services.connect.model.MonitorContactResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
@@ -21,6 +24,7 @@ import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 import tc3005b224.amazonconnectinsights.repository.InsightRepository;
 import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
 
+
 @Service
 @Transactional
 public class AlertService extends BaseService {
@@ -32,6 +36,23 @@ public class AlertService extends BaseService {
     private TrainingRepository trainingRepository;
     @Autowired
     private InsightRepository insightRepository;
+
+    //Service to monitor a contact via BARGE
+    public MonitorContactResponse monitorContact(String userUuid, String contactId) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+
+        String userId = "7d76a01c-674f-431b-94ed-2d9a936ff3e3";
+
+        MonitorContactRequest request = MonitorContactRequest.builder()
+                .instanceId(clientInfo.getInstanceId())
+                .contactId(contactId)
+                .userId(userId)
+                .allowedMonitorCapabilities(MonitorCapability.SILENT_MONITOR, MonitorCapability.BARGE)
+                .build();
+
+        return getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .monitorContact(request);
+    }
 
     // Service that returns all the unsolved alerts, ordered by priority that belong to a given connection.
     public AlertPriorityDTO findAll(String userUuid, String denominationAlike, String resource, String logs) {
