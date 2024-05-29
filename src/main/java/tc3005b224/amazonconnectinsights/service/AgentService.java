@@ -32,8 +32,10 @@ import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
 import software.amazon.awssdk.services.connect.model.StringCondition;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import software.amazon.awssdk.services.connect.model.UserSearchCriteria;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentAvailableToTransferListDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
+import tc3005b224.amazonconnectinsights.dto.agent.AgentMinimalDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
@@ -52,6 +54,9 @@ public class AgentService extends BaseService {
     @Autowired
     private MetricService metricService;
 
+    @Autowired
+    private RoutingProfileService routingProfileService;
+
     /**
      * Get all the agents general information required to display at the agent cards
      * if more specific information is required, use the findById method
@@ -59,7 +64,7 @@ public class AgentService extends BaseService {
      * and c is the amount of total contacts all agents have
      * this is the worst case scenario where no contact has a negative sentiment
      * 
-     * @param token
+     * @param userUuid
      * @param resourceId
      * @return Iterable<AgentCardDTO>
      * @throws BadRequestException
@@ -68,9 +73,9 @@ public class AgentService extends BaseService {
      * 
      * @see AgentCardDTO
      */
-    public Iterable<AgentCardDTO> findAll(String token, String resourceId)
+    public Iterable<AgentCardDTO> findAll(String userUuid, String resourceId)
             throws BadRequestException {
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         // Get all the agents
         Builder searchUserRequest = SearchUsersRequest.builder().instanceId(clientInfo.getInstanceId()).maxResults(500);
 
@@ -247,7 +252,7 @@ public class AgentService extends BaseService {
                             agentStatus.getOrDefault(userData.id(), "DISCONNECTED"),
                             worstSentiment,
                             queuesSet,
-                            alertService.findHighestPriority(token, userData.arn()).getHighestPriorityAlert()));
+                            alertService.findHighestPriority(userUuid, userData.arn()).getHighestPriorityAlert()));
                 });
         return agents;
     };
@@ -255,7 +260,7 @@ public class AgentService extends BaseService {
     /**
      * Get the detailed agent information by the agentId
      * 
-     * @param token
+     * @param userUuid
      * @param agentId
      * @return AgentDTO
      * @throws Exception
@@ -265,8 +270,8 @@ public class AgentService extends BaseService {
      * 
      * @see AgentDTO
      */
-    public AgentDTO findById(String token, String agentId) throws Exception {
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+    public AgentDTO findById(String userUuid, String agentId) throws Exception {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
         // Get the agent general information
         DescribeUserResponse agent = getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(),
@@ -274,7 +279,7 @@ public class AgentService extends BaseService {
                         DescribeUserRequest.builder().instanceId(clientInfo.getInstanceId()).userId(agentId).build());
 
         // Get the alerts of the agent
-        AlertPriorityDTO alerts = alertService.findByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
+        AlertPriorityDTO alerts = alertService.findByResource(userUuid, agent.user().arn());
 
         // Get the real-time data of the agent
         GetCurrentUserDataResponse agentCurrentDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
@@ -349,7 +354,7 @@ public class AgentService extends BaseService {
                 .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
 
         // Get the agent metrics
-        InformationMetricSectionListDTO metrics = metricService.getMetricsById(token, "AGENT", agent.user().arn());
+        InformationMetricSectionListDTO metrics = metricService.getMetricsById(userUuid, "AGENT", agent.user().arn());
 
         return new AgentDTO(
                 agentId,
@@ -361,5 +366,83 @@ public class AgentService extends BaseService {
                 trainings,
                 metrics
         );
+    }
+
+    /**
+     * Get the available agents that are not in a given routing profile. Access to
+     * the agents attribute of the returned object to get the list of agents. The
+     * cappedRoutingProfileId attribute is the routing profile id that was used to
+     * get the agents that are not within it.
+     * 
+     * @param userUuid
+     * @param routingProfileId
+     * @return AgentAvailableToTransferListDTO
+     * @throws Exception
+     * 
+     * @author Diego Jacobo Djmr5
+     * 
+     * @see AgentAvailableToTransferListDTO
+     */
+    public AgentAvailableToTransferListDTO findAvailableAgentNotInRoutingProfile(String userUuid, String routingProfileId)
+            throws Exception {
+        // Handle exceptions
+        if (routingProfileId == null || routingProfileId.isEmpty())
+            throw new BadRequestException("The routingProfileId is required");
+        if (userUuid == null || userUuid.isEmpty())
+            throw new BadRequestException("The user information was not provided");
+
+        // Get the client info based on the token
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+
+        // Get all the agents from the routing profile
+        SearchUsersResponse routingProfileUsers = getConnectClient(clientInfo.getAccessKeyId(),
+                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .searchUsers(SearchUsersRequest.builder()
+                        .instanceId(clientInfo.getInstanceId())
+                        .searchCriteria(UserSearchCriteria.builder()
+                                .stringCondition(StringCondition.builder()
+                                        .comparisonType("EXACT")
+                                        .fieldName("RoutingProfileId")
+                                        .value(routingProfileId)
+                                        .build())
+                                .build())
+                        .build());
+
+        List<String> agentsIdsInRoutingProfile = new ArrayList<>();
+        routingProfileUsers.users().forEach(user -> {
+            agentsIdsInRoutingProfile.add(user.id());
+        });
+
+        // Get the real-time data of the agent
+        Iterable<RoutingProfileSummary> skills = routingProfileService.getRoutingProfiles(userUuid);
+        List<String> skillsIds = new ArrayList<>();
+        skills.forEach(skill -> {
+            if (!skill.id().equals(routingProfileId)) {
+                skillsIds.add(skill.id());
+            }
+        });
+
+        GetCurrentUserDataResponse agentCurrentDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
+                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .getCurrentUserData(GetCurrentUserDataRequest.builder()
+                        .instanceId(clientInfo.getInstanceId())
+                        .filters(UserDataFilters.builder().routingProfiles(skillsIds).build())
+                        .build());
+
+        // Create the list of available agents not in the routing profile
+        List<AgentMinimalDTO> availableAgents = new ArrayList<>();
+        agentCurrentDataResponse.userDataList().forEach(userData -> {
+            if (userData.status().statusName().equals("Available")
+                    && !agentsIdsInRoutingProfile.contains(userData.user().id()) && userData.contacts().isEmpty()) {
+                availableAgents.add(new AgentMinimalDTO(
+                        userData.user().id(),
+                        null,
+                        userData.status().statusName(),
+                        userData.routingProfile().id()));
+            }
+        });
+
+        // Obtener contactos
+        return new AgentAvailableToTransferListDTO(routingProfileId, availableAgents);
     }
 }
