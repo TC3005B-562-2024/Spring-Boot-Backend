@@ -62,7 +62,7 @@ public class SkillService extends BaseService {
         InformationSectionListDTO metrics = metricService.getMetricsById(userUuid, "ROUTING_PROFILE", data.routingProfileArn());
         
         Iterable<Alert> trainings = trainingsService
-                .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), data.routingProfileArn());
+                .findTrainingsAlertsByResource(clientInfo.getIdentifier(), data.routingProfileArn());
         
         Iterable<AgentCardDTO> agents = agentService.findAll(userUuid, skillId);
                 
