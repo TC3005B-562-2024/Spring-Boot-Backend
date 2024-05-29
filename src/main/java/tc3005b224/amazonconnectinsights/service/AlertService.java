@@ -151,15 +151,6 @@ public class AlertService extends BaseService {
 
     // Method that stores a new alert to the database.
     public Alert saveAlert(String userUuid, Alert newAlert) throws BadRequestException {
-        // Get the client information
-        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        int connectionIdentifier = clientInfo.getIdentifier();
-
-        // Check if the connection is the same as the one that is trying to be accessed
-        if (newAlert.getConnection().getIdentifier() != connectionIdentifier) {
-            throw new BadRequestException("Unauthorized access to connection");
-        }
-        
         return alertRepository.save(newAlert);
     }
 
