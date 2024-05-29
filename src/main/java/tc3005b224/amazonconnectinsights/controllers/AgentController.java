@@ -20,12 +20,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentAvailableToTransferListDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.service.AgentService;
+import tc3005b224.amazonconnectinsights.service.ContactService;
 
 @RestController
 @RequestMapping("/agents")
 public class AgentController {
     @Autowired
     private AgentService agentService;
+    @Autowired
+    private ContactService contactService;
 
     @Operation(summary = "Returns a list of agents that might be filtered by a resource id.", responses = {
             @ApiResponse(responseCode = "200", description = "List of agents.", content = {
@@ -76,11 +79,27 @@ public class AgentController {
     @GetMapping("/available-to-transfer")
     public ResponseEntity<?> test(@RequestParam(required = true) String routingProfileId, Principal principal) {
         try {
-            return ResponseEntity.ok(agentService.findAvailableAgentNotInRoutingProfile(principal.getName(), routingProfileId));
+            return ResponseEntity
+                    .ok(agentService.findAvailableAgentNotInRoutingProfile(principal.getName(), routingProfileId));
         } catch (Exception e) {
             // Return error 404 if there is an exception.
             ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
             return new ResponseEntity<>(error, error.getStatusCode());
         }
     }
+
+    @GetMapping("/{agentId}/contacts")
+    public ResponseEntity<?> getContacts(@PathVariable String agentId, Principal principal) {
+        try {
+            // Return 200 if there is no exception.
+            return new ResponseEntity<>(
+                    contactService.findAllContactsByUserId(principal.getName(), agentId),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
+    }
+
 }

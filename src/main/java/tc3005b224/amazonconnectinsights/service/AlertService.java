@@ -9,10 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-import software.amazon.awssdk.services.connect.ConnectClient;
+import software.amazon.awssdk.services.connect.model.MonitorCapability;
 import software.amazon.awssdk.services.connect.model.MonitorContactRequest;
 import software.amazon.awssdk.services.connect.model.MonitorContactResponse;
-import software.amazon.awssdk.services.connect.model.MonitorCapability;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
@@ -39,22 +38,20 @@ public class AlertService extends BaseService {
     private InsightRepository insightRepository;
 
     //Service to monitor a contact via BARGE
-    public MonitorContactResponse monitorContact(String token, String contactId) {
-        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+    public MonitorContactResponse monitorContact(String userUuid, String contactId) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
-        ConnectClient connectClient = getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(), clientInfo.getRegion());
-
-
-        String userId = "ProvitionalUserID";
+        String userId = "7d76a01c-674f-431b-94ed-2d9a936ff3e3";
 
         MonitorContactRequest request = MonitorContactRequest.builder()
                 .instanceId(clientInfo.getInstanceId())
                 .contactId(contactId)
                 .userId(userId)
-                .allowedMonitorCapabilities(MonitorCapability.BARGE)
+                .allowedMonitorCapabilities(MonitorCapability.SILENT_MONITOR, MonitorCapability.BARGE)
                 .build();
 
-        return connectClient.monitorContact(request);
+        return getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .monitorContact(request);
     }
 
     // Service that returns all the unsolved alerts, ordered by priority that belong to a given connection.
