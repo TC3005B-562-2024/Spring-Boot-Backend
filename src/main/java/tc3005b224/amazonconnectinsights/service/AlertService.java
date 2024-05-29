@@ -62,7 +62,7 @@ public class AlertService extends BaseService {
 
         // Get the connection identifier
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        int connectionIdentifier = clientInfo.getConnectionIdentifier();
+        int connectionIdentifier = clientInfo.getIdentifier();
 
         // Instantiate an AlertPriorityDTO
         AlertPriorityDTO response = new AlertPriorityDTO();
@@ -100,7 +100,7 @@ public class AlertService extends BaseService {
 
         if (alertsOptional.isPresent()) {
             if (alertsOptional.get().getConnection().getIdentifier() == getConnectClientInfo(userUuid)
-                    .getConnectionIdentifier()) {
+                    .getIdentifier()) {
                 return alertsOptional.get();
             }
             throw new Exception("Unauthorized access to alert");
@@ -112,7 +112,7 @@ public class AlertService extends BaseService {
     public AlertPriorityDTO findByResource(String userUuid, String resourceArn){
         // Get the client information
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        int connectionIdentifier = clientInfo.getConnectionIdentifier();
+        int connectionIdentifier = clientInfo.getIdentifier();
         
         // Instantiate an AlertPriorityDTO
         AlertPriorityDTO response = new AlertPriorityDTO();
@@ -153,7 +153,7 @@ public class AlertService extends BaseService {
     public Alert saveAlert(String userUuid, Alert newAlert) throws BadRequestException {
         // Get the client information
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        int connectionIdentifier = clientInfo.getConnectionIdentifier();
+        int connectionIdentifier = clientInfo.getIdentifier();
 
         // Check if the connection is the same as the one that is trying to be accessed
         if (newAlert.getConnection().getIdentifier() != connectionIdentifier) {
@@ -195,7 +195,7 @@ public class AlertService extends BaseService {
     public void deleteById(String userUuid, Long id) throws Exception {
         alertRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Alert not found!"));
         if (alertRepository.findById(id).get().getConnection().getIdentifier() != getConnectClientInfo(userUuid)
-                .getConnectionIdentifier()) {
+                .getIdentifier()) {
             throw new Exception("Unauthorized access to alert");
         }
         alertRepository.deleteById(id);
@@ -245,9 +245,9 @@ public class AlertService extends BaseService {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         if (resource != null) {
             highestPriority = alertRepository.findHighestPriorityByResource(resource,
-                    clientInfo.getConnectionIdentifier());
+                    clientInfo.getIdentifier());
         } else {
-            highestPriority = alertRepository.findHighestPriority(clientInfo.getConnectionIdentifier());
+            highestPriority = alertRepository.findHighestPriority(clientInfo.getIdentifier());
         }
 
         if (highestPriority.isPresent()) {
@@ -283,6 +283,6 @@ public class AlertService extends BaseService {
      */
     public Iterable<Alert> findTrainingAlerts(String userUuid, String resource) {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        return alertRepository.findByConnectionIdentifierAndResourceAndSolvedAndHasTraining(clientInfo.getConnectionIdentifier(), resource, true, true);
+        return alertRepository.findByConnectionIdentifierAndResourceAndSolvedAndHasTraining(clientInfo.getIdentifier(), resource, true, true);
     }
 }
