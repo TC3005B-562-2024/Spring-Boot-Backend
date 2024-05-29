@@ -40,8 +40,10 @@ import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeCont
 import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeContactAnalysisSegmentsResponse;
 import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
 import software.amazon.awssdk.services.connect.model.StringCondition;
+import software.amazon.awssdk.services.connect.model.UserData;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import software.amazon.awssdk.services.connect.model.UserSearchCriteria;
+import software.amazon.awssdk.services.connect.model.UserSearchSummary;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentAvailableToTransferListDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
@@ -67,6 +69,9 @@ public class AgentService extends BaseService {
     @Autowired
     private RoutingProfileService routingProfileService;
 
+    @Autowired
+    private UserService userService;
+
     /**
      * Get all the agents general information required to display at the agent cards
      * if more specific information is required, use the findById method
@@ -86,36 +91,26 @@ public class AgentService extends BaseService {
     public Iterable<AgentCardDTO> findAll(String userUuid, String resourceId)
             throws BadRequestException {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+
         // Get all the agents
-        Builder searchUserRequest = SearchUsersRequest.builder().instanceId(clientInfo.getInstanceId()).maxResults(500);
+        List<UserSearchSummary> users = userService.searchUsers(userUuid);
 
         // If a resourceId is provided, filter the agents by that resourceId
         if (!resourceId.isEmpty()) {
-            UserSearchCriteria criteria = UserSearchCriteria.builder().stringCondition(
-                    StringCondition.builder().comparisonType("EXACT").fieldName("RoutingProfileId").value(resourceId)
-                            .build())
-                    .build();
-            searchUserRequest.searchCriteria(criteria);
+            users = userService.searchUsers(userUuid, resourceId);
+        } else {
+            users = userService.searchUsers(userUuid);
         }
 
-        // Get the agents / users from the instance
-        SearchUsersResponse users = null;
-        users = getConnectClient(clientInfo.getAccessKeyId(),
-                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
-                .searchUsers(searchUserRequest.build());
-        if (users.users().isEmpty()) {
+        if (users.isEmpty()) {
             // If there is no agents with the resourceId, try to get the agents from the
             // queues
             // The resourceId might be from a queue, in that case, get the agents from the
             // routing profile
             try {
-                ListRoutingProfilesResponse routingProfiles = getConnectClient(clientInfo.getAccessKeyId(),
-                        clientInfo.getSecretAccessKey(), clientInfo.getRegion())
-                        .listRoutingProfiles(ListRoutingProfilesRequest.builder()
-                                .instanceId(clientInfo.getInstanceId()).build());
+                Iterable<RoutingProfileSummary> routingProfiles = routingProfileService.getRoutingProfiles(userUuid);
                 Set<String> routingProfileIdsAssociatedToTheQueue = new HashSet<>();
-                for (int i = 0; i < routingProfiles.routingProfileSummaryList().size(); i++) {
-                    RoutingProfileSummary routingProfile = routingProfiles.routingProfileSummaryList().get(i);
+                routingProfiles.forEach(routingProfile -> {
                     ListRoutingProfileQueuesResponse routingProfileQueues = getConnectClient(
                             clientInfo.getAccessKeyId(),
                             clientInfo.getSecretAccessKey(), clientInfo.getRegion())
@@ -128,13 +123,9 @@ public class AgentService extends BaseService {
                             routingProfileIdsAssociatedToTheQueue.add(routingProfile.id());
                         }
                     }
-
-                }
+                });
                 if (routingProfileIdsAssociatedToTheQueue.size() > 0) {
                     // Reset the searchUserRequest
-                    Builder newSearchUserRequest = SearchUsersRequest.builder()
-                            .instanceId(clientInfo.getInstanceId());
-
                     List<UserSearchCriteria> criterias = new ArrayList<UserSearchCriteria>();
 
                     routingProfileIdsAssociatedToTheQueue.forEach(
@@ -147,12 +138,7 @@ public class AgentService extends BaseService {
                             });
                     // Retrieve the new agents associated to the routing profiles associated to the
                     // queue
-                    users = getConnectClient(clientInfo.getAccessKeyId(),
-                            clientInfo.getSecretAccessKey(), clientInfo.getRegion())
-                            .searchUsers(newSearchUserRequest
-                                    .maxResults(500)
-                                    .searchCriteria(UserSearchCriteria.builder().andConditions(criterias).build())
-                                    .build());
+                    users = userService.searchUsers(userUuid, criterias);
                 } else {
                     throw new BadRequestException("Sorry, we could found any agent in the resourceId, Xd");
                 }
@@ -164,50 +150,40 @@ public class AgentService extends BaseService {
 
         // Create the filters to get the user data from the agents retrieved
         Collection<String> userIds = new ArrayList<String>();
-        users.users().forEach(
-                user -> {
-                    userIds.add(user.id());
-                });
-        if (userIds.isEmpty()) {
+        users.forEach(user -> {
+            userIds.add(user.id());
+        });
+        if (userIds.isEmpty())
             throw new BadRequestException("There are no agents with the resourceId provided");
-        }
 
         // Get the contacts information for the agents
-        GetCurrentUserDataResponse getCurrentUserDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
-                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
-                .getCurrentUserData(GetCurrentUserDataRequest.builder()
-                        .instanceId(clientInfo.getInstanceId())
-                        .filters(UserDataFilters.builder().agents(userIds).build())
-                        .build());
+        List<UserData> getCurrentUserDataResponse = userService.getCurrentUserData(userUuid, userIds);
 
         // Get the contacts and status for the agents
         // If there are no values in the getCurrentUserDataResponse, create an empty map
         Map<String, List<String>> contacts = new HashMap<String, List<String>>();
         Map<String, String> agentStatus = new HashMap<String, String>();
-        if (!getCurrentUserDataResponse.userDataList().isEmpty()) {
+        if (!getCurrentUserDataResponse.isEmpty()) {
             // Create a map with the contacts for each agent
-            users.users().forEach(
-                    user -> {
-                        List<String> contactIds = new ArrayList<String>();
-                        getCurrentUserDataResponse.userDataList().forEach(
-                                userData -> {
-                                    if (userData.user().id().equals(user.id())) {
-                                        // Add all the contacts to the list
-                                        userData.contacts().forEach(
-                                                contact -> {
-                                                    contactIds.add(contact.contactId());
-                                                });
-                                        // Add the status of the agent
-                                        agentStatus.put(user.id(), userData.status().statusName());
-                                    }
-                                });
-                        contacts.put(user.id(), contactIds);
-                    });
+            users.forEach(user -> {
+                List<String> contactIds = new ArrayList<String>();
+                getCurrentUserDataResponse.forEach(userData -> {
+                    if (userData.user().id().equals(user.id())) {
+                        // Add all the contacts to the list
+                        userData.contacts().forEach(contact -> {
+                            contactIds.add(contact.contactId());
+                        });
+                        // Add the status of the agent
+                        agentStatus.put(user.id(), userData.status().statusName());
+                    }
+                });
+                contacts.put(user.id(), contactIds);
+            });
         }
 
         // Create the list of agents to return
         List<AgentCardDTO> agents = new ArrayList<AgentCardDTO>();
-        users.users().forEach(
+        users.forEach(
                 userData -> {
                     // Get the details of the routing profile
                     ListRoutingProfileQueuesResponse routingProfileQueues = getConnectClient(
@@ -292,12 +268,7 @@ public class AgentService extends BaseService {
         AlertPriorityDTO alerts = alertService.findByResource(userUuid, agent.user().arn());
 
         // Get the real-time data of the agent
-        GetCurrentUserDataResponse agentCurrentDataResponse = getConnectClient(clientInfo.getAccessKeyId(),
-                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
-                .getCurrentUserData(GetCurrentUserDataRequest.builder()
-                        .instanceId(clientInfo.getInstanceId())
-                        .filters(UserDataFilters.builder().agents(agentId).build())
-                        .build());
+        List<UserData> agentCurrentDataResponse = userService.getCurrentUserData(userUuid, List.of(agentId));
 
         // Routing profile name
         String routingProfileName = getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(),
@@ -309,7 +280,7 @@ public class AgentService extends BaseService {
         // Obtener contactos
         // TODO: Obtener el promedio de las duraciones de las llamadas
         List<ContactInformationDTO> contacts = new ArrayList<>();
-        agentCurrentDataResponse.userDataList().forEach(userData -> {
+        agentCurrentDataResponse.forEach(userData -> {
             userData.contacts().forEach(contact -> {
                 // TODO: Review, it can be different due to the timezones
                 DescribeContactResponse contactDetails = getConnectClient(clientInfo.getAccessKeyId(),
@@ -355,13 +326,13 @@ public class AgentService extends BaseService {
 
         String name = agent.user().identityInfo().firstName() + " " + agent.user().identityInfo().lastName();
         String agentStatus = null;
-        if (!agentCurrentDataResponse.userDataList().isEmpty()) {
-            agentStatus = agentCurrentDataResponse.userDataList().get(0).status().statusName();
+        if (!agentCurrentDataResponse.isEmpty()) {
+            agentStatus = agentCurrentDataResponse.get(0).status().statusName();
         }
         AgentInformationDTO agentInformation = new AgentInformationDTO(name, routingProfileName,
                 agentStatus);
         Iterable<Alert> trainings = trainingsService
-                .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
+                .findTrainingsAlertsByResource(clientInfo.getIdentifier(), agent.user().arn());
 
         // Get the agent metrics
         InformationMetricSectionListDTO metrics = metricService.getMetricsById(userUuid, "AGENT", agent.user().arn());
@@ -393,7 +364,8 @@ public class AgentService extends BaseService {
      * 
      * @see AgentAvailableToTransferListDTO
      */
-    public AgentAvailableToTransferListDTO findAvailableAgentNotInRoutingProfile(String userUuid, String routingProfileId)
+    public AgentAvailableToTransferListDTO findAvailableAgentNotInRoutingProfile(String userUuid,
+            String routingProfileId)
             throws Exception {
         // Handle exceptions
         if (routingProfileId == null || routingProfileId.isEmpty())
@@ -405,21 +377,10 @@ public class AgentService extends BaseService {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
         // Get all the agents from the routing profile
-        SearchUsersResponse routingProfileUsers = getConnectClient(clientInfo.getAccessKeyId(),
-                clientInfo.getSecretAccessKey(), clientInfo.getRegion())
-                .searchUsers(SearchUsersRequest.builder()
-                        .instanceId(clientInfo.getInstanceId())
-                        .searchCriteria(UserSearchCriteria.builder()
-                                .stringCondition(StringCondition.builder()
-                                        .comparisonType("EXACT")
-                                        .fieldName("RoutingProfileId")
-                                        .value(routingProfileId)
-                                        .build())
-                                .build())
-                        .build());
+        Iterable<UserSearchSummary> routingProfileUsers = userService.searchUsers(userUuid, routingProfileId);
 
         List<String> agentsIdsInRoutingProfile = new ArrayList<>();
-        routingProfileUsers.users().forEach(user -> {
+        routingProfileUsers.forEach(user -> {
             agentsIdsInRoutingProfile.add(user.id());
         });
 
@@ -494,9 +455,7 @@ public class AgentService extends BaseService {
         contacts.contacts().forEach(contact -> {
             try {
                 ListRealtimeContactAnalysisSegmentsResponse segments = getConnectContactLensClient(
-                    clientInfo.getAccessKeyId(),
-                    clientInfo.getSecretAccessKey(),
-                    clientInfo.getRegion()
+                    clientInfo
                 ).listRealtimeContactAnalysisSegments(
                     ListRealtimeContactAnalysisSegmentsRequest.builder()
                     .contactId(contact.id())

@@ -32,6 +32,19 @@ public class AlertController {
     @Autowired
     private AlertService alertService;
 
+    @GetMapping("/monitor-contact")
+    public ResponseEntity<?> monitorContact(
+            @RequestParam String contactId, Principal principal) {
+        try {
+            alertService.monitorContact(principal.getName(), contactId);
+            return ResponseEntity.ok("Request to monitor contact sent successfully.");
+        } catch (Exception e) {
+            // Return error if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
+    }
+
     @Operation(summary = "Returns an AlertPriorityDTO, which has multiple lists of alerts ordered by priority.", responses = {
             @ApiResponse(responseCode = "200", description = "Alerts Found.", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = AlertPriorityDTO.class))
@@ -185,7 +198,8 @@ public class AlertController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to database."),
     })
     @GetMapping("/highestPriority")
-    public ResponseEntity<AlertHighPriorityDTO> getHighestPriority(@RequestParam(required = false) String resource, Principal principal) {
+    public ResponseEntity<AlertHighPriorityDTO> getHighestPriority(@RequestParam(required = false) String resource,
+            Principal principal) {
         AlertHighPriorityDTO priority = alertService.findHighestPriority(principal.getName(), resource);
         return ResponseEntity.ok(priority);
     }

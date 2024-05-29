@@ -70,7 +70,7 @@ public class QueueService extends BaseService {
     public Iterable<QueueCardDTO> findAll(String token, String resourceId) throws BadRequestException {
         // Buld the request for getting the queues.
         ConnectClientInfo clientInfo = getConnectClientInfo(token);
-        SearchQueuesRequest.Builder searchQueuesRequest = SearchQueuesRequest.builder().instanceId(clientInfo.getInstanceId());
+        SearchQueuesRequest.Builder searchQueuesRequest = SearchQueuesRequest.builder().instanceId(clientInfo.getInstanceId()).maxResults(100);
         SearchQueuesResponse queues = getConnectClient(
             clientInfo.getAccessKeyId(), 
             clientInfo.getSecretAccessKey(), 

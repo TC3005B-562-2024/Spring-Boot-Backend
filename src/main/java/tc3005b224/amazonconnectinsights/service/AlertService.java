@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import software.amazon.awssdk.services.connect.model.MonitorCapability;
+import software.amazon.awssdk.services.connect.model.MonitorContactRequest;
+import software.amazon.awssdk.services.connect.model.MonitorContactResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
@@ -21,6 +24,7 @@ import tc3005b224.amazonconnectinsights.repository.AlertRepository;
 import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 import tc3005b224.amazonconnectinsights.repository.InsightRepository;
 import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
+
 
 @Service
 @Transactional
@@ -34,6 +38,23 @@ public class AlertService extends BaseService {
     @Autowired
     private InsightRepository insightRepository;
 
+    //Service to monitor a contact via BARGE
+    public MonitorContactResponse monitorContact(String userUuid, String contactId) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+
+        String userId = "7d76a01c-674f-431b-94ed-2d9a936ff3e3";
+
+        MonitorContactRequest request = MonitorContactRequest.builder()
+                .instanceId(clientInfo.getInstanceId())
+                .contactId(contactId)
+                .userId(userId)
+                .allowedMonitorCapabilities(MonitorCapability.SILENT_MONITOR, MonitorCapability.BARGE)
+                .build();
+
+        return getConnectClient(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey(), clientInfo.getRegion())
+                .monitorContact(request);
+    }
+
     // Service that returns all the unsolved alerts, ordered by priority that belong to a given connection.
     public AlertPriorityDTO findAll(String userUuid, String denominationAlike, String resource, String logs) {
         if(!logs.equals("true") && !logs.equals("false")) {
@@ -42,7 +63,7 @@ public class AlertService extends BaseService {
 
         // Get the connection identifier
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        int connectionIdentifier = clientInfo.getConnectionIdentifier();
+        int connectionIdentifier = clientInfo.getIdentifier();
 
         // Instantiate an AlertPriorityDTO
         AlertPriorityDTO response = new AlertPriorityDTO();
@@ -80,7 +101,7 @@ public class AlertService extends BaseService {
 
         if (alertsOptional.isPresent()) {
             if (alertsOptional.get().getConnection().getIdentifier() == getConnectClientInfo(userUuid)
-                    .getConnectionIdentifier()) {
+                    .getIdentifier()) {
                 return alertsOptional.get();
             }
             throw new Exception("Unauthorized access to alert");
@@ -92,7 +113,7 @@ public class AlertService extends BaseService {
     public AlertPriorityDTO findByResource(String userUuid, String resourceArn){
         // Get the client information
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        int connectionIdentifier = clientInfo.getConnectionIdentifier();
+        int connectionIdentifier = clientInfo.getIdentifier();
         
         // Instantiate an AlertPriorityDTO
         AlertPriorityDTO response = new AlertPriorityDTO();
@@ -131,15 +152,6 @@ public class AlertService extends BaseService {
 
     // Method that stores a new alert to the database.
     public Alert saveAlert(String userUuid, Alert newAlert) throws BadRequestException {
-        // Get the client information
-        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        int connectionIdentifier = clientInfo.getConnectionIdentifier();
-
-        // Check if the connection is the same as the one that is trying to be accessed
-        if (newAlert.getConnection().getIdentifier() != connectionIdentifier) {
-            throw new BadRequestException("Unauthorized access to connection");
-        }
-        
         return alertRepository.save(newAlert);
     }
 
@@ -175,7 +187,7 @@ public class AlertService extends BaseService {
     public void deleteById(String userUuid, Long id) throws Exception {
         alertRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Alert not found!"));
         if (alertRepository.findById(id).get().getConnection().getIdentifier() != getConnectClientInfo(userUuid)
-                .getConnectionIdentifier()) {
+                .getIdentifier()) {
             throw new Exception("Unauthorized access to alert");
         }
         alertRepository.deleteById(id);
@@ -225,9 +237,9 @@ public class AlertService extends BaseService {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         if (resource != null) {
             highestPriority = alertRepository.findHighestPriorityByResource(resource,
-                    clientInfo.getConnectionIdentifier());
+                    clientInfo.getIdentifier());
         } else {
-            highestPriority = alertRepository.findHighestPriority(clientInfo.getConnectionIdentifier());
+            highestPriority = alertRepository.findHighestPriority(clientInfo.getIdentifier());
         }
 
         if (highestPriority.isPresent()) {
@@ -263,7 +275,7 @@ public class AlertService extends BaseService {
      */
     public Iterable<Alert> findTrainingAlerts(String userUuid, String resource) {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        return alertRepository.findByConnectionIdentifierAndResourceAndSolvedAndHasTraining(clientInfo.getConnectionIdentifier(), resource, true, true);
+        return alertRepository.findByConnectionIdentifierAndResourceAndSolvedAndHasTraining(clientInfo.getIdentifier(), resource, true, true);
     }
 
     /**

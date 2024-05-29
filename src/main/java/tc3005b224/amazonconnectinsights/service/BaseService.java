@@ -4,7 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URLDecoder;
 import java.util.Map;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ReflectionUtils;
 
@@ -12,10 +14,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connectcontactlens.ConnectContactLensClient;
+import tc3005b224.amazonconnectinsights.models_sql.Connection;
+import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 
 /**
  * Base service class with common functionalities that might be used in most
@@ -25,6 +30,9 @@ import software.amazon.awssdk.services.connectcontactlens.ConnectContactLensClie
  * @author Diego Jacobo Djmr5
  */
 public class BaseService {
+
+    @Autowired
+    private ConnectionRepository connectionRepository;
 
     @Value("${aws_accessKeyId}")
     private String accessKeyId;
@@ -130,39 +138,64 @@ public class BaseService {
                 .build();
     }
 
-    protected ConnectContactLensClient getConnectContactLensClient(String accessKeyId, String secretAccessKey, Region region) {
-        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
-        return ConnectContactLensClient.builder()
-                .credentialsProvider(() -> awsCreds)
-                .region(region)
-                .build();
+    private ConnectClientInfo mapConnectionToConnectClientInfo(Connection connection) {
+        ConnectClientInfo clientInfo = new ConnectClientInfo();
+        clientInfo.setIdentifier(connection.getIdentifier());
+        clientInfo.setAccessKeyId(accessKeyId);
+        clientInfo.setSecretAccessKey(secretAccessKey);
+        clientInfo.setInstanceId(instanceId);
+        clientInfo.setRegion(Region.of(region));
+        clientInfo.setContactLensEnabled(false);
+        clientInfo.setSupervisor(connection.getSupervisor());
+        clientInfo.setUid(connection.getUid());
+        return clientInfo;
     }
 
-    protected ConnectClientInfo getConnectClientInfo(String token) {
+    protected ConnectClientInfo getConnectClientInfo(String userUuid) {
         // If token matches, returns data from the database
-        return new ConnectClientInfo(
-            (short) 1,
-            accessKeyId,
-            secretAccessKey,
-            instanceId,
-            Region.of(region),
-            false
-            );
+        Optional<Connection> optConnection = connectionRepository.findByUid(userUuid);
+        
+        if (!optConnection.isPresent()) {
+            throw new IllegalArgumentException("Connection not found");
+        }
 
+        // TODO: Review and add verify contact lens via Endpoint
+        Connection connection = optConnection.get();
+        return mapConnectionToConnectClientInfo(connection);
+    }
+
+    protected ConnectClientInfo getConnectClientInfoByIdentifier(Integer identifier) {
+        Optional<Connection> optConnection = connectionRepository.findById(identifier.shortValue());
+        if (!optConnection.isPresent()) {
+            throw new IllegalArgumentException("Connection not found");
+        }
+
+        Connection connection = optConnection.get();
+        return mapConnectionToConnectClientInfo(connection);
+    }
+
+    protected ConnectContactLensClient getConnectContactLensClient(ConnectClientInfo clientInfo) {
+        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey());
+        return ConnectContactLensClient.builder()
+                .credentialsProvider(() -> awsCreds)
+                .region(clientInfo.getRegion())
+                .build();
     }
 
     @AllArgsConstructor
     @Getter
     @Setter
     @NoArgsConstructor
+    @ToString
     protected class ConnectClientInfo {
-
-        private Short connectionIdentifier;
+        private Integer identifier;
         private String accessKeyId;
         private String secretAccessKey;
         private String instanceId;
         private Region region;
         private Boolean contactLensEnabled;
+        private String supervisor;
+        private String uid;
     }
 }
 
