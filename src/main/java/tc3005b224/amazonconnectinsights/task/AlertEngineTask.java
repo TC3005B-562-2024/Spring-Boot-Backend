@@ -16,7 +16,7 @@ public class AlertEngineTask {
     @Scheduled(fixedDelay = 1000)
     public void mainTask() {
         if (running) {
-            alertEngineService.generateAlerts("token");
+            alertEngineService.generateAlerts("0DW8s4ZUHveDwLkK3u0qSiKIMZ53");
         }
     }
 

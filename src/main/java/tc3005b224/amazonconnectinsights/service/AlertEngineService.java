@@ -3,6 +3,7 @@ package tc3005b224.amazonconnectinsights.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class AlertEngineService extends BaseService {
 
     @Autowired
     private ConnectionsService connectionsService;
+
+    @Autowired
+    private AgentService agentService;
 
     /**
      * Service that retrieves all the routing profiles arn's of the instance
@@ -170,7 +174,34 @@ public class AlertEngineService extends BaseService {
                     try {
                         InformationMetricSectionListDTO metrics = metricService.getMetricsById(token, "ROUTING_PROFILE", routingProfileArn);
                         System.out.println("Routing Profile: " + routingProfileArn);
-                        analyzeMetrics(clientInfo.getConnectionIdentifier(), metrics, "ROUTING_PROFILE", routingProfileArn);
+                        System.out.println(metrics.toString());
+                        analyzeMetrics(clientInfo.getIdentifier().shortValue(), metrics, "ROUTING_PROFILE", routingProfileArn);
+                    } catch (BadRequestException e) {
+                        System.out.println("Catch: " + e.getMessage());
+                    }
+                }
+            );
+
+            queues.forEach(
+                queueArn -> {
+                    System.out.println("Queue: " + queueArn);
+                    try {
+                        InformationMetricSectionListDTO metrics = metricService.getMetricsById(token, "QUEUE", queueArn);
+                        System.out.println("Queue: " + queueArn);
+                        System.out.println(metrics.toString());
+                        analyzeMetrics( clientInfo.getIdentifier().shortValue(), metrics, "QUEUE", queueArn);
+                    } catch (BadRequestException e) {
+                        System.out.println("Catch: " + e.getMessage());
+                    }
+                }
+            );
+
+            agents.forEach(
+                agentArn -> {
+                    try {
+                        InformationMetricSectionListDTO metrics = metricService.getMetricsById(token, "AGENT", agentArn);
+                        System.out.println("Agent: " + agentArn);
+                        analyzeMetrics( clientInfo.getIdentifier().shortValue(), metrics, "AGENT", agentArn);
                     } catch (BadRequestException e) {
                         System.out.println("Catch: " + e.getMessage());
                     }
@@ -202,34 +233,36 @@ public class AlertEngineService extends BaseService {
                 Double sectionValue = section.getSectionValue();
                 Double sectionParentValue = section.getSectionParentValue();
 
-                switch (section.getSectionTitle()) {
-                    case "ABANDONMENT_RATE":
-                        analyzeAbandonmentRate(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
-                        break;
-                    case "AGENT_SCHEDULE_ADHERENCE":
-                        analyzeAgentScheduleAdherence(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
-                        break;
-                    case "AVG_HANDLE_TIME":
-                        analyzeAvgHandleTimeTraining(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
-                        analyzeAvgHandleTimeIntervene(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
-                        break;
-                    case "AVG_QUEUE_ANSWER_TIME":
-                        analyzeAvgQueueAnswerTime(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
-                        break;
-                    case "AVG_RESOLUTION_TIME":
-                        System.out.println("AVG_RESOLUTION_TIME" + sectionValue);
-                        break;
-                    case "PERCENT_CASES_FIRST_CONTACT_RESOLVED":
-                        System.out.println("PERCENT_CASES_FIRST_CONTACT_RESOLVED" + sectionValue);
-                        break;
-                    case "SERVICE_LEVEL":
-                        analyzeServiceLevel(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
-                        break;
-                    case "AGENT_OCCUPANCY":
-                        analyzeAgentOccupancy(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
-                        break;
-                    default:
-                        break;
+                if(sectionValue != null) {
+                    switch (section.getSectionTitle()) {
+                        case "ABANDONMENT_RATE":
+                            analyzeAbandonmentRate(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
+                            break;
+                        case "AGENT_SCHEDULE_ADHERENCE":
+                            analyzeAgentScheduleAdherence(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
+                            break;
+                        case "AVG_HANDLE_TIME":
+                            analyzeAvgHandleTimeTraining(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
+                            analyzeAvgHandleTimeIntervene(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
+                            break;
+                        case "AVG_QUEUE_ANSWER_TIME":
+                            analyzeAvgQueueAnswerTime(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
+                            break;
+                        case "AVG_RESOLUTION_TIME":
+                            // TODO: Implement this case
+                            break;
+                        case "PERCENT_CASES_FIRST_CONTACT_RESOLVED":
+                            // TODO: Implement this case
+                            break;
+                        case "SERVICE_LEVEL":
+                            analyzeServiceLevel(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
+                            break;
+                        case "AGENT_OCCUPANCY":
+                            analyzeAgentOccupancy(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         );
@@ -279,11 +312,11 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsBiggerBy10Percent = sectionValue > sectionParentValue * 1.1;
 
         if(valueIsBiggerBy10Percent && alertDoestExist) {
-            String uuid = connectionsService.findById((short)1).getUid();
+            ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
             AlertDTO alertDTO = AlertDTO.newTrainingAlertDTO(connectionId, insightId, trainingId, resourceArn);
             
             try {
-                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+                alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
             } catch (Exception e) {
                 System.out.println("Error in analyzeAvgHandleTimeTraining(), " + e.getMessage());
             }
@@ -316,10 +349,10 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsLowerThan90Percent = sectionValue < 90;
 
         if(valueIsLowerThan90Percent && alertDoestExist) {
-            String uuid = connectionsService.findById((short)1).getUid();
+            ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
             AlertDTO alertDTO = AlertDTO.newTrainingAlertDTO(connectionId, insightId, trainingId, resourceArn);
             try {
-                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+                alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
             } catch (Exception e) {
                 System.out.println("Error in analyzeAgentScheduleAdherence(), " + e.getMessage());
             }
@@ -352,10 +385,10 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsBiggerBy10Percent = sectionValue > sectionParentValue * 1.1;
 
         if(!resourceType.equals("AGENT") && valueIsBiggerBy10Percent && alertDoestExist) {
-            String uuid = connectionsService.findById((short)1).getUid();
+            ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
             AlertDTO alertDTO = AlertDTO.newTrainingAlertDTO(connectionId, insightId, trainingId, resourceArn);
             try {
-                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+                alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
             } catch (Exception e) {
                 System.out.println("Error in analyzeAvgQueueAnswerTime(), " + e.getMessage());
             }
@@ -387,7 +420,7 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsLowerThan80Percent = sectionValue < 80;
 
         if(resourceType.equals("ROUTING_PROFILE") && valueIsLowerThan80Percent && alertDoestExist) {
-            String uuid = connectionsService.findById((short)1).getUid();
+            ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
 
             // This information is obtained when the accept button is clicked
             String originalRoutingProfile = null;
@@ -399,7 +432,7 @@ public class AlertEngineService extends BaseService {
             AlertDTO alertDTO = AlertDTO.newTransferAlertDTO(connectionId, insightId, originalRoutingProfile, destinationRoutingProfile, transferedAgent, resourceArn);
 
             try {
-                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+                alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
             } catch (Exception e) {
                 System.out.println("Error in analyzeServiceLevel(), " + e.getMessage());
             }
@@ -431,7 +464,7 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsBiggerThan5Percent = sectionValue > 5;
 
         if(resourceType.equals("ROUTING_PROFILE") && valueIsBiggerThan5Percent && alertDoestExist) {
-            String uuid = connectionsService.findById((short)1).getUid();
+            ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
 
             // This information is obtained when the accept button is clicked
             String originalRoutingProfile = null;
@@ -443,7 +476,7 @@ public class AlertEngineService extends BaseService {
             AlertDTO alertDTO = AlertDTO.newTransferAlertDTO(connectionId, insightId, originalRoutingProfile, destinationRoutingProfile, transferedAgent, resourceArn);
 
             try {
-                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+                alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
             } catch (Exception e) {
                 System.out.println("Error in analyzeAbandonmentRate(), " + e.getMessage());
             }
@@ -472,7 +505,7 @@ public class AlertEngineService extends BaseService {
         Short insightId = 16;
 
         if (resourceType.equals("ROUTING_PROFILE") && sectionValue > 0.8 && !checkAlertExists(resourceArn, insightId)) {
-            String uuid = connectionsService.findById((short)1).getUid();
+            ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
 
             // This information is obtained when the accept button is clicked
             String originalRoutingProfile = null;
@@ -484,7 +517,7 @@ public class AlertEngineService extends BaseService {
             AlertDTO alertDTO = AlertDTO.newTransferAlertDTO(connectionId, insightId, originalRoutingProfile, destinationRoutingProfile, transferedAgent, resourceArn);
 
             try {
-                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+                alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
             } catch (Exception e) {
                 System.out.println("Error in analyzeAgentOccupancy(), " + e.getMessage());
             }
@@ -515,12 +548,21 @@ public class AlertEngineService extends BaseService {
         Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
         Boolean valueIsBiggerBy50Percent = sectionValue > sectionParentValue * 1.5;
 
-        // Check contacts that are being handled by the problematic agent
-        // If one of the has a "NEGATIVE" sentimente, raise the alert 
-
         if(resourceType.equals("AGENT") && valueIsBiggerBy50Percent && alertDoestExist) {
-            //AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
-            //alertService.saveAlert(alertService.fromDTO(alertDto));
+            ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
+
+            Set<String> problematicContacts = agentService.getNegativeSentimentContacts(clientInfo.getUid(), resourceArn);
+
+            if (problematicContacts.size() > 0) {
+                problematicContacts.forEach(contact -> {
+                    AlertDTO alertDTO = AlertDTO.newInterventionAlertDTO(connectionId, insightId, contact, clientInfo.getSupervisor(), resourceArn);
+                    try {
+                        alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
+                    } catch (BadRequestException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
         }
     }
 }

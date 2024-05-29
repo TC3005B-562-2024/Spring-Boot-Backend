@@ -41,7 +41,7 @@ public class MetricService extends BaseService {
         }else if(resourceType.equals("QUEUE")){
             resourceParentType = "QUEUE";
         }
-        
+
         // Metrics to search.
         Collection<MetricV2> metricsToSearch = new ArrayList<>();
         metricsToSearch.add(MetricV2.builder().name("ABANDONMENT_RATE").build());
@@ -56,6 +56,25 @@ public class MetricService extends BaseService {
         if(resourceType.equals("AGENT") || resourceType.equals("ROUTING_PROFILE")){
             metricsToSearch.add(MetricV2.builder().name("AGENT_OCCUPANCY").build());
         }
+
+        // Metrics to search.
+        Collection<MetricV2> parentMetricsToSearch = new ArrayList<>();
+        parentMetricsToSearch.add(MetricV2.builder().name("ABANDONMENT_RATE").build());
+        parentMetricsToSearch.add(MetricV2.builder().name("AGENT_SCHEDULE_ADHERENCE").build());
+        parentMetricsToSearch.add(MetricV2.builder().name("AVG_HANDLE_TIME").build());
+        parentMetricsToSearch.add(MetricV2.builder().name("AVG_QUEUE_ANSWER_TIME").build());
+        parentMetricsToSearch.add(MetricV2.builder().name("AVG_RESOLUTION_TIME").build());
+        parentMetricsToSearch.add(MetricV2.builder().name("PERCENT_CASES_FIRST_CONTACT_RESOLVED").build());
+        parentMetricsToSearch.add(MetricV2.builder().name("SERVICE_LEVEL")
+                .threshold(ThresholdV2.builder().thresholdValue(7200.0).comparison("LT").build()).build());
+
+        if(resourceParentType.equals("AGENT") || resourceParentType.equals("ROUTING_PROFILE")){
+            parentMetricsToSearch.add(MetricV2.builder().name("AGENT_OCCUPANCY").build());
+        }
+        
+        System.out.println("Bandera 1");
+        System.out.println(getResourceParentArns(token, resourceParentType, resourceArn));
+        System.out.println(resourceParentType);
 
         // Get the client info
         ConnectClientInfo clientInfo = getConnectClientInfo(token);
@@ -83,6 +102,10 @@ public class MetricService extends BaseService {
         //  Create a map with the metrics of the parent
         Map<String, Double> parentMetricsMap = new HashMap<>();
 
+        System.out.println("Bandera 2");
+        System.out.println(getResourceParentArns(token, resourceParentType, resourceArn));
+        System.out.println(resourceParentType);
+
         // Get the metrics of the parent
         GetMetricDataV2Response parentMetrics = getConnectClient(
             clientInfo.getAccessKeyId(),
@@ -98,17 +121,23 @@ public class MetricService extends BaseService {
                         .filterValues(getResourceParentArns(token, resourceParentType, resourceArn))
                         .build()
                 ).metrics(
-                    metricsToSearch
+                    parentMetricsToSearch
                 )
                 .resourceArn(instanceService.getInstanceDetails(token).getArn())
                 .build()
         );
+
+        System.out.println("Bandera 3");
+        System.out.println(getResourceParentArns(token, resourceParentType, resourceArn));
+        System.out.println(resourceParentType);
 
         parentMetrics.metricResults().forEach(metric -> {
             metric.collections().forEach(collection -> {
                 parentMetricsMap.put(collection.metric().name(), collection.value());
             });
         });
+
+        System.out.println("Bandera 4");
 
         // Create the information section list.
         InformationMetricSectionListDTO informationSectionListDTO = new InformationMetricSectionListDTO();
@@ -228,7 +257,7 @@ public class MetricService extends BaseService {
                 );
         
                 routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(queue -> {
-                    parentList.add(queue.queueName());
+                    parentList.add(queue.queueArn());
                 });
             }else if(resourceType.equals("QUEUE")){
                 parentList.add(resourceArn);
