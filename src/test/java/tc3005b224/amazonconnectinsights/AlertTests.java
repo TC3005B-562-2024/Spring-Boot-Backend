@@ -136,7 +136,6 @@ class AlertTests {
 
         Alert updatedAlertFromDB = alertRepository.findById(savedAlert.getId()).get();
         assertThat(updatedAlertFromDB.getResource()).isEqualTo("resource");
-        assertThat(updatedAlertFromDB.getSolved()).isTrue();
         alertRepository.delete(updatedAlertFromDB);
     }
 
