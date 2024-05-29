@@ -26,6 +26,9 @@ public class AlertEngineService extends BaseService {
     @Autowired
     private AlertService alertService;
 
+    @Autowired
+    private ConnectionsService connectionsService;
+
     /**
      * Service that retrieves all the routing profiles arn's of the instance
      * @param token
@@ -208,6 +211,7 @@ public class AlertEngineService extends BaseService {
                         break;
                     case "AVG_HANDLE_TIME":
                         analyzeAvgHandleTimeTraining(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
+                        analyzeAvgHandleTimeIntervene(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
                         break;
                     case "AVG_QUEUE_ANSWER_TIME":
                         analyzeAvgQueueAnswerTime(connectionId, sectionValue, sectionParentValue, resourceType, resourceArn);
@@ -250,34 +254,6 @@ public class AlertEngineService extends BaseService {
     }
 
     /**
-     * Service that analyzes AGENT_OCCUPANCY metric and generates alerts if necessary.
-     * 
-     * @param sectionValue
-     * @param sectionParentValue
-     * @param resourceType
-     * @param resourceArn
-     * 
-     * @return void
-     * 
-     * @see checkAlertExists
-     * @see AlertDTO
-     * @see alertService
-     * @see Alert
-     * 
-     * @author Moisés Adame
-     * 
-     */
-    public void analyzeAgentOccupancy(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
-        Short insightId = 16;
-
-        if (resourceType.equals("ROUTING_PROFILE") && sectionValue > 0.8 && !checkAlertExists(resourceArn, insightId)) {
-            // TODO: Get agent whose status is "Available" and doesn't belong to the problematic routing profile
-            AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
-            alertService.saveAlert(alertService.fromDTO(alertDto));
-        }
-    }
-
-    /**
      * Service that analyzes AVG_HANDLE_TIME metric and generates training alerts if necessary.
      * 
      * @param connectionId
@@ -303,8 +279,14 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsBiggerBy10Percent = sectionValue > sectionParentValue * 1.1;
 
         if(valueIsBiggerBy10Percent && alertDoestExist) {
-            AlertDTO alertDto = new AlertDTO(connectionId, insightId, trainingId, resourceArn, null, null);
-            alertService.saveAlert(alertService.fromDTO(alertDto));
+            String uuid = connectionsService.findById((short)1).getUid();
+            AlertDTO alertDTO = AlertDTO.newTrainingAlertDTO(connectionId, insightId, trainingId, resourceArn);
+            
+            try {
+                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+            } catch (Exception e) {
+                System.out.println("Error in analyzeAvgHandleTimeTraining(), " + e.getMessage());
+            }
         }
     }
 
@@ -334,8 +316,13 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsLowerThan90Percent = sectionValue < 90;
 
         if(valueIsLowerThan90Percent && alertDoestExist) {
-            AlertDTO alertDto = new AlertDTO(connectionId, insightId, trainingId, resourceArn, null, null);
-            alertService.saveAlert(alertService.fromDTO(alertDto));
+            String uuid = connectionsService.findById((short)1).getUid();
+            AlertDTO alertDTO = AlertDTO.newTrainingAlertDTO(connectionId, insightId, trainingId, resourceArn);
+            try {
+                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+            } catch (Exception e) {
+                System.out.println("Error in analyzeAgentScheduleAdherence(), " + e.getMessage());
+            }
         }
     }
 
@@ -365,39 +352,13 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsBiggerBy10Percent = sectionValue > sectionParentValue * 1.1;
 
         if(!resourceType.equals("AGENT") && valueIsBiggerBy10Percent && alertDoestExist) {
-            AlertDTO alertDto = new AlertDTO(connectionId, insightId, trainingId, resourceArn, null, null);
-            alertService.saveAlert(alertService.fromDTO(alertDto));
-        }
-    }
-
-    /**
-     * Service that analyzes ABANDONMENT_RATE metric and generates alerts if necessary.
-     * 
-     * @param connectionId
-     * @param sectionValue
-     * @param sectionParentValue
-     * @param resourceType
-     * @param resourceArn
-     * 
-     * @return void
-     * 
-     * @see checkAlertExists
-     * @see AlertDTO
-     * @see alertService
-     * @see Alert
-     * 
-     * @author Moisés Adame
-     * 
-     */
-    public void analyzeAbandonmentRate(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
-        Short insightId = 15;
-        Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
-        Boolean valueIsBiggerThan5Percent = sectionValue > 5;
-
-        if(resourceType.equals("ROUTING_PROFILE") && valueIsBiggerThan5Percent && alertDoestExist) {
-            // TODO: Get agent whose status is "Available" and doesn't belong to the problematic routing profile
-            AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
-            alertService.saveAlert(alertService.fromDTO(alertDto));
+            String uuid = connectionsService.findById((short)1).getUid();
+            AlertDTO alertDTO = AlertDTO.newTrainingAlertDTO(connectionId, insightId, trainingId, resourceArn);
+            try {
+                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+            } catch (Exception e) {
+                System.out.println("Error in analyzeAvgQueueAnswerTime(), " + e.getMessage());
+            }
         }
     }
 
@@ -426,9 +387,107 @@ public class AlertEngineService extends BaseService {
         Boolean valueIsLowerThan80Percent = sectionValue < 80;
 
         if(resourceType.equals("ROUTING_PROFILE") && valueIsLowerThan80Percent && alertDoestExist) {
-            // TODO: Get agent whose status is "Available" and doesn't belong to the problematic routing profile.
-            AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
-            alertService.saveAlert(alertService.fromDTO(alertDto));
+            String uuid = connectionsService.findById((short)1).getUid();
+
+            // This information is obtained when the accept button is clicked
+            String originalRoutingProfile = null;
+            String transferedAgent = null;
+
+            // The destination routing profile is the one that raised the alert.
+            String destinationRoutingProfile = resourceArn;
+
+            AlertDTO alertDTO = AlertDTO.newTransferAlertDTO(connectionId, insightId, originalRoutingProfile, destinationRoutingProfile, transferedAgent, resourceArn);
+
+            try {
+                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+            } catch (Exception e) {
+                System.out.println("Error in analyzeServiceLevel(), " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Service that analyzes ABANDONMENT_RATE metric and generates alerts if necessary.
+     * 
+     * @param connectionId
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return void
+     * 
+     * @see checkAlertExists
+     * @see AlertDTO
+     * @see alertService
+     * @see Alert
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeAbandonmentRate(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+        Short insightId = 15;
+        Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
+        Boolean valueIsBiggerThan5Percent = sectionValue > 5;
+
+        if(resourceType.equals("ROUTING_PROFILE") && valueIsBiggerThan5Percent && alertDoestExist) {
+            String uuid = connectionsService.findById((short)1).getUid();
+
+            // This information is obtained when the accept button is clicked
+            String originalRoutingProfile = null;
+            String transferedAgent = null;
+
+            // The destination routing profile is the one that raised the alert.
+            String destinationRoutingProfile = resourceArn;
+
+            AlertDTO alertDTO = AlertDTO.newTransferAlertDTO(connectionId, insightId, originalRoutingProfile, destinationRoutingProfile, transferedAgent, resourceArn);
+
+            try {
+                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+            } catch (Exception e) {
+                System.out.println("Error in analyzeAbandonmentRate(), " + e.getMessage());
+            }
+        }
+    }
+
+        /**
+     * Service that analyzes AGENT_OCCUPANCY metric and generates alerts if necessary.
+     * 
+     * @param sectionValue
+     * @param sectionParentValue
+     * @param resourceType
+     * @param resourceArn
+     * 
+     * @return void
+     * 
+     * @see checkAlertExists
+     * @see AlertDTO
+     * @see alertService
+     * @see Alert
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public void analyzeAgentOccupancy(Short connectionId, Double sectionValue, Double sectionParentValue, String resourceType, String resourceArn) {
+        Short insightId = 16;
+
+        if (resourceType.equals("ROUTING_PROFILE") && sectionValue > 0.8 && !checkAlertExists(resourceArn, insightId)) {
+            String uuid = connectionsService.findById((short)1).getUid();
+
+            // This information is obtained when the accept button is clicked
+            String originalRoutingProfile = null;
+            String transferedAgent = null;
+
+            // The destination routing profile is the one that raised the alert.
+            String destinationRoutingProfile = resourceArn;
+
+            AlertDTO alertDTO = AlertDTO.newTransferAlertDTO(connectionId, insightId, originalRoutingProfile, destinationRoutingProfile, transferedAgent, resourceArn);
+
+            try {
+                alertService.saveAlert(uuid, alertService.fromDTO(alertDTO));
+            } catch (Exception e) {
+                System.out.println("Error in analyzeAgentOccupancy(), " + e.getMessage());
+            }
         }
     }
 
@@ -460,8 +519,8 @@ public class AlertEngineService extends BaseService {
         // If one of the has a "NEGATIVE" sentimente, raise the alert 
 
         if(resourceType.equals("AGENT") && valueIsBiggerBy50Percent && alertDoestExist) {
-            AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
-            alertService.saveAlert(alertService.fromDTO(alertDto));
+            //AlertDTO alertDto = new AlertDTO(connectionId, insightId, null, resourceArn, null, null);
+            //alertService.saveAlert(alertService.fromDTO(alertDto));
         }
     }
 }

@@ -1,5 +1,6 @@
 package tc3005b224.amazonconnectinsights.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,6 +27,10 @@ import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
 import software.amazon.awssdk.services.connect.model.RealTimeContactAnalysisSegmentType;
 import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
+import software.amazon.awssdk.services.connect.model.SearchContactsRequest;
+import software.amazon.awssdk.services.connect.model.SearchContactsResponse;
+import software.amazon.awssdk.services.connect.model.SearchContactsTimeRange;
+import software.amazon.awssdk.services.connect.model.SearchCriteria;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest.Builder;
 import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
@@ -445,4 +450,43 @@ public class AgentService extends BaseService {
         // Obtener contactos
         return new AgentAvailableToTransferListDTO(routingProfileId, availableAgents);
     }
+
+    /**
+     * Get the id's contacts of a given agent whose sentiment is negative.
+     * 
+     * @param userUuid
+     * @param agentId
+     * 
+     * @return List<String>
+     * 
+     * @author Moisés Adame
+     */
+    public List<String> getNegativeSentimentContacts(String userUuid, String agentId) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+
+        SearchContactsResponse contacts = getConnectClient(
+            clientInfo.getAccessKeyId(), 
+            clientInfo.getSecretAccessKey(),
+            clientInfo.getRegion()
+                ).searchContacts(
+                    SearchContactsRequest.builder()
+                    .instanceId(clientInfo.getInstanceId())
+                    .searchCriteria(
+                        SearchCriteria
+                        .builder()
+                        .build()
+                    )
+                    .timeRange(
+                        SearchContactsTimeRange
+                        .builder()
+                        .startTime(Instant.now().minusSeconds(7200))
+                        .endTime(Instant.now())
+                        .build()
+                    )
+                    .build()
+                );
+
+        return negativeSentimentContacts;
+    }
+
 }
