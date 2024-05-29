@@ -15,6 +15,7 @@ import lombok.Setter;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.connect.ConnectClient;
+import software.amazon.awssdk.services.connectcontactlens.ConnectContactLensClient;
 
 /**
  * Base service class with common functionalities that might be used in most
@@ -124,6 +125,14 @@ public class BaseService {
     protected ConnectClient getConnectClient(String accessKeyId, String secretAccessKey, Region region) {
         AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
         return ConnectClient.builder()
+                .credentialsProvider(() -> awsCreds)
+                .region(region)
+                .build();
+    }
+
+    protected ConnectContactLensClient getConnectContactLensClient(String accessKeyId, String secretAccessKey, Region region) {
+        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+        return ConnectContactLensClient.builder()
                 .credentialsProvider(() -> awsCreds)
                 .region(region)
                 .build();

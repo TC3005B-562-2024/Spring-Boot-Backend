@@ -83,4 +83,15 @@ public class AgentController {
             return new ResponseEntity<>(error, error.getStatusCode());
         }
     }
+
+    @GetMapping("/{agentId}/contacts")
+    public ResponseEntity<?> getAgentContacts(@PathVariable String agentId, Principal principal) {
+        try {
+            return ResponseEntity.ok(agentService.getNegativeSentimentContacts(principal.getName(), agentId));
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
+    }
 }

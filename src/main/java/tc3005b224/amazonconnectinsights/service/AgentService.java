@@ -21,18 +21,23 @@ import software.amazon.awssdk.services.connect.model.DescribeUserResponse;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataRequest;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataResponse;
 import software.amazon.awssdk.services.connect.model.ListRealtimeContactAnalysisSegmentsV2Request;
+import software.amazon.awssdk.services.connect.model.ListRealtimeContactAnalysisSegmentsV2Response;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesResponse;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
+import software.amazon.awssdk.services.connect.model.RealTimeContactAnalysisOutputType;
 import software.amazon.awssdk.services.connect.model.RealTimeContactAnalysisSegmentType;
 import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
 import software.amazon.awssdk.services.connect.model.SearchContactsRequest;
 import software.amazon.awssdk.services.connect.model.SearchContactsResponse;
 import software.amazon.awssdk.services.connect.model.SearchContactsTimeRange;
+import software.amazon.awssdk.services.connect.model.SearchContactsTimeRangeType;
 import software.amazon.awssdk.services.connect.model.SearchCriteria;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest;
 import software.amazon.awssdk.services.connect.model.SearchUsersRequest.Builder;
+import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeContactAnalysisSegmentsRequest;
+import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeContactAnalysisSegmentsResponse;
 import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
 import software.amazon.awssdk.services.connect.model.StringCondition;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
@@ -461,32 +466,54 @@ public class AgentService extends BaseService {
      * 
      * @author Moisés Adame
      */
-    public List<String> getNegativeSentimentContacts(String userUuid, String agentId) {
+    public Set<String> getNegativeSentimentContacts(String userUuid, String agentId) throws Exception {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
 
         SearchContactsResponse contacts = getConnectClient(
-            clientInfo.getAccessKeyId(), 
-            clientInfo.getSecretAccessKey(),
-            clientInfo.getRegion()
-                ).searchContacts(
-                    SearchContactsRequest.builder()
+        clientInfo.getAccessKeyId(), 
+        clientInfo.getSecretAccessKey(),
+        clientInfo.getRegion()
+        ).searchContacts(
+            SearchContactsRequest.builder()
+            .instanceId(clientInfo.getInstanceId())
+            .searchCriteria(
+                SearchCriteria.builder()
+                .agentIds(agentId)
+                .build()
+            ).timeRange(
+                SearchContactsTimeRange.builder()
+                .startTime(Instant.now().minusSeconds(7200))
+                .endTime(Instant.now())
+                .type(SearchContactsTimeRangeType.INITIATION_TIMESTAMP)
+                .build()
+            ).build()
+        );
+
+        Set<String> negativeSentimentContacts = new HashSet<String>();
+
+        contacts.contacts().forEach(contact -> {
+            try {
+                ListRealtimeContactAnalysisSegmentsResponse segments = getConnectContactLensClient(
+                    clientInfo.getAccessKeyId(),
+                    clientInfo.getSecretAccessKey(),
+                    clientInfo.getRegion()
+                ).listRealtimeContactAnalysisSegments(
+                    ListRealtimeContactAnalysisSegmentsRequest.builder()
+                    .contactId(contact.id())
                     .instanceId(clientInfo.getInstanceId())
-                    .searchCriteria(
-                        SearchCriteria
-                        .builder()
-                        .build()
-                    )
-                    .timeRange(
-                        SearchContactsTimeRange
-                        .builder()
-                        .startTime(Instant.now().minusSeconds(7200))
-                        .endTime(Instant.now())
-                        .build()
-                    )
                     .build()
                 );
 
+                segments.segments().forEach(segment -> {
+                    if(segment.transcript().sentiment().toString().equals("NEGATIVE")) {
+                        negativeSentimentContacts.add(contact.id());
+                    }
+                });
+            } catch (Exception e) {
+                // Do nothing
+            }
+        });
+
         return negativeSentimentContacts;
     }
-
 }
