@@ -35,6 +35,21 @@ public class Alert {
     @JoinColumn(name = "training_identifier")
     private Training training;
 
+    @Column(name = "intervene_contact")
+    private String interveneContact;
+
+    @Column(name = "intervene_agent")
+    private String interveneAgent;
+
+    @Column(name = "original_routing_profile")
+    private String originalRoutingProfile;
+
+    @Column(name = "destination_routing_profile")
+    private String destinationRoutingProfile;
+
+    @Column(name = "transfered_agent")
+    private String transferedAgent;
+
     @Column(name = "resource")
     private String resource;
 
@@ -103,7 +118,10 @@ public class Alert {
 
         if(alertDTO.getTrainingCompleted() != null){
             this.trainingCompleted = alertDTO.getTrainingCompleted();
-            this.dateTrainingCompleted = new Date();
+
+            if(this.trainingCompleted){
+                this.dateTrainingCompleted = new Date();
+            }
         }
     }
 
