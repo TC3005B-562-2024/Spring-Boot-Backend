@@ -34,8 +34,8 @@ import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentMinimalDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
-import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationSectionDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
@@ -314,8 +314,11 @@ public class AgentService extends BaseService {
         if (!agentCurrentDataResponse.isEmpty()) {
             agentStatus = agentCurrentDataResponse.get(0).status().statusName();
         }
-        AgentInformationDTO agentInformation = new AgentInformationDTO(name, routingProfileName,
-                agentStatus);
+        List<InformationSectionDTO> sections = new ArrayList<>();
+        sections.add(new InformationSectionDTO("Name", name, "black"));
+        sections.add(new InformationSectionDTO("Skill", routingProfileName, "black"));
+        sections.add(new InformationSectionDTO("Status", agentStatus, "black"));
+        InformationSectionListDTO agentInformation = new InformationSectionListDTO("Information", sections);
         Iterable<Alert> trainings = trainingsService
                 .findTrainingsAlertsByResource(clientInfo.getIdentifier(), agent.user().arn());
 
@@ -325,12 +328,12 @@ public class AgentService extends BaseService {
         return new AgentDTO(
                 agentId,
                 agent.user().arn(),
-                queues,
                 agentInformation,
-                contacts,
+                metrics,
                 alerts,
                 trainings,
-                metrics);
+                queues,
+                contacts);
     }
 
     /**
