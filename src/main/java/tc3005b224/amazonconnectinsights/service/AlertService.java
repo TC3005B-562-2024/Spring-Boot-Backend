@@ -122,7 +122,7 @@ public class AlertService extends BaseService {
 
         for (int priority = 1; priority <= 3; priority++) {
             // Query using the defined parameters
-            Iterable<Alert> queryPriority = alertRepository.findByConnectionIdentifierAndResourceAndSolvedAndInsight_Category_Priority(connectionIdentifier, resourceArn, false, priority);
+            Iterable<Alert> queryPriority = alertRepository.findByConnectionIdentifierAndResourceAndSolvedAndInsight_Category_Priority(connectionIdentifier, resourceArn, null, priority);
             List<Alert> listByPriority = new ArrayList<>();
             queryPriority.forEach(alert -> listByPriority.add(alert));
 

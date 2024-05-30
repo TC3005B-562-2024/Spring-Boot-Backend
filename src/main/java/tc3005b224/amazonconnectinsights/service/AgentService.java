@@ -319,9 +319,9 @@ public class AgentService extends BaseService {
         });
 
         String name = agent.user().identityInfo().firstName() + " " + agent.user().identityInfo().lastName();
-        String agentStatus = null;
+        String agentStatus = "DISCONNECTED";
         if (!agentCurrentDataResponse.isEmpty()) {
-            agentStatus = agentCurrentDataResponse.get(0).status().statusName();
+            agentStatus = agentCurrentDataResponse.get(0).status().statusName().toUpperCase();
         }
         List<InformationSectionDTO> sections = new ArrayList<>();
         sections.add(new InformationSectionDTO("Name", name, "black"));
