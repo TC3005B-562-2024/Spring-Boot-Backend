@@ -72,10 +72,6 @@ public class MetricService extends BaseService {
             parentMetricsToSearch.add(MetricV2.builder().name("AGENT_OCCUPANCY").build());
         }
         
-        System.out.println("Bandera 1");
-        System.out.println(getResourceParentArns(token, resourceParentType, resourceArn));
-        System.out.println(resourceParentType);
-
         // Get the client info
         ConnectClientInfo clientInfo = getConnectClientInfo(token);
         GetMetricDataV2Response metrics = getConnectClient(
@@ -102,10 +98,6 @@ public class MetricService extends BaseService {
         //  Create a map with the metrics of the parent
         Map<String, Double> parentMetricsMap = new HashMap<>();
 
-        System.out.println("Bandera 2");
-        System.out.println(getResourceParentArns(token, resourceParentType, resourceArn));
-        System.out.println(resourceParentType);
-
         // Get the metrics of the parent
         GetMetricDataV2Response parentMetrics = getConnectClient(
             clientInfo.getAccessKeyId(),
@@ -127,17 +119,11 @@ public class MetricService extends BaseService {
                 .build()
         );
 
-        System.out.println("Bandera 3");
-        System.out.println(getResourceParentArns(token, resourceParentType, resourceArn));
-        System.out.println(resourceParentType);
-
         parentMetrics.metricResults().forEach(metric -> {
             metric.collections().forEach(collection -> {
                 parentMetricsMap.put(collection.metric().name(), collection.value());
             });
         });
-
-        System.out.println("Bandera 4");
 
         // Create the information section list.
         InformationMetricSectionListDTO informationSectionListDTO = new InformationMetricSectionListDTO();

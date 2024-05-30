@@ -9,15 +9,15 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
 import software.amazon.awssdk.services.connect.model.ListUsersRequest;
 import software.amazon.awssdk.services.connect.model.ListUsersResponse;
+import software.amazon.awssdk.services.connect.model.SearchQueuesRequest;
+import software.amazon.awssdk.services.connect.model.SearchQueuesResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
-import software.amazon.awssdk.services.connect.model.ListQueuesRequest;
-import software.amazon.awssdk.services.connect.model.ListQueuesResponse;
-import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
 
 @Service
 public class AlertEngineService extends BaseService {
@@ -26,9 +26,6 @@ public class AlertEngineService extends BaseService {
 
     @Autowired
     private AlertService alertService;
-
-    @Autowired
-    private ConnectionsService connectionsService;
 
     @Autowired
     private AgentService agentService;
@@ -82,19 +79,20 @@ public class AlertEngineService extends BaseService {
      * @author Moisés Adame
      * 
      */
-    public List<String> getQueuesArns(String token) {
+    public List<String> getQueuesArns(String token, Iterable<String> routingProfiles) {
         // Get the client info
         ConnectClientInfo clientInfo = getConnectClientInfo(token);
 
         // Get the queues
-        ListQueuesResponse queues = getConnectClient(
+        SearchQueuesResponse queues = getConnectClient(
             clientInfo.getAccessKeyId(),
             clientInfo.getSecretAccessKey(),
             clientInfo.getRegion()
-        ).listQueues(
-            ListQueuesRequest
+        ).searchQueues(
+            SearchQueuesRequest
                 .builder()
                 .instanceId(clientInfo.getInstanceId())
+                .maxResults(100)
                 .build()
         );
 
@@ -102,8 +100,8 @@ public class AlertEngineService extends BaseService {
         List<String> queuesArn = new ArrayList<>();
 
         // Add the arn's to the list
-        queues.queueSummaryList().forEach(queue -> {
-            queuesArn.add(queue.arn());
+        queues.queues().forEach(queue -> {
+            queuesArn.add(queue.queueArn());
         });
 
         return queuesArn;
@@ -164,7 +162,7 @@ public class AlertEngineService extends BaseService {
     public void generateAlerts(String token) {
         try {
             List<String> routingProfiles = getRoutingProfilesArns(token);
-            List<String> queues = getQueuesArns(token);
+            List<String> queues = getQueuesArns(token, routingProfiles);
             List<String> agents = getAgentsArns(token);
 
             ConnectClientInfo clientInfo = getConnectClientInfo(token);
@@ -184,7 +182,6 @@ public class AlertEngineService extends BaseService {
 
             queues.forEach(
                 queueArn -> {
-                    System.out.println("Queue: " + queueArn);
                     try {
                         InformationMetricSectionListDTO metrics = metricService.getMetricsById(token, "QUEUE", queueArn);
                         System.out.println("Queue: " + queueArn);
