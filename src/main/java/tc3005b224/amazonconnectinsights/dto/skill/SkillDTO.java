@@ -1,4 +1,6 @@
 package tc3005b224.amazonconnectinsights.dto.skill;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,8 +9,8 @@ import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.information.SkillsInformationDTO;
-import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
-import tc3005b224.amazonconnectinsights.models_sql.Alert;
+import tc3005b224.amazonconnectinsights.dto.queue.QueueCardDTO;
+import tc3005b224.amazonconnectinsights.dto.training.TrainingProgressItemDTO;
 
 @NoArgsConstructor @AllArgsConstructor @Getter @Setter
 public class SkillDTO {
@@ -16,10 +18,10 @@ public class SkillDTO {
     private String arn;
     private String alias;
     private Long totalAgents;
-    private Iterable<IdAndNameDTO> queues;
+    private Iterable<QueueCardDTO> queues;
     private AlertPriorityDTO alerts;
     private SkillsInformationDTO skillsInformationDTO;
-    private Iterable<Alert> trainings;
+    private List<TrainingProgressItemDTO> trainings;
     private InformationMetricSectionListDTO metrics;
     private Iterable<AgentCardDTO> agents;
 }

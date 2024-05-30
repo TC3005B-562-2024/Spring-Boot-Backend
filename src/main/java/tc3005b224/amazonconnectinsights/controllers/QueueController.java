@@ -41,7 +41,7 @@ public class QueueController {
         }
     )
     @GetMapping
-    public ResponseEntity<Iterable<QueueCardDTO>> getAllQueues(@RequestParam(required = false) String resourceId,
+    public ResponseEntity<Iterable<QueueCardDTO>> getAllQueues(@RequestParam(required = false, defaultValue = "") String resourceId,
             Principal principal) {
         try {
             Iterable<QueueCardDTO> queueCards = queueService.findAll(principal.getName(), resourceId);
