@@ -97,12 +97,28 @@ public class AgentController {
         }
     }
 
+    @Operation(summary = "Get all the contacts of an agent whose sentiment is negative", responses = {
+        @ApiResponse(responseCode = "200", description = "Agent transferred."),
+        @ApiResponse(responseCode = "500", description = "Internal error."),
+        @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
+    })
+    @GetMapping("/{agentId}/negative-sentiment-contacts")
+    public ResponseEntity<?> getAgentContacts(@PathVariable String agentId, Principal principal) {
+        try {
+            return ResponseEntity.ok(agentService.getNegativeSentimentContacts(principal.getName(), agentId));
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
+    }
+
     @Operation(summary = "Transfer an agent to a routing profile.", responses = {
             @ApiResponse(responseCode = "200", description = "Agent transferred."),
             @ApiResponse(responseCode = "500", description = "Internal error."),
             @ApiResponse(responseCode = "503", description = "Couldn't connect to Amazon Connect."),
     })
-    @PostMapping("transfer")
+    @PostMapping("/transfer")
     public ResponseEntity<?> transfer(@RequestBody AgentTransferDTO agentTransferDTO, Principal principal) {
         try {
             // Try to transfer the agent
@@ -116,7 +132,7 @@ public class AgentController {
         }
     }
 
-    @Operation(summary = "Transfer an agent to a routing profile.", responses = {
+    @Operation(summary = "Get all contacts from an agent.", responses = {
             @ApiResponse(responseCode = "200", description = "Agent transferred.", content = {
                     @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = AgentTransferDTO.class)))
             }),

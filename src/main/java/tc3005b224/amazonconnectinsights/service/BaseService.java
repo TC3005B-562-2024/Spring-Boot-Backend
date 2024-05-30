@@ -18,6 +18,7 @@ import lombok.ToString;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.connect.ConnectClient;
+import software.amazon.awssdk.services.connectcontactlens.ConnectContactLensClient;
 import tc3005b224.amazonconnectinsights.models_sql.Connection;
 import tc3005b224.amazonconnectinsights.repository.ConnectionRepository;
 
@@ -173,13 +174,20 @@ public class BaseService {
         return mapConnectionToConnectClientInfo(connection);
     }
 
+    protected ConnectContactLensClient getConnectContactLensClient(ConnectClientInfo clientInfo) {
+        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(clientInfo.getAccessKeyId(), clientInfo.getSecretAccessKey());
+        return ConnectContactLensClient.builder()
+                .credentialsProvider(() -> awsCreds)
+                .region(clientInfo.getRegion())
+                .build();
+    }
+
     @AllArgsConstructor
     @Getter
     @Setter
     @NoArgsConstructor
     @ToString
     protected class ConnectClientInfo {
-
         private Integer identifier;
         private String accessKeyId;
         private String secretAccessKey;

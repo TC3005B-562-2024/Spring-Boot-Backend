@@ -1,5 +1,6 @@
 package tc3005b224.amazonconnectinsights.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,17 +25,25 @@ import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesReq
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesResponse;
 import software.amazon.awssdk.services.connect.model.RealTimeContactAnalysisSegmentType;
 import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
+import software.amazon.awssdk.services.connect.model.SearchContactsRequest;
+import software.amazon.awssdk.services.connect.model.SearchContactsResponse;
+import software.amazon.awssdk.services.connect.model.SearchContactsTimeRange;
+import software.amazon.awssdk.services.connect.model.SearchContactsTimeRangeType;
+import software.amazon.awssdk.services.connect.model.SearchCriteria;
 import software.amazon.awssdk.services.connect.model.StringCondition;
 import software.amazon.awssdk.services.connect.model.UserData;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import software.amazon.awssdk.services.connect.model.UserSearchCriteria;
 import software.amazon.awssdk.services.connect.model.UserSearchSummary;
+import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeContactAnalysisSegmentsRequest;
+import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeContactAnalysisSegmentsResponse;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentAvailableToTransferListDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentMinimalDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
@@ -323,7 +332,7 @@ public class AgentService extends BaseService {
                 .findTrainingsAlertsByResource(clientInfo.getIdentifier(), agent.user().arn());
 
         // Get the agent metrics
-        InformationSectionListDTO metrics = metricService.getMetricsById(userUuid, "AGENT", agent.user().arn());
+        InformationMetricSectionListDTO metrics = metricService.getMetricsById(userUuid, "AGENT", agent.user().arn());
 
         return new AgentDTO(
                 agentId,
@@ -402,5 +411,64 @@ public class AgentService extends BaseService {
 
         // Obtener contactos
         return new AgentAvailableToTransferListDTO(routingProfileId, availableAgents);
+    }
+
+    /**
+     * Get the id's contacts of a given agent whose sentiment is negative.
+     * 
+     * @param userUuid
+     * @param agentId
+     * 
+     * @return List<String>
+     * 
+     * @author Moisés Adame
+     */
+    public Set<String> getNegativeSentimentContacts(String userUuid, String agentId) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+
+        SearchContactsResponse contacts = getConnectClient(
+        clientInfo.getAccessKeyId(), 
+        clientInfo.getSecretAccessKey(),
+        clientInfo.getRegion()
+        ).searchContacts(
+            SearchContactsRequest.builder()
+            .instanceId(clientInfo.getInstanceId())
+            .searchCriteria(
+                SearchCriteria.builder()
+                .agentIds(agentId)
+                .build()
+            ).timeRange(
+                SearchContactsTimeRange.builder()
+                .startTime(Instant.now().minusSeconds(7200))
+                .endTime(Instant.now())
+                .type(SearchContactsTimeRangeType.INITIATION_TIMESTAMP)
+                .build()
+            ).build()
+        );
+
+        Set<String> negativeSentimentContacts = new HashSet<String>();
+
+        contacts.contacts().forEach(contact -> {
+            try {
+                ListRealtimeContactAnalysisSegmentsResponse segments = getConnectContactLensClient(
+                    clientInfo
+                ).listRealtimeContactAnalysisSegments(
+                    ListRealtimeContactAnalysisSegmentsRequest.builder()
+                    .contactId(contact.id())
+                    .instanceId(clientInfo.getInstanceId())
+                    .build()
+                );
+
+                segments.segments().forEach(segment -> {
+                    if(segment.transcript().sentiment().toString().equals("NEGATIVE")) {
+                        negativeSentimentContacts.add(contact.id());
+                    }
+                });
+            } catch (Exception e) {
+                // Do nothing
+            }
+        });
+
+        return negativeSentimentContacts;
     }
 }

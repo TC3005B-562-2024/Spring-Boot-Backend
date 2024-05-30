@@ -42,6 +42,18 @@ public class AlertDTO {
         this.trainingCompleted = trainingCompleted;
     }
 
+    public static AlertDTO newTrainingAlertDTO(Short connectionId, Short insightId, Short trainingId, String resource) {
+        return new AlertDTO(connectionId, insightId, trainingId, null, null, null, null, null, resource, null, null);
+    }
+
+    public static AlertDTO newInterventionAlertDTO(Short connectionId, Short insightId, String interveneContact, String interveneAgent, String resource) {
+        return new AlertDTO(connectionId, insightId, null, interveneContact, interveneAgent, null, null, null, resource, null, null);
+    }
+
+    public static AlertDTO newTransferAlertDTO(Short connectionId, Short insightId, String originalRoutingProfile, String destinationRoutingProfile, String transferedAgent, String resource) {
+        return new AlertDTO(connectionId, insightId, null, null, null, originalRoutingProfile, destinationRoutingProfile, transferedAgent, resource, null, null);
+    }
+
     public Short getConnectionId() {
         return connectionId;
     }
@@ -134,4 +146,3 @@ public class AlertDTO {
         this.trainingCompleted = trainingCompleted;
     }
 }
-

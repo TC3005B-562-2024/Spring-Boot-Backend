@@ -12,10 +12,11 @@ import software.amazon.awssdk.services.connect.model.RoutingProfile;
 import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
-import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.information.SkillsInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDTO;
+import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
 @Service
@@ -59,24 +60,27 @@ public class SkillService extends BaseService {
         Instant createdAt = Instant.now(); // TODO: Change Mocked creation time
         SkillsInformationDTO skillsInformationDTO = new SkillsInformationDTO(data.name(), createdAt, data.numberOfAssociatedUsers());
 
-        InformationSectionListDTO metrics = metricService.getMetricsById(userUuid, "ROUTING_PROFILE", data.routingProfileArn());
+        InformationMetricSectionListDTO metrics = metricService.getMetricsById(userUuid, "ROUTING_PROFILE", data.routingProfileArn());
         
         Iterable<Alert> trainings = trainingsService
                 .findTrainingsAlertsByResource(clientInfo.getIdentifier(), data.routingProfileArn());
         
-        Iterable<AgentCardDTO> agents = agentService.findAll(userUuid, skillId);
-                
+        Iterable<AgentCardDTO> agents = agentService.findAll(userUuid, skillId);    
+        
+        Iterable<IdAndNameDTO> queues = new ArrayList<IdAndNameDTO>();
+
         SkillDTO response = new SkillDTO(
-        skillId,
-        data.routingProfileArn(),
-        data.name(),
-        data.numberOfAssociatedUsers(),
-        null,
-        alerts,
-        skillsInformationDTO,
-        trainings,
-        metrics,
-        agents);
+            skillId,
+            data.routingProfileArn(),
+            data.name(),
+            data.numberOfAssociatedUsers(),
+            queues,
+            alerts,
+            skillsInformationDTO,
+            trainings,
+            metrics,
+            agents
+        );
         
         return response;
     }

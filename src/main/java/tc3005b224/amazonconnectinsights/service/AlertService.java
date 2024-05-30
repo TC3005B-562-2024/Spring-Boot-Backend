@@ -1,6 +1,7 @@
 package tc3005b224.amazonconnectinsights.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -288,5 +289,25 @@ public class AlertService extends BaseService {
     public Iterable<Alert> findTrainingAlerts(String userUuid, String resource) {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         return alertRepository.findByConnectionIdentifierAndResourceAndSolvedAndHasTraining(clientInfo.getIdentifier(), resource, true, true);
+    }
+
+    /**
+     * Service that returns all the alerts with a given resource, insightId and that are between two dates.
+     * 
+     * @param resource
+     * @param insightIdentifier
+     * 
+     * @see alertRepository.findByResourceAndInsightIdentifierAndDateRegisteredBetween()
+     * 
+     * @return Iterable<Alert>
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public Iterable<Alert> checkAlertExists(String resource, Short insightIdentifier) {
+        Date currentDate = new Date();
+        Date currentMinusOneHourDate = new Date(System.currentTimeMillis() - 3600 * 1000);
+
+        return alertRepository.findByResourceAndInsightIdentifierAndDateRegisteredBetween(resource, insightIdentifier, currentMinusOneHourDate, currentDate);
     }
 }

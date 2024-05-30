@@ -1,5 +1,6 @@
 package tc3005b224.amazonconnectinsights.repository;
 
+import java.util.Date;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,6 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     Optional<Integer> findHighestPriorityByResource(String resource, int connectionIdentifier);
 
     Iterable<Alert> findByConnectionIdentifierAndResourceAndSolvedAndHasTraining(int connectionIdentifier, String resource, Boolean solved, Boolean hasTraining);
+
+    Iterable<Alert> findByResourceAndInsightIdentifierAndDateRegisteredBetween(String resource, Short insightIdentifier, Date dateFrom, Date dateTo);
 }
