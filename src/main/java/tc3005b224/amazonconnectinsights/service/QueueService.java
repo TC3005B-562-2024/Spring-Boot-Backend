@@ -70,50 +70,92 @@ public class QueueService extends BaseService {
     public Iterable<QueueCardDTO> findAll(String token, String resourceId) throws BadRequestException {
         // Buld the request for getting the queues.
         ConnectClientInfo clientInfo = getConnectClientInfo(token);
-        SearchQueuesRequest.Builder searchQueuesRequest = SearchQueuesRequest.builder().instanceId(clientInfo.getInstanceId()).maxResults(100);
-        SearchQueuesResponse queues = getConnectClient(
-            clientInfo.getAccessKeyId(), 
-            clientInfo.getSecretAccessKey(), 
-            clientInfo.getRegion()
-        ).searchQueues(searchQueuesRequest.build());
-
-        // Create the an array of the queue of the queue id's.
-        Collection<String> queueIds = new ArrayList<String>();
-        queues.queues().forEach(
-            queue -> {
-                queueIds.add(queue.queueId());
-            }
-        );
 
         // Instantiate an iterarble of QueueCardDTO
-        List<QueueCardDTO> queueCardDTOs = new ArrayList<QueueCardDTO>();
+        Set<QueueCardDTO> queueCardDTOs = new HashSet<QueueCardDTO>();
 
-        // Iterate over the queue id's and get the queue information.
-        queues.queues().forEach(
-            queue -> {
-                // Request for describing an individual queue.
-                DescribeQueueRequest.Builder describeQueueRequest = DescribeQueueRequest.builder().instanceId(clientInfo.getInstanceId()).queueId(queue.queueId());
-                DescribeQueueResponse queuesInfo = getConnectClient(
-                    clientInfo.getAccessKeyId(), 
-                    clientInfo.getSecretAccessKey(), 
-                    clientInfo.getRegion()
-                ).describeQueue(describeQueueRequest.build());
+        Set<String> queueIds = new HashSet<String>();
 
-                // Create a new QueueCardDTO object and add it to the iterable.
-                QueueCardDTO queueCardDTO = new QueueCardDTO(
-                    queuesInfo.queue().queueId(),
-                    queuesInfo.queue().queueArn(),
-                    queuesInfo.queue().name(),
-                    queuesInfo.queue().description(),
-                    queuesInfo.queue().status().toString(),
-                    queuesInfo.queue().maxContacts(),
-                    findAgentsInQueue(token, queuesInfo.queue().queueId()).size()
-                );
+        if(resourceId.equals("")){
+            SearchQueuesResponse queues = getConnectClient(
+                clientInfo.getAccessKeyId(), 
+                clientInfo.getSecretAccessKey(), 
+                clientInfo.getRegion()
+            ).searchQueues(
+                SearchQueuesRequest.builder()
+                .instanceId(clientInfo.getInstanceId())
+                .maxResults(100)
+                .build()
+            );
 
-                queueCardDTOs.add(queueCardDTO);
-            }
-        );
+            // Iterate over the queue id's and get the queue information.
+            queues.queues().forEach(
+                queue -> {
+                    // Request for describing an individual queue.
+                    DescribeQueueRequest.Builder describeQueueRequest = DescribeQueueRequest.builder().instanceId(clientInfo.getInstanceId()).queueId(queue.queueId());
+                    DescribeQueueResponse queuesInfo = getConnectClient(
+                        clientInfo.getAccessKeyId(), 
+                        clientInfo.getSecretAccessKey(), 
+                        clientInfo.getRegion()
+                    ).describeQueue(describeQueueRequest.build());
 
+                    // Create a new QueueCardDTO object and add it to the iterable.
+                    QueueCardDTO queueCardDTO = new QueueCardDTO(
+                        queuesInfo.queue().queueId(),
+                        queuesInfo.queue().queueArn(),
+                        queuesInfo.queue().name(),
+                        queuesInfo.queue().description(),
+                        queuesInfo.queue().status().toString(),
+                        queuesInfo.queue().maxContacts(),
+                        findAgentsInQueue(token, queuesInfo.queue().queueId()).size()
+                    );
+
+                    queueCardDTOs.add(queueCardDTO);
+                }
+            );
+
+        }else{
+            // Get the queues associated to the agent
+            ListRoutingProfileQueuesResponse routingProfileQueues = getConnectClient(
+                clientInfo.getAccessKeyId(),
+                clientInfo.getSecretAccessKey(), 
+                clientInfo.getRegion()
+            ).listRoutingProfileQueues(
+                ListRoutingProfileQueuesRequest
+                .builder()
+                .instanceId(clientInfo.getInstanceId())
+                .routingProfileId(resourceId).build()
+            );
+
+            // Iterate over the queue id's and get the queue information.
+            routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(
+                queue -> {
+                    // Request for describing an individual queue.
+                    DescribeQueueRequest.Builder describeQueueRequest = DescribeQueueRequest.builder().instanceId(clientInfo.getInstanceId()).queueId(queue.queueId());
+                    DescribeQueueResponse queuesInfo = getConnectClient(
+                        clientInfo.getAccessKeyId(), 
+                        clientInfo.getSecretAccessKey(), 
+                        clientInfo.getRegion()
+                    ).describeQueue(describeQueueRequest.build());
+                    
+                    if (!queueIds.contains(queue.queueId())) {
+                        // Create a new QueueCardDTO object and add it to the iterable.
+                        QueueCardDTO queueCardDTO = new QueueCardDTO(
+                            queuesInfo.queue().queueId(),
+                            queuesInfo.queue().queueArn(),
+                            queuesInfo.queue().name(),
+                            queuesInfo.queue().description(),
+                            queuesInfo.queue().status().toString(),
+                            queuesInfo.queue().maxContacts(),
+                            findAgentsInQueue(token, queuesInfo.queue().queueId()).size()
+                        );
+                        
+                        queueCardDTOs.add(queueCardDTO);
+                        queueIds.add(queue.queueId());
+                    }
+                }
+            );
+        }
         return queueCardDTOs;
     }
 
