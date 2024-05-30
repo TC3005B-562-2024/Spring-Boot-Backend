@@ -212,5 +212,35 @@ public class Alert {
     public void setTrainingCompleted(Boolean trainingCompleted) {
         this.trainingCompleted = trainingCompleted;
     }
+    public String getInterveneContact() {
+        return interveneContact;
+    }
+    public void setInterveneContact(String interveneContact) {
+        this.interveneContact = interveneContact;
+    }
+    public String getInterveneAgent() {
+        return interveneAgent;
+    }
+    public void setInterveneAgent(String interveneAgent) {
+        this.interveneAgent = interveneAgent;
+    }
+    public String getOriginalRoutingProfile() {
+        return originalRoutingProfile;
+    }
+    public void setOriginalRoutingProfile(String originalRoutingProfile) {
+        this.originalRoutingProfile = originalRoutingProfile;
+    }
+    public String getDestinationRoutingProfile() {
+        return destinationRoutingProfile;
+    }
+    public void setDestinationRoutingProfile(String destinationRoutingProfile) {
+        this.destinationRoutingProfile = destinationRoutingProfile;
+    }
+    public String getTransferedAgent() {
+        return transferedAgent;
+    }
+    public void setTransferedAgent(String transferedAgent) {
+        this.transferedAgent = transferedAgent;
+    }
 }
 

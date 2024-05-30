@@ -21,12 +21,8 @@ import software.amazon.awssdk.services.connect.model.DescribeUserResponse;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataRequest;
 import software.amazon.awssdk.services.connect.model.GetCurrentUserDataResponse;
 import software.amazon.awssdk.services.connect.model.ListRealtimeContactAnalysisSegmentsV2Request;
-import software.amazon.awssdk.services.connect.model.ListRealtimeContactAnalysisSegmentsV2Response;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesRequest;
 import software.amazon.awssdk.services.connect.model.ListRoutingProfileQueuesResponse;
-import software.amazon.awssdk.services.connect.model.ListRoutingProfilesRequest;
-import software.amazon.awssdk.services.connect.model.ListRoutingProfilesResponse;
-import software.amazon.awssdk.services.connect.model.RealTimeContactAnalysisOutputType;
 import software.amazon.awssdk.services.connect.model.RealTimeContactAnalysisSegmentType;
 import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
 import software.amazon.awssdk.services.connect.model.SearchContactsRequest;
@@ -34,24 +30,22 @@ import software.amazon.awssdk.services.connect.model.SearchContactsResponse;
 import software.amazon.awssdk.services.connect.model.SearchContactsTimeRange;
 import software.amazon.awssdk.services.connect.model.SearchContactsTimeRangeType;
 import software.amazon.awssdk.services.connect.model.SearchCriteria;
-import software.amazon.awssdk.services.connect.model.SearchUsersRequest;
-import software.amazon.awssdk.services.connect.model.SearchUsersRequest.Builder;
-import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeContactAnalysisSegmentsRequest;
-import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeContactAnalysisSegmentsResponse;
-import software.amazon.awssdk.services.connect.model.SearchUsersResponse;
 import software.amazon.awssdk.services.connect.model.StringCondition;
 import software.amazon.awssdk.services.connect.model.UserData;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import software.amazon.awssdk.services.connect.model.UserSearchCriteria;
 import software.amazon.awssdk.services.connect.model.UserSearchSummary;
+import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeContactAnalysisSegmentsRequest;
+import software.amazon.awssdk.services.connectcontactlens.model.ListRealtimeContactAnalysisSegmentsResponse;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentAvailableToTransferListDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentMinimalDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
-import tc3005b224.amazonconnectinsights.dto.information.AgentInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationSectionDTO;
+import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
@@ -329,8 +323,11 @@ public class AgentService extends BaseService {
         if (!agentCurrentDataResponse.isEmpty()) {
             agentStatus = agentCurrentDataResponse.get(0).status().statusName();
         }
-        AgentInformationDTO agentInformation = new AgentInformationDTO(name, routingProfileName,
-                agentStatus);
+        List<InformationSectionDTO> sections = new ArrayList<>();
+        sections.add(new InformationSectionDTO("Name", name, "black"));
+        sections.add(new InformationSectionDTO("Skill", routingProfileName, "black"));
+        sections.add(new InformationSectionDTO("Status", agentStatus, "black"));
+        InformationSectionListDTO agentInformation = new InformationSectionListDTO("Information", sections);
         Iterable<Alert> trainings = trainingsService
                 .findTrainingsAlertsByResource(clientInfo.getIdentifier(), agent.user().arn());
 
@@ -340,13 +337,12 @@ public class AgentService extends BaseService {
         return new AgentDTO(
                 agentId,
                 agent.user().arn(),
-                queues,
                 agentInformation,
-                contacts,
+                metrics,
                 alerts,
                 trainings,
-                metrics
-        );
+                queues,
+                contacts);
     }
 
     /**

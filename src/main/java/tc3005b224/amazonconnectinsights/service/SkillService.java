@@ -13,7 +13,6 @@ import software.amazon.awssdk.services.connect.model.RoutingProfileSummary;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentCardDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
-import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.information.SkillsInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillBriefDTO;
 import tc3005b224.amazonconnectinsights.dto.skill.SkillDTO;

@@ -37,6 +37,8 @@ public class AlertService extends BaseService {
     private TrainingRepository trainingRepository;
     @Autowired
     private InsightRepository insightRepository;
+    @Autowired
+    private UserService userService;
 
     //Service to monitor a contact via BARGE
     public MonitorContactResponse monitorContact(String userUuid, String contactId) {
@@ -204,15 +206,26 @@ public class AlertService extends BaseService {
     // Service that accepts an alert and executes a series of functions so that
     // the insight of that alert is followed.
     public String acceptById(String userUuid, Long id) throws Exception {
-        // TODO: If category = Training, save training to DB.
-        // TODO: If category = Intervene, barge into call.
-        // TODO: If category = Transfer, move agent to the desired resurce.
-
         Alert alert = alertRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Alert not found!"));
         String alertInsightCategoryDenomination = alert.getInsight().getCategory().getDenomination();
+        AlertDTO alertDTO = new AlertDTO();
+
+        try {
+            if (alertInsightCategoryDenomination.equals("training")) {
+                // Save training to DB
+                alertDTO.setTrainingCompleted(false);
+            } else if (alertInsightCategoryDenomination.equals("intervene")) {
+                // Barge into call
+                this.monitorContact(userUuid, alert.getInterveneContact());
+            } else if (alertInsightCategoryDenomination.equals("transfer")) {
+                // Move agent to the desired resource
+                userService.transfer(userUuid, alert.getTransferedAgent(), alert.getDestinationRoutingProfile());
+            }
+        } catch (Exception e) {
+            throw new Exception("Error while accepting alert: " + e.getMessage());
+        }
 
         // Is solved set to true
-        AlertDTO alertDTO = new AlertDTO();
         alertDTO.setSolved(true);
         this.updateAlert(userUuid, id, alertDTO);
         return alertInsightCategoryDenomination;
