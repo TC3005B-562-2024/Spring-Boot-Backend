@@ -71,7 +71,7 @@ public class MetricService extends BaseService {
         if(resourceParentType.equals("AGENT") || resourceParentType.equals("ROUTING_PROFILE")){
             parentMetricsToSearch.add(MetricV2.builder().name("AGENT_OCCUPANCY").build());
         }
-        
+          
         // Get the client info
         ConnectClientInfo clientInfo = getConnectClientInfo(token);
         GetMetricDataV2Response metrics = getConnectClient(
@@ -110,7 +110,7 @@ public class MetricService extends BaseService {
                 .filters(
                     FilterV2.builder()
                         .filterKey(resourceParentType)
-                        .filterValues(getResourceParentArns(token, resourceParentType, resourceArn))
+                        .filterValues(getResourceParentArns(token, resourceType, resourceArn))
                         .build()
                 ).metrics(
                     parentMetricsToSearch
@@ -241,7 +241,7 @@ public class MetricService extends BaseService {
                     .instanceId(clientInfo.getInstanceId())
                     .routingProfileId(agent.user().routingProfileId()).build()
                 );
-        
+                System.out.println(routingProfileQueues.toString());
                 routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(queue -> {
                     parentList.add(queue.queueArn());
                 });
