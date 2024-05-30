@@ -35,6 +35,21 @@ public class Alert {
     @JoinColumn(name = "training_identifier")
     private Training training;
 
+    @Column(name = "intervene_contact")
+    private String interveneContact;
+
+    @Column(name = "intervene_agent")
+    private String interveneAgent;
+
+    @Column(name = "original_routing_profile")
+    private String originalRoutingProfile;
+
+    @Column(name = "destination_routing_profile")
+    private String destinationRoutingProfile;
+
+    @Column(name = "transfered_agent")
+    private String transferedAgent;
+
     @Column(name = "resource")
     private String resource;
 
@@ -103,7 +118,10 @@ public class Alert {
 
         if(alertDTO.getTrainingCompleted() != null){
             this.trainingCompleted = alertDTO.getTrainingCompleted();
-            this.dateTrainingCompleted = new Date();
+
+            if(this.trainingCompleted){
+                this.dateTrainingCompleted = new Date();
+            }
         }
     }
 
@@ -193,6 +211,36 @@ public class Alert {
 
     public void setTrainingCompleted(Boolean trainingCompleted) {
         this.trainingCompleted = trainingCompleted;
+    }
+    public String getInterveneContact() {
+        return interveneContact;
+    }
+    public void setInterveneContact(String interveneContact) {
+        this.interveneContact = interveneContact;
+    }
+    public String getInterveneAgent() {
+        return interveneAgent;
+    }
+    public void setInterveneAgent(String interveneAgent) {
+        this.interveneAgent = interveneAgent;
+    }
+    public String getOriginalRoutingProfile() {
+        return originalRoutingProfile;
+    }
+    public void setOriginalRoutingProfile(String originalRoutingProfile) {
+        this.originalRoutingProfile = originalRoutingProfile;
+    }
+    public String getDestinationRoutingProfile() {
+        return destinationRoutingProfile;
+    }
+    public void setDestinationRoutingProfile(String destinationRoutingProfile) {
+        this.destinationRoutingProfile = destinationRoutingProfile;
+    }
+    public String getTransferedAgent() {
+        return transferedAgent;
+    }
+    public void setTransferedAgent(String transferedAgent) {
+        this.transferedAgent = transferedAgent;
     }
 }
 

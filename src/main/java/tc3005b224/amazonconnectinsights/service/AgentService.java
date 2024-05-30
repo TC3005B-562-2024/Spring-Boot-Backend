@@ -317,7 +317,7 @@ public class AgentService extends BaseService {
         AgentInformationDTO agentInformation = new AgentInformationDTO(name, routingProfileName,
                 agentStatus);
         Iterable<Alert> trainings = trainingsService
-                .findTrainingsAlertsByResource(clientInfo.getConnectionIdentifier(), agent.user().arn());
+                .findTrainingsAlertsByResource(clientInfo.getIdentifier(), agent.user().arn());
 
         // Get the agent metrics
         InformationSectionListDTO metrics = metricService.getMetricsById(userUuid, "AGENT", agent.user().arn());
