@@ -559,15 +559,18 @@ public class QueueService extends BaseService {
                 .routingProfileId(resourceId).build()
             );
 
+            Set<String> queueIds = new HashSet<String>();
             routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(
                 queue -> {
-                    // Create a new QueueCardDTO object and add it to the iterable.
-                    QueueMinDTO queueMinDTO = new QueueMinDTO(
-                        queue.queueId(),
-                        queue.queueName()
-                    );
-                    
-                    queueMinDTOs.add(queueMinDTO);
+                    if (queueIds.add(queue.queueId())){
+                        // Create a new QueueCardDTO object and add it to the iterable.
+                        QueueMinDTO queueMinDTO = new QueueMinDTO(
+                            queue.queueId(),
+                            queue.queueName()
+                        );
+                        
+                        queueMinDTOs.add(queueMinDTO);
+                    }
                 }
             );
         }
