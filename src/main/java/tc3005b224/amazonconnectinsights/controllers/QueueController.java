@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueCardDTO;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueDTO;
+import tc3005b224.amazonconnectinsights.dto.queue.QueueMinDTO;
 import tc3005b224.amazonconnectinsights.service.QueueService;
 
 @RestController
@@ -80,4 +81,22 @@ public class QueueController {
             return new ResponseEntity<>(error, error.getStatusCode());
         }
     }
+
+    @Operation(summary = "Returns a list of all the Queues with less information.", responses = {
+            @ApiResponse(responseCode = "200", description = "Queues found.", content = {
+                    @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = QueueMinDTO.class))) })
+    })
+
+    @GetMapping("/min")
+    public ResponseEntity<Iterable<QueueMinDTO>> getAllQueuesMin(
+            @RequestParam(required = false, defaultValue = "") String resourceId, Principal principal) {
+        try {
+            Iterable<QueueMinDTO> queueMinDTOs = queueService.findAllMin(principal.getName(), resourceId);
+            return ResponseEntity.ok(queueMinDTOs);
+        } catch (Exception e) {
+            System.out.println(e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

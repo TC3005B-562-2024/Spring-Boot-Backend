@@ -33,6 +33,7 @@ import software.amazon.awssdk.services.connect.model.SearchQueuesResponse;
 import software.amazon.awssdk.services.connect.model.UserDataFilters;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueCardDTO;
 import tc3005b224.amazonconnectinsights.dto.queue.QueueDTO;
+import tc3005b224.amazonconnectinsights.dto.queue.QueueMinDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.agent.AgentDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionDTO;
@@ -516,4 +517,61 @@ public class QueueService extends BaseService {
 
         return agentDTOs;
     }
+
+    public Iterable<QueueMinDTO> findAllMin (String token, String resourceId) throws BadRequestException {
+        // Buld the request for getting the queues.
+        ConnectClientInfo clientInfo = getConnectClientInfo(token);
+
+        // Instantiate an iterarble of QueueCardDTO
+        Set<QueueMinDTO> queueMinDTOs = new HashSet<QueueMinDTO>();
+
+        if(resourceId.equals("")){
+            SearchQueuesResponse queues = getConnectClient(
+                clientInfo.getAccessKeyId(), 
+                clientInfo.getSecretAccessKey(), 
+                clientInfo.getRegion()
+            ).searchQueues(
+                SearchQueuesRequest.builder()
+                .instanceId(clientInfo.getInstanceId())
+                .maxResults(100)
+                .build()
+            );
+            queues.queues().forEach(
+                queue -> {
+                    // Create a new QueueCardDTO object and add it to the iterable.
+                    QueueMinDTO queueMinDTO = new QueueMinDTO(
+                        queue.queueId(),
+                        queue.name()
+                    );
+
+                    queueMinDTOs.add(queueMinDTO);
+                }
+            );
+        }else {
+            ListRoutingProfileQueuesResponse routingProfileQueues = getConnectClient(
+                clientInfo.getAccessKeyId(),
+                clientInfo.getSecretAccessKey(), 
+                clientInfo.getRegion()
+            ).listRoutingProfileQueues(
+                ListRoutingProfileQueuesRequest
+                .builder()
+                .instanceId(clientInfo.getInstanceId())
+                .routingProfileId(resourceId).build()
+            );
+
+            routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(
+                queue -> {
+                    // Create a new QueueCardDTO object and add it to the iterable.
+                    QueueMinDTO queueMinDTO = new QueueMinDTO(
+                        queue.queueId(),
+                        queue.queueName()
+                    );
+                    
+                    queueMinDTOs.add(queueMinDTO);
+                }
+            );
+        }
+        return queueMinDTOs;
+    }
 }
+
