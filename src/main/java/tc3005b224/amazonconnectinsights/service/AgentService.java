@@ -191,6 +191,7 @@ public class AgentService extends BaseService {
                     routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(queue -> {
                         queuesSet.add(new QueueMinDTO(queue.queueId(), queue.queueName()));
                     });
+                    List<QueueMinDTO> uniqueQueues = new ArrayList<>(queuesSet);
 
                     // Get the MOST NEGATIVE sentiment status of contacts for the agent
                     // IF Contact Lens is enabled
@@ -232,7 +233,7 @@ public class AgentService extends BaseService {
                                     + userData.identityInfo().lastName(),
                             agentStatus.getOrDefault(userData.id(), "DISCONNECTED"),
                             worstSentiment,
-                            queuesSet,
+                            uniqueQueues,
                             alertService.findHighestPriority(userUuid, userData.arn()).getHighestPriorityAlert()));
                 });
         return agents;
