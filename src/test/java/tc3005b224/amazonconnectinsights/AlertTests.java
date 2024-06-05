@@ -177,7 +177,7 @@ class AlertTests {
     // Test the acceptance of an alert in the database, and then check if it was accepted correctly.
     @Test
     public void acceptAlertTest() throws Exception {
-        AlertDTO alert = new AlertDTO((short) 1, (short) 16, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
+        AlertDTO alert = new AlertDTO((short) 1, (short) 10, (short) 1, "interveneContact", "interveneAgent", "originalRoutingProfile", "destinationRoutingProfile", "transferedAgent", "resource", false, false);
         Alert alertToDB = alertService.fromDTO(alert);
         Alert savedAlert = alertRepository.save(alertToDB);
 
@@ -191,8 +191,4 @@ class AlertTests {
         assertThat(acceptedAlert.getSolved()).isTrue();
         alertRepository.delete(acceptedAlert);
     }
-
-
-
-
 }
