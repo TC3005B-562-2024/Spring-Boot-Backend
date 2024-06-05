@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tc3005b224.amazonconnectinsights.dto.queue.QueueMinDTO;
 
 @Getter
 @Setter
@@ -15,6 +16,6 @@ public class AgentCardDTO {
     private String name;
     private String status;
     private String sentiment;
-    private Iterable<String> queues;
+    private Iterable<QueueMinDTO> queues;
     private String topPriorityAlert;
 }

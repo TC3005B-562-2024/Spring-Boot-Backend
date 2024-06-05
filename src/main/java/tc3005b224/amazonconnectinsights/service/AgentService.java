@@ -46,6 +46,7 @@ import tc3005b224.amazonconnectinsights.dto.information.ContactInformationDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationMetricSectionListDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionDTO;
 import tc3005b224.amazonconnectinsights.dto.information.InformationSectionListDTO;
+import tc3005b224.amazonconnectinsights.dto.queue.QueueMinDTO;
 import tc3005b224.amazonconnectinsights.dto.utils.IdAndNameDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 
@@ -186,10 +187,11 @@ public class AgentService extends BaseService {
                             .listRoutingProfileQueues(
                                     ListRoutingProfileQueuesRequest.builder().instanceId(clientInfo.getInstanceId())
                                             .routingProfileId(userData.routingProfileId()).build());
-                    Set<String> queuesSet = new HashSet<>();
+                    Set<QueueMinDTO> queuesSet = new HashSet<>();
                     routingProfileQueues.routingProfileQueueConfigSummaryList().forEach(queue -> {
-                        queuesSet.add(queue.queueName());
+                        queuesSet.add(new QueueMinDTO(queue.queueId(), queue.queueName()));
                     });
+                    List<QueueMinDTO> uniqueQueues = new ArrayList<>(queuesSet);
 
                     // Get the MOST NEGATIVE sentiment status of contacts for the agent
                     // IF Contact Lens is enabled
@@ -231,7 +233,7 @@ public class AgentService extends BaseService {
                                     + userData.identityInfo().lastName(),
                             agentStatus.getOrDefault(userData.id(), "DISCONNECTED"),
                             worstSentiment,
-                            queuesSet,
+                            uniqueQueues,
                             alertService.findHighestPriority(userUuid, userData.arn()).getHighestPriorityAlert()));
                 });
         return agents;
