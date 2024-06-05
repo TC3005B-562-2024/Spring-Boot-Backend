@@ -1,8 +1,11 @@
 package tc3005b224.amazonconnectinsights.controllers;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,12 +51,15 @@ public class InstanceController {
     )
 
     @GetMapping
-    public ResponseEntity<InstanceDTO> getInstanceData(@RequestParam(required = true) String token) {
+    public ResponseEntity<?> getInstanceData(Principal principal) {
         try {
-            InstanceDTO response = instanceService.getInstanceDetails(token);
+            InstanceDTO response = instanceService.getInstanceDetails(principal.getName());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+            System.out.println(e.getMessage());
+            // Return error if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
         }
     }
 }

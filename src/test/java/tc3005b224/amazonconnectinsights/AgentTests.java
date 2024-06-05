@@ -1,0 +1,42 @@
+package tc3005b224.amazonconnectinsights;
+
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+public class AgentTests extends BaseTest {
+
+    /**
+     * ID: B.AgentTests.1 - Test to get all agents from the Amazon Connect instance.
+     * Verify that the response contains the following information for each agent:
+     * 1. The agent information.
+     * 2. The highest priority alert.
+     * 3. Queues for the agent.
+     * 4. Status of the agent.
+     * 5. Sentiment of contacts handled by the agent.
+     * 
+     * @author Diego Jacobo Djmr5
+     * 
+     * @throws IOException
+     * @throws Exception
+     */
+    @Test
+    public void testGetAllAgents() throws IOException, Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/agents")
+                .header("Authorization", "Bearer " + obtainAuthToken())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].arn").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].queues").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].topPriorityAlert").isEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].status").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].sentiment").isEmpty());
+    }
+}
