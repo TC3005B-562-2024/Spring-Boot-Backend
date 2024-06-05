@@ -32,6 +32,12 @@ public class AlertController {
     @Autowired
     private AlertService alertService;
 
+    @Operation(summary = "Sends a request to monitor a contact.", responses = {
+            @ApiResponse(responseCode = "200", description = "Request to monitor contact sent successfully.", content = {
+                    @Content(schema = @Schema(implementation = String.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal error."),
+            @ApiResponse(responseCode = "503", description = "Couldn't connect to database.") })
     @GetMapping("/monitor-contact")
     public ResponseEntity<?> monitorContact(
             @RequestParam String contactId, Principal principal) {
