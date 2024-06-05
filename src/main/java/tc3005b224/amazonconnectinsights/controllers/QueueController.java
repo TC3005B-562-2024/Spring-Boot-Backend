@@ -86,7 +86,6 @@ public class QueueController {
             @ApiResponse(responseCode = "200", description = "Queues found.", content = {
                     @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = QueueMinDTO.class))) })
     })
-
     @GetMapping("/min")
     public ResponseEntity<Iterable<QueueMinDTO>> getAllQueuesMin(
             @RequestParam(required = false, defaultValue = "") String resourceId, Principal principal) {
@@ -98,5 +97,4 @@ public class QueueController {
             return ResponseEntity.notFound().build();
         }
     }
-
 }

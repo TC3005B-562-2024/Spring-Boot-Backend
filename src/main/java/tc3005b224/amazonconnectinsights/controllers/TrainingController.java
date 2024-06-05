@@ -64,7 +64,6 @@ public class TrainingController {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
                 }
         }
-
         /**
          * Get the training data by its id
          * 
@@ -92,7 +91,6 @@ public class TrainingController {
                         return ResponseEntity.notFound().build();
                 }
         }
-
         /**
          * Save a new training data
          * 
@@ -113,7 +111,6 @@ public class TrainingController {
         public ResponseEntity<TrainingDTO> saveTrainingData(@RequestBody TrainingNoIdDTO newTraining) {
                 return ResponseEntity.ok(trainingService.saveTraining(newTraining));
         }
-
         /**
          * Update a training data by its id
          * 
@@ -145,7 +142,6 @@ public class TrainingController {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
                 }
         }
-
         /**
          * Delete a training data by its id
          * 
