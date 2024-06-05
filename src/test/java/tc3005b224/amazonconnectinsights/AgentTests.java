@@ -39,6 +39,23 @@ public class AgentTests extends BaseTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sentiment").isEmpty());
     }
 
+    /**
+     * ID: B.AgentTests.2 - Test to get a single agent from the Amazon Connect instance.
+     * Verify that the response contains the following information for the agent:
+     * 1. The agent ID.
+     * 2. The agent ARN.
+     * 3. The agent information.
+     * 4. The agent metrics.
+     * 5. The agent alerts.
+     * 6. The agent trainings.
+     * 7. The agent queues.
+     * 8. The agent contacts information.
+     * 
+     * @author Diego Jacobo Djmr5
+     * 
+     * @throws IOException
+     * @throws Exception
+     */
     @Test
     public void testSingleAgent() throws IOException, Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/agents/6887b106-f684-485e-9c47-a6b1e16cdd21")
