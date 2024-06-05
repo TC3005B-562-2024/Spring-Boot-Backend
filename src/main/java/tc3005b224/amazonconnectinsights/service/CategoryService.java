@@ -39,6 +39,9 @@ public class CategoryService {
         }
         return false;
     }
+    public Category fromDTO(CategoryDTO categoryDTO) {
+        return new Category(categoryDTO);
+    }
 
     // Service that instantiates a category, given a CategoryDTO and stores it in the DB.
     public Category createCategory(CategoryDTO categoryDTO) {

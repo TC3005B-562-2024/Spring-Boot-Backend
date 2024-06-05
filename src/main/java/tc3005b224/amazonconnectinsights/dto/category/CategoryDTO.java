@@ -7,6 +7,13 @@ public class CategoryDTO {
     private Short priority;
     private Boolean isActive;
 
+    public CategoryDTO(String denomination, String description, Short priority, Boolean isActive) {
+        this.denomination = denomination;
+        this.description = description;
+        this.priority = priority;
+        this.isActive = isActive;
+    }
+
     public String getDenomination() {
         return denomination;
     }
