@@ -103,9 +103,7 @@ public class AlertController {
             @ApiResponse(responseCode = "404", description = "Invalid connection, trainig or insight identifier."),
             @ApiResponse(responseCode = "500", description = "Internal error."),
             @ApiResponse(responseCode = "503", description = "Couldn't connect to database."),
-    }
-
-    )
+    })
     @PostMapping("")
     public ResponseEntity<?> postAlert(@RequestBody AlertDTO dto, Principal principal) {
         try {
