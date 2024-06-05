@@ -30,7 +30,6 @@ public class AgentTests extends BaseTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
-                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].arn").exists())
@@ -38,5 +37,21 @@ public class AgentTests extends BaseTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].topPriorityAlert").isEmpty())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].status").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sentiment").isEmpty());
+    }
+
+    @Test
+    public void testSingleAgent() throws IOException, Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/agents/6887b106-f684-485e-9c47-a6b1e16cdd21")
+                .header("Authorization", "Bearer " + obtainAuthToken())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value("6887b106-f684-485e-9c47-a6b1e16cdd21"))
+                .andExpect(MockMvcResultMatchers.jsonPath("arn").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("information").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("metrics").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("alerts").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("trainings").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("queues").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("contactInformationDTO").isArray());
     }
 }
