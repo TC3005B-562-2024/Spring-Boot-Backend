@@ -191,8 +191,4 @@ class AlertTests {
         assertThat(acceptedAlert.getSolved()).isTrue();
         alertRepository.delete(acceptedAlert);
     }
-
-
-
-
 }
