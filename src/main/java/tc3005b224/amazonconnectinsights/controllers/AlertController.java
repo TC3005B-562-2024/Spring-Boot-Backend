@@ -208,4 +208,16 @@ public class AlertController {
         AlertHighPriorityDTO priority = alertService.findHighestPriority(principal.getName(), resource);
         return ResponseEntity.ok(priority);
     }
+
+    @Operation(
+        summary = "Calls the stored procedure get_alert_insight_category_count.", 
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Alert ignored successfully."),
+            @ApiResponse(responseCode = "404", description = "Invalid alertIdentifier."),
+        }
+    )
+    @GetMapping("/insight-category-count")
+    public Iterable<?> getMethodName(Principal principal) {
+        return alertService.callAlertInsightCategoryCountProcedure(principal.getName());
+    }
 }
