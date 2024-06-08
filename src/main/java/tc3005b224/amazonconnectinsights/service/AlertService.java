@@ -310,4 +310,21 @@ public class AlertService extends BaseService {
 
         return alertRepository.findByResourceAndInsightIdentifierAndDateRegisteredBetween(resource, insightIdentifier, currentMinusOneHourDate, currentDate);
     }
+
+    /**
+     * Service that calls the get_alert_insight_category_count stored procedure.
+     * 
+     * @param userUuid
+     * 
+     * @see alertRepository.callAlertInsightCategoryCountProcedure
+     * 
+     * @return Iterable<?>
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public Iterable<?> callAlertInsightCategoryCountProcedure(String userUuid) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+        return alertRepository.callAlertInsightCategoryCountProcedure(clientInfo.getIdentifier(), 1, true);
+    }
 }
