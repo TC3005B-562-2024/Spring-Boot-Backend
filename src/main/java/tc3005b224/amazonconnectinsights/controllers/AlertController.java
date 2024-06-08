@@ -28,6 +28,7 @@ import tc3005b224.amazonconnectinsights.service.AlertService;
 
 @RestController
 @RequestMapping("/alerts")
+
 public class AlertController {
     @Autowired
     private AlertService alertService;
@@ -39,6 +40,7 @@ public class AlertController {
             @ApiResponse(responseCode = "500", description = "Internal error."),
             @ApiResponse(responseCode = "503", description = "Couldn't connect to database.") })
     @GetMapping("/monitor-contact")
+
     public ResponseEntity<?> monitorContact(
             @RequestParam String contactId, Principal principal) {
         try {
@@ -203,9 +205,8 @@ public class AlertController {
             @ApiResponse(responseCode = "503", description = "Couldn't connect to database."),
     })
     @GetMapping("/highestPriority")
-    public ResponseEntity<AlertHighPriorityDTO> getHighestPriority(@RequestParam(required = false) String resource,
-            Principal principal) {
-        AlertHighPriorityDTO priority = alertService.findHighestPriority(principal.getName(), resource);
-        return ResponseEntity.ok(priority);
+    public String sendWebSocketMessage(@RequestParam String message) {
+        alertService.sendWebSocketMessage(message);
+        return "Message sent to WebSocket: " + message;
     }
 }

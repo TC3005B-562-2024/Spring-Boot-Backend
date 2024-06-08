@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,9 @@ public class AlertEngineService extends BaseService {
     @Autowired
     private MetricService metricService;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    
     @Autowired
     private AlertService alertService;
 
@@ -314,6 +318,8 @@ public class AlertEngineService extends BaseService {
             
             try {
                 alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
+                String message = "Training Alert: Average handle time exceeded by 10% for " + resourceArn;
+                messagingTemplate.convertAndSend("/topic/alertas", message); 
             } catch (Exception e) {
                 System.out.println("Error in analyzeAvgHandleTimeTraining(), " + e.getMessage());
             }
@@ -344,12 +350,19 @@ public class AlertEngineService extends BaseService {
         Short trainingId = 2;
         Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
         Boolean valueIsLowerThan90Percent = sectionValue < 90;
-
-        if(valueIsLowerThan90Percent && alertDoestExist) {
+    
+        if (valueIsLowerThan90Percent && alertDoestExist) {
             ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
             AlertDTO alertDTO = AlertDTO.newTrainingAlertDTO(connectionId, insightId, trainingId, resourceArn);
+    
             try {
                 alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
+    
+                // --- Add WebSocket Notification ---
+                String message = "Agent Schedule Adherence Alert: Agent adherence is below 90% for " + resourceArn;
+                messagingTemplate.convertAndSend("/topic/alertas", message);
+                // ---------------------------------
+    
             } catch (Exception e) {
                 System.out.println("Error in analyzeAgentScheduleAdherence(), " + e.getMessage());
             }
@@ -380,12 +393,18 @@ public class AlertEngineService extends BaseService {
         Short trainingId = 3;
         Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
         Boolean valueIsBiggerBy10Percent = sectionValue > sectionParentValue * 1.1;
-
-        if(!resourceType.equals("AGENT") && valueIsBiggerBy10Percent && alertDoestExist) {
+    
+        if (!resourceType.equals("AGENT") && valueIsBiggerBy10Percent && alertDoestExist) {
             ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
             AlertDTO alertDTO = AlertDTO.newTrainingAlertDTO(connectionId, insightId, trainingId, resourceArn);
             try {
                 alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
+    
+                // --- Add WebSocket Notification ---
+                String message = "Avg. Queue Answer Time Alert: Exceeded threshold by 10% for " + resourceArn;
+                messagingTemplate.convertAndSend("/topic/alertas", message);
+                // ---------------------------------
+    
             } catch (Exception e) {
                 System.out.println("Error in analyzeAvgQueueAnswerTime(), " + e.getMessage());
             }
@@ -415,21 +434,27 @@ public class AlertEngineService extends BaseService {
         Short insightId = 14;
         Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
         Boolean valueIsLowerThan80Percent = sectionValue < 80;
-
-        if(resourceType.equals("ROUTING_PROFILE") && valueIsLowerThan80Percent && alertDoestExist) {
+    
+        if (resourceType.equals("ROUTING_PROFILE") && valueIsLowerThan80Percent && alertDoestExist) {
             ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
-
+    
             // This information is obtained when the accept button is clicked
             String originalRoutingProfile = null;
             String transferedAgent = null;
-
+    
             // The destination routing profile is the one that raised the alert.
             String destinationRoutingProfile = resourceArn;
-
+    
             AlertDTO alertDTO = AlertDTO.newTransferAlertDTO(connectionId, insightId, originalRoutingProfile, destinationRoutingProfile, transferedAgent, resourceArn);
-
+    
             try {
                 alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
+    
+                // --- Add WebSocket Notification ---
+                String message = "Service Level Alert: Service level below 80% for routing profile: " + resourceArn;
+                messagingTemplate.convertAndSend("/topic/alertas", message);
+                // ---------------------------------
+    
             } catch (Exception e) {
                 System.out.println("Error in analyzeServiceLevel(), " + e.getMessage());
             }
@@ -474,6 +499,12 @@ public class AlertEngineService extends BaseService {
 
             try {
                 alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
+    
+                // --- Add WebSocket Notification ---
+                String message = "Abandonment Rate Alert: Abandonment rate exceeds 5% for routing profile: " + resourceArn;
+                messagingTemplate.convertAndSend("/topic/alertas", message);
+                // ---------------------------------
+    
             } catch (Exception e) {
                 System.out.println("Error in analyzeAbandonmentRate(), " + e.getMessage());
             }
@@ -515,9 +546,16 @@ public class AlertEngineService extends BaseService {
 
             try {
                 alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
+    
+                // --- Add WebSocket Notification ---
+                String message = "Agent Occupancy Alert: Occupancy above " + (sectionValue * 100) + "% for routing profile: " + resourceArn;
+                messagingTemplate.convertAndSend("/topic/alertas", message);
+                // ---------------------------------
+    
             } catch (Exception e) {
                 System.out.println("Error in analyzeAgentOccupancy(), " + e.getMessage());
             }
+    
         }
     }
 
@@ -544,22 +582,31 @@ public class AlertEngineService extends BaseService {
         Short insightId = 13;
         Boolean alertDoestExist = !checkAlertExists(resourceArn, insightId);
         Boolean valueIsBiggerBy50Percent = sectionValue > sectionParentValue * 1.5;
-
-        if(resourceType.equals("AGENT") && valueIsBiggerBy50Percent && alertDoestExist) {
+    
+        if (resourceType.equals("AGENT") && valueIsBiggerBy50Percent && alertDoestExist) {
             ConnectClientInfo clientInfo = getConnectClientInfoByIdentifier((int) connectionId);
-
+    
             Set<String> problematicContacts = agentService.getNegativeSentimentContacts(clientInfo.getUid(), resourceArn);
-
+    
             if (problematicContacts.size() > 0) {
                 problematicContacts.forEach(contact -> {
                     AlertDTO alertDTO = AlertDTO.newInterventionAlertDTO(connectionId, insightId, contact, clientInfo.getSupervisor(), resourceArn);
                     try {
                         alertService.saveAlert(clientInfo.getUid(), alertService.fromDTO(alertDTO));
+    
+                        // --- Add WebSocket Notification ---
+                        String message = "Avg. Handle Time (Intervene) Alert: Agent " + resourceArn + " has exceeded avg. handle time by 50% on contact " + contact;
+                        messagingTemplate.convertAndSend("/topic/alertas", message);
+                        // ---------------------------------
+    
                     } catch (BadRequestException e) {
                         e.printStackTrace();
                     }
                 });
             }
         }
+    }
+    public void sendWebSocketMessage(String message) {
+        System.out.println("WebSocket message sent: " + message);
     }
 }
