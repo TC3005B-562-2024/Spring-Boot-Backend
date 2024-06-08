@@ -35,4 +35,7 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     
     @Procedure("get_alert_insight_category_count")
     Iterable<?> callAlertInsightCategoryCountProcedure(int connectionIdentifier, int solvedValue, Boolean trainingCompleted);
+
+    @Procedure("get_alert_training_count")
+    Iterable<?> callTrainigProcedure(int connectionIdentifier, int solvedValue, Boolean trainingCompleted);
 }

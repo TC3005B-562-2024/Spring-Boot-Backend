@@ -327,4 +327,21 @@ public class AlertService extends BaseService {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
         return alertRepository.callAlertInsightCategoryCountProcedure(clientInfo.getIdentifier(), 1, true);
     }
+
+    /**
+     * Service that calls the get_alert_training_count stored procedure.
+     * 
+     * @param userUuid
+     * 
+     * @see alertRepository.callTrainigProcedure
+     * 
+     * @return Iterable<?>
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public Iterable<?> callTrainingCountProcedure(String userUuid) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+        return alertRepository.callTrainigProcedure(clientInfo.getIdentifier(), 1, true);
+    }
 }
