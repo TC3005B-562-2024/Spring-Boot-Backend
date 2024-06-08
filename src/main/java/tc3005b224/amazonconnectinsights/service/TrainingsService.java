@@ -19,7 +19,6 @@ import tc3005b224.amazonconnectinsights.repository.AlertRepository;
 import tc3005b224.amazonconnectinsights.repository.TrainingRepository;
 
 @Service
-@Transactional
 public class TrainingsService extends BaseService {
     @Autowired
     private TrainingRepository trainingRepository;

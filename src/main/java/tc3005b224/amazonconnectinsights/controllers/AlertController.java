@@ -217,8 +217,8 @@ public class AlertController {
         }
     )
     @GetMapping("/insight-category-count")
-    public Iterable<?> getInsightCategoryCount(Principal principal) {
-        return alertService.callAlertInsightCategoryCountProcedure(principal.getName());
+    public ResponseEntity<?> getInsightCategoryCount(Principal principal) {
+        return ResponseEntity.ok(alertService.callAlertInsightCategoryCountProcedure(principal.getName()));
     }
 
     @GetMapping("/training-count")
