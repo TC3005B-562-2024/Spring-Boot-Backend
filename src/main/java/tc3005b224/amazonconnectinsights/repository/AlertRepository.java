@@ -36,7 +36,7 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     Iterable<Alert> findByResourceAndInsightIdentifierAndDateRegisteredBetween(String resource, Short insightIdentifier, Date dateFrom, Date dateTo);
     
     @Procedure("get_alert_insight_category_count")
-    Iterable<?> callAlertInsightCategoryCountProcedure(int connectionIdentifier, int solvedValue, Boolean trainingCompleted);
+    Iterable<InsightCategoryCountDTO> callAlertInsightCategoryCountProcedure(int connectionIdentifier, int solvedValue, Boolean trainingCompleted);
 
     @Procedure("get_alert_training_count")
     Iterable<?> callTrainigProcedure(int connectionIdentifier, int solvedValue, Boolean trainingCompleted);
