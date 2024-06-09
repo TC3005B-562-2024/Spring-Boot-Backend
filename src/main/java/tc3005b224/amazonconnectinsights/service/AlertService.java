@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -39,6 +40,8 @@ public class AlertService extends BaseService {
     private InsightRepository insightRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     //Service to monitor a contact via BARGE
     public MonitorContactResponse monitorContact(String userUuid, String contactId) {
@@ -156,6 +159,15 @@ public class AlertService extends BaseService {
     public Alert saveAlert(String userUuid, Alert newAlert) throws BadRequestException {
         return alertRepository.save(newAlert);
     }
+
+    public Alert saveNewAlert(String userUuid, Alert newAlert) throws BadRequestException {
+        Alert alert = saveAlert(userUuid, newAlert);
+        
+        String message = "Created new alert ";
+                messagingTemplate.convertAndSend("/topic/alertas", message);
+        return alert;
+    }
+    
 
     // Method that gets an AlertDTO and an Alert as an input, updating only the AlertDTO attributes that are null.
     public void updateAlert(String userUuid, Long alertIdentifier, AlertDTO alertDTO) throws Exception {        

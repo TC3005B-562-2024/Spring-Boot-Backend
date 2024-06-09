@@ -84,6 +84,13 @@
 			<artifactId>spring-security-core</artifactId>
 			<version>6.2.4</version>
 		</dependency>
+
+		<!--Inserta nuevo web socket-->
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-jose</artifactId>
