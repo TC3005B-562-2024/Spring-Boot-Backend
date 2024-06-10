@@ -18,11 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.InsightCategoryCountDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.TrainingCountDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 import tc3005b224.amazonconnectinsights.service.AlertService;
 
@@ -221,5 +224,49 @@ public class AlertController {
     @GetMapping("/insight-category-count")
     public Iterable<?> getMethodName(Principal principal) {
         return alertService.callAlertInsightCategoryCountProcedure(principal.getName());
+    }
+
+    @Operation(
+        summary = "Calls the stored procedure get_alert_insight_category_count.", 
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Stored procedure (get_alert_insight_category_count) called successfully.",
+            content = {@Content(
+                mediaType = "application/json",
+                array = @ArraySchema(schema = @Schema(implementation = InsightCategoryCountDTO.class)))
+            }),
+            @ApiResponse(responseCode = "404", description = "Stored procedure called unsuccessfully."),
+        }
+    )
+    @GetMapping("/insight-category-count")
+    public ResponseEntity<?> getInsightCategoryCount(Principal principal) {
+        try {
+            return ResponseEntity.ok(alertService.callAlertInsightCategoryCountProcedure(principal.getName()));
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
+    }
+    
+    @Operation(
+        summary = "Calls the stored procedure get_alert_training_count.", 
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Stored procedure (get_alert_training_count) called successfully.",
+            content = {@Content(
+                mediaType = "application/json",
+                array = @ArraySchema(schema = @Schema(implementation = TrainingCountDTO.class)))
+            }),
+            @ApiResponse(responseCode = "404", description = "Stored procedure called unsuccessfully."),
+        }
+    )
+    @GetMapping("/training-count")
+    public ResponseEntity<?> getTrainingCount(Principal principal) {
+        try {
+            return ResponseEntity.ok(alertService.callTrainingCountProcedure(principal.getName()));
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
     }
 }
