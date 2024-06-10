@@ -217,18 +217,6 @@ public class AlertController {
     @Operation(
         summary = "Calls the stored procedure get_alert_insight_category_count.", 
         responses = {
-            @ApiResponse(responseCode = "200", description = "Alert ignored successfully."),
-            @ApiResponse(responseCode = "404", description = "Invalid alertIdentifier."),
-        }
-    )
-    @GetMapping("/insight-category-count")
-    public Iterable<?> getMethodName(Principal principal) {
-        return alertService.callAlertInsightCategoryCountProcedure(principal.getName());
-    }
-
-    @Operation(
-        summary = "Calls the stored procedure get_alert_insight_category_count.", 
-        responses = {
             @ApiResponse(responseCode = "200", description = "Stored procedure (get_alert_insight_category_count) called successfully.",
             content = {@Content(
                 mediaType = "application/json",
