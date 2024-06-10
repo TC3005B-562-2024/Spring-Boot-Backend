@@ -31,6 +31,7 @@ import tc3005b224.amazonconnectinsights.service.AlertService;
 
 @RestController
 @RequestMapping("/alerts")
+
 public class AlertController {
     @Autowired
     private AlertService alertService;
@@ -42,6 +43,7 @@ public class AlertController {
             @ApiResponse(responseCode = "500", description = "Internal error."),
             @ApiResponse(responseCode = "503", description = "Couldn't connect to database.") })
     @GetMapping("/monitor-contact")
+
     public ResponseEntity<?> monitorContact(
             @RequestParam String contactId, Principal principal) {
         try {
@@ -110,7 +112,7 @@ public class AlertController {
     @PostMapping("")
     public ResponseEntity<?> postAlert(@RequestBody AlertDTO dto, Principal principal) {
         try {
-            alertService.saveAlert(principal.getName(), alertService.fromDTO(dto));
+            alertService.saveNewAlert(principal.getName(), alertService.fromDTO(dto));
             return ResponseEntity.ok("Alert added successfully");
         } catch (Exception e) {
             // Return error 404 if there is an exception.
@@ -209,7 +211,19 @@ public class AlertController {
     public ResponseEntity<AlertHighPriorityDTO> getHighestPriority(@RequestParam(required = false) String resource,
             Principal principal) {
         AlertHighPriorityDTO priority = alertService.findHighestPriority(principal.getName(), resource);
-        return ResponseEntity.ok(priority);
+        return ResponseEntity.ok(priority);    
+    }
+
+    @Operation(
+        summary = "Calls the stored procedure get_alert_insight_category_count.", 
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Alert ignored successfully."),
+            @ApiResponse(responseCode = "404", description = "Invalid alertIdentifier."),
+        }
+    )
+    @GetMapping("/insight-category-count")
+    public Iterable<?> getMethodName(Principal principal) {
+        return alertService.callAlertInsightCategoryCountProcedure(principal.getName());
     }
 
     @Operation(
