@@ -1,6 +1,7 @@
 package tc3005b224.amazonconnectinsights.repository;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,8 +37,8 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     Iterable<Alert> findByResourceAndInsightIdentifierAndDateRegisteredBetween(String resource, Short insightIdentifier, Date dateFrom, Date dateTo);
     
     @Procedure("get_alert_insight_category_count")
-    Iterable<InsightCategoryCountDTO> callAlertInsightCategoryCountProcedure(int connectionIdentifier, int solvedValue, Boolean trainingCompleted);
+    Iterable<Object> callAlertInsightCategoryCountProcedure(int connectionIdentifier, int solvedValue, Boolean trainingCompleted);
 
     @Procedure("get_alert_training_count")
-    Iterable<?> callTrainigProcedure(int connectionIdentifier, int solvedValue, Boolean trainingCompleted);
+    Iterable<Object> callTrainigProcedure(int connectionIdentifier, int solvedValue, Boolean trainingCompleted);
 }

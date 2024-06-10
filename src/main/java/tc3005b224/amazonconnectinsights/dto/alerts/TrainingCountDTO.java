@@ -9,10 +9,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class InsightCategoryCountDTO {
+public class TrainingCountDTO {
     private Object groupCount;
-    private Object insightDenomination;
-    private Object categoryDenomination;
+    private Object denomination;
     private Object trainingCompletedCount;
     private Object trainingCompletedDifference;
     private Object solvedCount;

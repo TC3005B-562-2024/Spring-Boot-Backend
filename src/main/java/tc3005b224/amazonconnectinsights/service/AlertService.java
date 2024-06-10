@@ -16,6 +16,8 @@ import software.amazon.awssdk.services.connect.model.MonitorContactResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.InsightCategoryCountDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.TrainingCountDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 import tc3005b224.amazonconnectinsights.models_sql.Connection;
 import tc3005b224.amazonconnectinsights.models_sql.Insight;
@@ -318,14 +320,23 @@ public class AlertService extends BaseService {
      * 
      * @see alertRepository.callAlertInsightCategoryCountProcedure
      * 
-     * @return Iterable<?>
+     * @return Iterable<InsightCategoryCountDTO>
      * 
      * @author Moisés Adame
      * 
      */
-    public Iterable<?> callAlertInsightCategoryCountProcedure(String userUuid) {
+    public Iterable<InsightCategoryCountDTO> callAlertInsightCategoryCountProcedure(String userUuid) {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        return alertRepository.callAlertInsightCategoryCountProcedure(clientInfo.getIdentifier(), 1, true);
+        Iterable<Object> responses = alertRepository.callAlertInsightCategoryCountProcedure(clientInfo.getIdentifier(), 1, true);
+        List<InsightCategoryCountDTO> insightCategoryCountDTOs = new ArrayList<>();
+        responses.forEach(
+            response -> {
+                Object[] responseArray = (Object[]) response;
+                InsightCategoryCountDTO insightCategoryCountDTO = new InsightCategoryCountDTO(responseArray[0], responseArray[1], responseArray[2], responseArray[3], responseArray[4], responseArray[5], responseArray[6]);
+                insightCategoryCountDTOs.add(insightCategoryCountDTO);
+            }
+        );
+        return insightCategoryCountDTOs;
     }
 
     /**
@@ -335,13 +346,22 @@ public class AlertService extends BaseService {
      * 
      * @see alertRepository.callTrainigProcedure
      * 
-     * @return Iterable<?>
+     * @return Iterable<TrainingCountDTO>
      * 
      * @author Moisés Adame
      * 
      */
-    public Iterable<?> callTrainingCountProcedure(String userUuid) {
+    public Iterable<TrainingCountDTO> callTrainingCountProcedure(String userUuid) {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        return alertRepository.callTrainigProcedure(clientInfo.getIdentifier(), 1, true);
+        Iterable<Object> responses = alertRepository.callTrainigProcedure(clientInfo.getIdentifier(), 1, true);
+        List<TrainingCountDTO> trainingCountDTOs = new ArrayList<>();
+        responses.forEach(
+            response -> {
+                Object[] responseArray = (Object[]) response;
+                TrainingCountDTO trainingCountDTO = new TrainingCountDTO(responseArray[0], responseArray[1], responseArray[2], responseArray[3], responseArray[4], responseArray[5]);
+                trainingCountDTOs.add(trainingCountDTO);
+            }
+        );
+        return trainingCountDTOs;
     }
 }
