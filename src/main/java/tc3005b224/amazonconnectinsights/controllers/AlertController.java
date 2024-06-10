@@ -217,13 +217,45 @@ public class AlertController {
     @Operation(
         summary = "Calls the stored procedure get_alert_insight_category_count.", 
         responses = {
-            @ApiResponse(responseCode = "200", description = "Alert ignored successfully."),
-            @ApiResponse(responseCode = "404", description = "Invalid alertIdentifier."),
+            @ApiResponse(responseCode = "200", description = "Stored procedure (get_alert_insight_category_count) called successfully.",
+            content = {@Content(
+                mediaType = "application/json",
+                array = @ArraySchema(schema = @Schema(implementation = InsightCategoryCountDTO.class)))
+            }),
+            @ApiResponse(responseCode = "404", description = "Stored procedure called unsuccessfully."),
         }
     )
     @GetMapping("/insight-category-count")
-    public Iterable<?> getMethodName(Principal principal) {
-        return alertService.callAlertInsightCategoryCountProcedure(principal.getName());
+    public ResponseEntity<?> getInsightCategoryCount(Principal principal) {
+        try {
+            return ResponseEntity.ok(alertService.callAlertInsightCategoryCountProcedure(principal.getName()));
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
+    }
+    
+    @Operation(
+        summary = "Calls the stored procedure get_alert_training_count.", 
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Stored procedure (get_alert_training_count) called successfully.",
+            content = {@Content(
+                mediaType = "application/json",
+                array = @ArraySchema(schema = @Schema(implementation = TrainingCountDTO.class)))
+            }),
+            @ApiResponse(responseCode = "404", description = "Stored procedure called unsuccessfully."),
+        }
+    )
+    @GetMapping("/training-count")
+    public ResponseEntity<?> getTrainingCount(Principal principal) {
+        try {
+            return ResponseEntity.ok(alertService.callTrainingCountProcedure(principal.getName()));
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            ErrorResponse error = ErrorResponse.builder(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()).build();
+            return new ResponseEntity<>(error, error.getStatusCode());
+        }
     }
 
     @Operation(
