@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -16,6 +17,8 @@ import software.amazon.awssdk.services.connect.model.MonitorContactResponse;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertHighPriorityDTO;
 import tc3005b224.amazonconnectinsights.dto.alerts.AlertPriorityDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.InsightCategoryCountDTO;
+import tc3005b224.amazonconnectinsights.dto.alerts.TrainingCountDTO;
 import tc3005b224.amazonconnectinsights.models_sql.Alert;
 import tc3005b224.amazonconnectinsights.models_sql.Connection;
 import tc3005b224.amazonconnectinsights.models_sql.Insight;
@@ -39,6 +42,8 @@ public class AlertService extends BaseService {
     private InsightRepository insightRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     //Service to monitor a contact via BARGE
     public MonitorContactResponse monitorContact(String userUuid, String contactId) {
@@ -156,6 +161,15 @@ public class AlertService extends BaseService {
     public Alert saveAlert(String userUuid, Alert newAlert) throws BadRequestException {
         return alertRepository.save(newAlert);
     }
+
+    public Alert saveNewAlert(String userUuid, Alert newAlert) throws BadRequestException {
+        Alert alert = saveAlert(userUuid, newAlert);
+        
+        String message = "Created new alert ";
+                messagingTemplate.convertAndSend("/topic/alertas", message);
+        return alert;
+    }
+    
 
     // Method that gets an AlertDTO and an Alert as an input, updating only the AlertDTO attributes that are null.
     public void updateAlert(String userUuid, Long alertIdentifier, AlertDTO alertDTO) throws Exception {        
@@ -318,13 +332,48 @@ public class AlertService extends BaseService {
      * 
      * @see alertRepository.callAlertInsightCategoryCountProcedure
      * 
-     * @return Iterable<?>
+     * @return Iterable<InsightCategoryCountDTO>
      * 
      * @author Moisés Adame
      * 
      */
-    public Iterable<?> callAlertInsightCategoryCountProcedure(String userUuid) {
+    public Iterable<InsightCategoryCountDTO> callAlertInsightCategoryCountProcedure(String userUuid) {
         ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
-        return alertRepository.callAlertInsightCategoryCountProcedure(clientInfo.getIdentifier(), 1, true);
+        Iterable<Object> responses = alertRepository.callAlertInsightCategoryCountProcedure(clientInfo.getIdentifier(), 1, true);
+        List<InsightCategoryCountDTO> insightCategoryCountDTOs = new ArrayList<>();
+        responses.forEach(
+            response -> {
+                Object[] responseArray = (Object[]) response;
+                InsightCategoryCountDTO insightCategoryCountDTO = new InsightCategoryCountDTO(responseArray[0], responseArray[1], responseArray[2], responseArray[3], responseArray[4], responseArray[5], responseArray[6]);
+                insightCategoryCountDTOs.add(insightCategoryCountDTO);
+            }
+        );
+        return insightCategoryCountDTOs;
+    }
+
+    /**
+     * Service that calls the get_alert_training_count stored procedure.
+     * 
+     * @param userUuid
+     * 
+     * @see alertRepository.callTrainigProcedure
+     * 
+     * @return Iterable<TrainingCountDTO>
+     * 
+     * @author Moisés Adame
+     * 
+     */
+    public Iterable<TrainingCountDTO> callTrainingCountProcedure(String userUuid) {
+        ConnectClientInfo clientInfo = getConnectClientInfo(userUuid);
+        Iterable<Object> responses = alertRepository.callTrainigProcedure(clientInfo.getIdentifier(), 1, true);
+        List<TrainingCountDTO> trainingCountDTOs = new ArrayList<>();
+        responses.forEach(
+            response -> {
+                Object[] responseArray = (Object[]) response;
+                TrainingCountDTO trainingCountDTO = new TrainingCountDTO(responseArray[0], responseArray[1], responseArray[2], responseArray[3], responseArray[4], responseArray[5]);
+                trainingCountDTOs.add(trainingCountDTO);
+            }
+        );
+        return trainingCountDTOs;
     }
 }
