@@ -169,6 +169,11 @@ public class AlertService extends BaseService {
                 messagingTemplate.convertAndSend("/topic/alertas", message);
         return alert;
     }
+
+    public void triggerWebsocket() {
+        String message = "Created new alert ";
+        messagingTemplate.convertAndSend("/topic/alertas", message);
+    }
     
 
     // Method that gets an AlertDTO and an Alert as an input, updating only the AlertDTO attributes that are null.

@@ -120,6 +120,17 @@ public class AlertController {
         }
     }
 
+    @PostMapping("/trigger-websocket")
+    public ResponseEntity<?> postAlert() {
+        try {
+            alertService.triggerWebsocket();
+            return ResponseEntity.ok("Websocket triggered");
+        } catch (Exception e) {
+            // Return error 404 if there is an exception.
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     @Operation(summary = "Updates all the attributes of the alert that are not set as null in the RequestBody's AlertDTO.", responses = {
             @ApiResponse(responseCode = "200", description = "Alert Added."),
             @ApiResponse(responseCode = "404", description = "Invalid alert, connection, trainig or insight identifier."),
